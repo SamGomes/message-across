@@ -22,7 +22,7 @@ public class LetterSpawner : MonoBehaviour
     {
         resetPool();
 
-        float initialDelayInSeconds = 2.0f;
+        float initialDelayInSeconds = 1.0f;
         StartCoroutine(spawnLetterWithDelay(initialDelayInSeconds));
     }
 
