@@ -4,56 +4,86 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 public static class Utilities
 {
-    public enum Scope
+    public static Exercise currExercise { get; set; }
+
+    public enum InputRestriction
     {
-        [Description("Individual Exercise!")]
-        INDIVIDUAL,
-        [Description("Group Exercise!")]
-        COOPERATION
+        BTN_0_ONLY,
+        BTN_1_ONLY,
+        NONE,
+        ALL_BTNS,
+
+        BTN_EXCHANGE,
+        BTN_ALL_ACTIONS
     }
 
-    public static string getDescription(Scope enumerationValue)
+
+    public enum OutputRestriction
     {
-        Type type = enumerationValue.GetType();
-        if (!type.IsEnum)
-        {
-            throw new ArgumentException("EnumerationValue must be of Enum type", "enumerationValue");
-        }
-
-        //Tries to find a DescriptionAttribute for a potential friendly name
-        //for the enum
-        MemberInfo[] memberInfo = type.GetMember(enumerationValue.ToString());
-        if (memberInfo != null && memberInfo.Length > 0)
-        {
-            object[] attrs = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-            if (attrs != null && attrs.Length > 0)
-            {
-                //Pull out the description value
-                return ((DescriptionAttribute)attrs[0]).Description;
-            }
-        }
-        //If we have no description attribute, just return the ToString of the enum
-        return enumerationValue.ToString();
+        ANT1_ANIM1,
+        ANT1_ANIM2,
+        ANT1_ANIM3
     }
+
+    public static InputRestriction[] inputRestrictions = (InputRestriction[]) Enum.GetValues(typeof(Utilities.InputRestriction));
+    public static OutputRestriction[] outputRestrictions = (OutputRestriction[])Enum.GetValues(typeof(Utilities.OutputRestriction));
+
+    public static int numInputRestrictions = inputRestrictions.Length;
+    public static int numOutputRestriction = outputRestrictions.Length;
 }
 
 public struct Exercise
 {
     public string displayMessage;
     public string targetWord;
-    public Utilities.Scope scope;
+    private List<Utilities.InputRestriction> inputRestrictionsForEachPlayer;
+    private Utilities.OutputRestriction outputRestriction;
 
-    public Exercise(string displayMessage, string targetWord, Utilities.Scope scope)
+    public Exercise(string displayMessage, string targetWord) : this()
     {
         this.displayMessage = displayMessage;
         this.targetWord = targetWord;
-        this.scope = scope;
+
+        inputRestrictionsForEachPlayer = new List<Utilities.InputRestriction>();
+
+        //init restrictions for all players
+        int numPlayers = 2;
+        for (int i=0; i < numPlayers; i++)
+        {
+            inputRestrictionsForEachPlayer.Add(Utilities.InputRestriction.BTN_0_ONLY);
+
+        }
+        this.outputRestriction = chooseOutputRestriction();
     }
+    private Utilities.InputRestriction chooseInputRestriction()
+    {
+        int randomIndex = UnityEngine.Random.Range(0, Utilities.numInputRestrictions);
+        return Utilities.inputRestrictions[randomIndex];
+
+    }
+    private Utilities.OutputRestriction chooseOutputRestriction()
+    {
+        int randomIndex = UnityEngine.Random.Range(0, Utilities.numOutputRestriction);
+        return Utilities.outputRestrictions[randomIndex];
+    }
+
+
+    public List<Utilities.InputRestriction> getInputRestrictionsForEachPlayer()
+    {
+        return this.inputRestrictionsForEachPlayer;
+
+    }
+
+    private Utilities.OutputRestriction getOutputRestriction()
+    {
+        return this.outputRestriction;
+    }
+
 }
 
 public class GameManager : MonoBehaviour
@@ -64,30 +94,38 @@ public class GameManager : MonoBehaviour
     public GameObject scorePanel;
     public GameObject timePanel;
     public GameObject reqPanel;
-
-    public GameObject scopePanel;
-
+    
     public GameObject Spawner;
     public GameObject[] LetterSpawners;
 
 
     public string currWord;
-    public Exercise currExercise;
 
     public float timeLeft = 30.0f;
 
 
-    public int lives = 4;
+    public int lives = 9000;
     private int score;
-    private Exercise[] exercises = { new Exercise("I got some _ for you", "CAKE", Utilities.Scope.INDIVIDUAL),
-                                     new Exercise("23 + 34 = _", "57", Utilities.Scope.COOPERATION)};
+    private List<Exercise> exercises;
 
     // Use this for initialization
     void Start()
     {
-
-        //exercises[0] = new Exercise("I got some _ for you", "CAKE", Utilities.Scope.INDIVIDUAL);
-        //exercises[1] = new Exercise("23 + 34", "57", Utilities.Scope.COOPERATION);
+        exercises = new List<Exercise>();
+        exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
+        exercises.Add(new Exercise("Word to match: BANANA \n Your Word:_", "BANANA"));
+        exercises.Add(new Exercise("Word to match: PIE \n Your Word:_", "PIE"));
+        exercises.Add(new Exercise("Word to match: PIZZA \n Your Word:_", "PIZZA"));
+        exercises.Add(new Exercise("Word to match: CROISSANT \n Your Word:_", "CROISSANT"));
+        exercises.Add(new Exercise("Word to match: DONUT \n Your Word:_", "DONUT"));
+        exercises.Add(new Exercise("Word to match: CHERRY \n Your Word:_", "CHERRY"));
+        exercises.Add(new Exercise("Word to match: XMASCOOKIES \n Your Word:_", "XMASCOOKIES"));
+        exercises.Add(new Exercise("Word to match: KIWI \n Your Word:_", "KIWI"));
+        exercises.Add(new Exercise("Word to match: QUICHE \n Your Word:_", "QUICHE"));
+        exercises.Add(new Exercise("Word to match: MANGO \n Your Word:_", "MANGO"));
+        exercises.Add(new Exercise("Word to match: FISH \n Your Word:_", "FISH"));
+        exercises.Add(new Exercise("Word to match: VANILLA \n Your Word:_", "VANILLA"));
+        exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
 
 
         InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
@@ -100,23 +138,29 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
+
         hpPanel.GetComponent<UnityEngine.UI.Text>().text = "Lifes: "+ lives;
         scorePanel.GetComponent<UnityEngine.UI.Text>().text = "Score: "+ score;
         timePanel.GetComponent<UnityEngine.UI.Text>().text = "Time: "+ timeLeft;
 
-
         //update curr display message
-        int missingLength = currExercise.targetWord.Length - currWord.Length;
-        string[] substrings = currExercise.displayMessage.Split('_');
+        int missingLength = Utilities.currExercise.targetWord.Length - currWord.Length;
+        string[] substrings = Utilities.currExercise.displayMessage.Split('_');
 
-        string displayString = substrings[0];
-        displayString += currWord;
-        for (int i = 0; i < missingLength; i++)
+        string displayString = "";
+        if (substrings.Length > 0)
         {
-            displayString += "_";
+            displayString = substrings[0];
+            displayString += currWord;
+            for (int i = 0; i < missingLength; i++)
+            {
+                displayString += "_";
+            }
+            if (substrings.Length > 1)
+            {
+                displayString += substrings[1];
+            }
         }
-        displayString += substrings[1];
-
         reqPanel.GetComponent<reqScript>().updateRequirement(displayString);
 
 
@@ -130,7 +174,7 @@ public class GameManager : MonoBehaviour
             SceneManager.LoadScene("gameover");
         }
 
-        string currTargetWord = currExercise.targetWord;
+        string currTargetWord = Utilities.currExercise.targetWord;
         //if(currTargetWord.Length > currWord.Length)
         //{
         //    currTargetWord = currTargetWord.Substring(0, currWord.Length);
@@ -173,12 +217,16 @@ public class GameManager : MonoBehaviour
 
     void changeTargetWord()
     {
-        int random = UnityEngine.Random.Range(0, exercises.Length);
-        currExercise = exercises[random];
+        int random = UnityEngine.Random.Range(0, exercises.Count);
+        Utilities.currExercise = exercises[random];
         currWord = "";
 
-        displayPanel.GetComponent<DisplayPanel>().setCurrWord(currExercise.targetWord);
-        scopePanel.GetComponent<UnityEngine.UI.Text>().text = Utilities.getDescription(currExercise.scope);
+        //int randomIndex = UnityEngine.Random.Range(0, 400);
+        //UnityWebRequest currPoke = UnityWebRequest.Get("http://pokeapi.co/api/v2/pokemon/"+randomIndex+"/");
+        //currExercise.targetWord = currPoke.name;
+        //currExercise.displayMessage = "Word to match: "+ currPoke.name+ " \n Your Word: _";
+
+        displayPanel.GetComponent<DisplayPanel>().setTargetImage(Utilities.currExercise.targetWord);
     }
 
     void hurt()
