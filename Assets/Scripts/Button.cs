@@ -2,63 +2,97 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ButtonId
-{
-    BTN_0,
-    BTN_1
-}
 
 public class Button : MonoBehaviour {
 
     public GameObject gameManager;
-    public ButtonId buttonCode;
+    public Utilities.ButtonId buttonCode;
     private string xboxCodeJoy1;
-    private string xboxCodeJoy2;
 
     private bool clicked;
 
 	// Use this for initialization
 	void Start () {
-        switch (buttonCode)
-        {
-            case ButtonId.BTN_0:
-                xboxCodeJoy1 = "YButtonJoy1";
-                xboxCodeJoy2 = "YButtonJoy2";
-                break;
-
-            case ButtonId.BTN_1:
-                xboxCodeJoy1 = "BButtonJoy1";
-                xboxCodeJoy2 = "BButtonJoy2";
-                break;
-        }
         
     }
 	
 	// Update is called once per frame
 	void FixedUpdate () {
+
+        int playerIndex = -1;
+        List<Utilities.ButtonId> pressedButtonCodes = new List<Utilities.ButtonId>();
+
+
         List<Utilities.InputRestriction> currIRestr = Utilities.currExercise.getInputRestrictionsForEachPlayer();
-        Utilities.InputRestriction iRestPL1 = currIRestr[0];
-        Utilities.InputRestriction iRestPL2 = currIRestr[1];
 
-        bool validateJoy1Input = (Input.GetButton(xboxCodeJoy1)
-            && (iRestPL1 != Utilities.InputRestriction.ALL_BTNS)
-            && (buttonCode==ButtonId.BTN_0 && iRestPL1!=Utilities.InputRestriction.BTN_0_ONLY));
+        var xboxKeyCodesPL0 = Utilities.xboxInputKeyCodes[Utilities.PlayerId.PLAYER_0];
+        var xboxKeyCodesPL1 = Utilities.xboxInputKeyCodes[Utilities.PlayerId.PLAYER_1];
 
-        bool validateJoy2Input = (Input.GetButton(xboxCodeJoy2)
-            && (iRestPL2 != Utilities.InputRestriction.ALL_BTNS)
-            && (buttonCode == ButtonId.BTN_1 && iRestPL2 != Utilities.InputRestriction.BTN_1_ONLY));
+        for (int i = 0; i < xboxKeyCodesPL0.Length; i++)
+        {
+            if (Input.GetButton(xboxKeyCodesPL0[i]))
+            {
+                playerIndex = 0;
+                pressedButtonCodes.Add(Utilities.buttonIds[i]);
+            }
+        }
+
+        for (int i = 0; i < xboxKeyCodesPL1.Length; i++)
+        {
+            if (Input.GetButton(xboxKeyCodesPL1[i]))
+            {
+                playerIndex = 1;
+                pressedButtonCodes.Add(Utilities.buttonIds[i]);
+            }
+        }
+
+        this.clicked = false;
+        this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+
+
+        if (playerIndex == -1)
+        {
+            return;
+        }
+
+        //------------------ MODS ---------------------
+        if (Utilities.currExercise.getInputModsForEachPlayer()[playerIndex] == Utilities.InputMod.BTN_ALL_ACTIONS)
+        {
+            pressedButtonCodes = new List<Utilities.ButtonId>();
+            pressedButtonCodes.AddRange(Utilities.buttonIds);
+        }
+        bool buttonIsPressed = pressedButtonCodes.Contains(this.buttonCode);
+
+        if (Utilities.currExercise.getInputModsForEachPlayer()[playerIndex] == Utilities.InputMod.BTN_OPPOSITION)
+        {
+            buttonIsPressed = !buttonIsPressed;
+        }
+        
+
+        if (!buttonIsPressed)
+        {
+            return;
+        }
+
+        //------------------ RESTRICTIONS ---------------------
+        Utilities.InputRestriction iRestCurrPL = currIRestr[playerIndex];
+        
+        bool validateBtn0Input = (this.buttonCode == Utilities.ButtonId.BTN_0)
+            &&(iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
+            && (iRestCurrPL != Utilities.InputRestriction.BTN_0_ONLY);
+
+        bool validateBtn1Input = (this.buttonCode == Utilities.ButtonId.BTN_1)
+            && (iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
+            && (iRestCurrPL != Utilities.InputRestriction.BTN_1_ONLY);
 
         //(uRestPL1 == Utilities.InputRestriction.BTN_EXCHANGE)
 
-        if (validateJoy1Input && validateJoy1Input)
+        if (validateBtn0Input || validateBtn1Input)
         {
             this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
             this.clicked = true;
-        }else
-        {
-            this.clicked = false;
-            this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
         }
+        
 
     }
 

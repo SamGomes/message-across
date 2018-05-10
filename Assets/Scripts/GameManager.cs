@@ -11,15 +11,37 @@ public static class Utilities
 {
     public static Exercise currExercise { get; set; }
 
+    public enum PlayerId
+    {
+        PLAYER_0,
+        PLAYER_1
+    }
+
+    public enum ButtonId
+    {
+        BTN_0,
+        BTN_1,
+        NONE
+    }
+
+    public static Dictionary<PlayerId, string[]> xboxInputKeyCodes = new Dictionary<PlayerId, string[]> {
+        { PlayerId.PLAYER_0, new string[] { "YButtonJoy1", "BButtonJoy1" } },
+        { PlayerId.PLAYER_1, new string[] { "YButtonJoy2", "BButtonJoy2" } }
+    };
+
     public enum InputRestriction
     {
         BTN_0_ONLY,
         BTN_1_ONLY,
         NONE,
-        ALL_BTNS,
+        ALL_BTNS
+    }
 
-        BTN_EXCHANGE,
-        BTN_ALL_ACTIONS
+    public enum InputMod
+    {
+        BTN_OPPOSITION,
+        BTN_ALL_ACTIONS,
+        NONE
     }
 
 
@@ -31,9 +53,14 @@ public static class Utilities
     }
 
     public static InputRestriction[] inputRestrictions = (InputRestriction[]) Enum.GetValues(typeof(Utilities.InputRestriction));
+    public static InputMod[] inputMods = (InputMod[]) Enum.GetValues(typeof(Utilities.InputMod));
+    public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Utilities.ButtonId));
+
     public static OutputRestriction[] outputRestrictions = (OutputRestriction[])Enum.GetValues(typeof(Utilities.OutputRestriction));
 
     public static int numInputRestrictions = inputRestrictions.Length;
+    public static int numInputMods = inputMods.Length;
+
     public static int numOutputRestriction = outputRestrictions.Length;
 }
 
@@ -42,6 +69,7 @@ public struct Exercise
     public string displayMessage;
     public string targetWord;
     private List<Utilities.InputRestriction> inputRestrictionsForEachPlayer;
+    private List<Utilities.InputMod> inputModsForEachPlayer;
     private Utilities.OutputRestriction outputRestriction;
 
     public Exercise(string displayMessage, string targetWord) : this()
@@ -50,12 +78,14 @@ public struct Exercise
         this.targetWord = targetWord;
 
         inputRestrictionsForEachPlayer = new List<Utilities.InputRestriction>();
+        inputModsForEachPlayer = new List<Utilities.InputMod>();
 
         //init restrictions for all players
         int numPlayers = 2;
         for (int i=0; i < numPlayers; i++)
         {
-            inputRestrictionsForEachPlayer.Add(Utilities.InputRestriction.BTN_0_ONLY);
+            inputRestrictionsForEachPlayer.Add(chooseInputRestriction());
+            inputModsForEachPlayer.Add(chooseInputMod());
 
         }
         this.outputRestriction = chooseOutputRestriction();
@@ -66,6 +96,13 @@ public struct Exercise
         return Utilities.inputRestrictions[randomIndex];
 
     }
+    private Utilities.InputMod chooseInputMod()
+    {
+        int randomIndex = UnityEngine.Random.Range(0, Utilities.numInputMods);
+        return Utilities.inputMods[randomIndex];
+
+    }
+
     private Utilities.OutputRestriction chooseOutputRestriction()
     {
         int randomIndex = UnityEngine.Random.Range(0, Utilities.numOutputRestriction);
@@ -73,9 +110,15 @@ public struct Exercise
     }
 
 
+
     public List<Utilities.InputRestriction> getInputRestrictionsForEachPlayer()
     {
         return this.inputRestrictionsForEachPlayer;
+
+    }
+    public List<Utilities.InputMod> getInputModsForEachPlayer()
+    {
+        return this.inputModsForEachPlayer;
 
     }
 
@@ -101,7 +144,8 @@ public class GameManager : MonoBehaviour
 
     public string currWord;
 
-    public float timeLeft = 30.0f;
+    public float timeLeft;
+    //public float timeLeft = -1.0f;
 
 
     public int lives = 9000;
@@ -130,7 +174,8 @@ public class GameManager : MonoBehaviour
 
         InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
         Application.targetFrameRate = 60;
-        //timeLeft = 30.0f;
+
+        timeLeft = 100.0f;
 
         changeTargetWord();
     }
@@ -169,9 +214,14 @@ public class GameManager : MonoBehaviour
 
 
 
-        if (timeLeft <= 0.0f || lives < 1)
+        if (timeLeft == 0.0f)
         {
-            SceneManager.LoadScene("gameover");
+            changeTargetWord();
+            timeLeft = 100.0f;
+            if (lives < 1)
+            {
+                SceneManager.LoadScene("gameover");
+            }
         }
 
         string currTargetWord = Utilities.currExercise.targetWord;
@@ -213,6 +263,7 @@ public class GameManager : MonoBehaviour
     void decrementTimeLeft()
     {
         timeLeft--;
+        //timeLeft = (timeLeft > 0) ? timeLeft-- : timeLeft;
     }
 
     void changeTargetWord()

@@ -10,6 +10,8 @@ public class LetterSpawner : MonoBehaviour
     public float maxIntervalRange;
     private int score = 0;
 
+    private float randomInterval;
+
 
     private string[] letters = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "L", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
                                  "1", "2", "3", "4", "5", "6", "7", "8", "9"};
@@ -19,12 +21,22 @@ public class LetterSpawner : MonoBehaviour
     void Start()
     {
         resetPool();
-        float random = Random.Range(minIntervalRange, maxIntervalRange);
-        InvokeRepeating("spawnLetter", random, random);
+
+        float initialDelayInSeconds = 2.0f;
+        StartCoroutine(spawnLetterWithDelay(initialDelayInSeconds));
     }
 
-    void spawnLetter()
+
+    private void FixedUpdate()
     {
+        //CustomWaitForSeconds(Random.Range(minIntervalRange, maxIntervalRange));
+        
+    }
+
+    IEnumerator spawnLetterWithDelay(float sec)
+    {
+
+        yield return new WaitForSeconds(sec);
         if (lettersPool.Count == 0)
         {
             resetPool();
@@ -47,6 +59,8 @@ public class LetterSpawner : MonoBehaviour
         newLetter.transform.position = gameObject.transform.position;
         newLetter.transform.rotation = gameObject.transform.rotation;
 
+        randomInterval = Random.Range(minIntervalRange, maxIntervalRange);
+        StartCoroutine(spawnLetterWithDelay(randomInterval));
     }
 
     private void resetPool()

@@ -146,7 +146,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 189, y: 110.99}
+  m_AnchoredPosition: {x: 195, y: 70.6}
   m_SizeDelta: {x: 181, y: 24.378}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &19847079
@@ -227,7 +227,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 52753738}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.417, y: 0.306, z: 0}
+  m_LocalPosition: {x: 3.44, y: 0.1792491, z: 0}
   m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_Children: []
   m_Father: {fileID: 1763637236}
@@ -245,8 +245,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a877e06e3261b64468c74df1a2523a28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 0}
-  buttonCode: 0
+  gameManager: {fileID: 75445754}
+  buttonCode: 1
 --- !u!65 &52753741
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -413,14 +413,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hpPanel: {fileID: 797586246}
-  displayPanel: {fileID: 1240623164}
+  displayPanel: {fileID: 253793924}
   scorePanel: {fileID: 1184651748}
   timePanel: {fileID: 130794679}
   reqPanel: {fileID: 19847077}
   Spawner: {fileID: 320422555}
   LetterSpawners: []
   currWord: 
-  timeLeft: 30
+  timeLeft: 0
   lives: 9000
 --- !u!4 &75445756
 Transform:
@@ -653,7 +653,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 199, y: 131.4}
+  m_AnchoredPosition: {x: 199, y: 83.99999}
   m_SizeDelta: {x: 15.5, y: 11.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &253793926
@@ -1063,7 +1063,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 606701994}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -3.48, z: 0}
+  m_LocalPosition: {x: 0, y: -4.18, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 310652116}
@@ -1311,7 +1311,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1171528325}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -10.87, y: 1.8100004, z: 0}
+  m_LocalPosition: {x: -10.87, y: 1.5500002, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 310652116}
@@ -1331,8 +1331,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   letterPrefab: {fileID: 1439335212217198, guid: f31bf636445269449ae7445df9a7599f,
     type: 2}
-  minIntervalRange: 0
-  maxIntervalRange: 400
+  minIntervalRange: 0.4
+  maxIntervalRange: 1
 --- !u!1 &1184651748
 GameObject:
   m_ObjectHideFlags: 0
@@ -1607,7 +1607,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4722657177228748, guid: 8f99c89e50de144699d24b03396638d9, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0.08
+      value: -0.6199998
       objectReference: {fileID: 0}
     - target: {fileID: 4722657177228748, guid: 8f99c89e50de144699d24b03396638d9, type: 2}
       propertyPath: m_LocalPosition.z
@@ -1802,7 +1802,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1806194781}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.417, y: 0.85, z: 0}
+  m_LocalPosition: {x: 3.44, y: 0.72324914, z: 0}
   m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_Children: []
   m_Father: {fileID: 1763637236}
@@ -1820,7 +1820,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a877e06e3261b64468c74df1a2523a28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 0}
+  gameManager: {fileID: 75445754}
   buttonCode: 0
 --- !u!54 &1806194784
 Rigidbody:
@@ -2001,7 +2001,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1821892090}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -10.87, y: 0.61, z: 0}
+  m_LocalPosition: {x: -10.87, y: 0.35, z: 0}
   m_LocalScale: {x: 0.9999907, y: 0.99999374, z: 1}
   m_Children: []
   m_Father: {fileID: 310652116}
@@ -2021,8 +2021,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   letterPrefab: {fileID: 1439335212217198, guid: f31bf636445269449ae7445df9a7599f,
     type: 2}
-  minIntervalRange: 0
-  maxIntervalRange: 400
+  minIntervalRange: 0.4
+  maxIntervalRange: 1
 --- !u!1 &1822767550
 GameObject:
   m_ObjectHideFlags: 0
