@@ -138,8 +138,8 @@ public class GameManager : MonoBehaviour
     public GameObject timePanel;
     public GameObject reqPanel;
     
-    public GameObject Spawner;
-    public GameObject[] LetterSpawners;
+    public GameObject[] antSpawners;
+    public GameObject[] letterSpawners;
 
 
     public string currWord;
@@ -148,7 +148,7 @@ public class GameManager : MonoBehaviour
     //public float timeLeft = -1.0f;
 
 
-    public int lives = 9000;
+    public int lives;
     private int score;
     private List<Exercise> exercises;
 
@@ -171,6 +171,7 @@ public class GameManager : MonoBehaviour
         exercises.Add(new Exercise("Word to match: VANILLA \n Your Word:_", "VANILLA"));
         exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
 
+        lives = 5;
 
         InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
         Application.targetFrameRate = 60;
@@ -233,29 +234,34 @@ public class GameManager : MonoBehaviour
         if (currWord == ""){
             return;
         }
-        if (!currTargetWord.Contains(currWord))
+        if (currTargetWord[currWord.Length-1]!=currWord[currWord.Length - 1])
         {
             hurt();
+            currWord = currWord.Remove(currWord.Length - 1);
             return;
         }
         
         if (currWord.CompareTo(currTargetWord) == 0)
         {
             score += currTargetWord.Length;
-            timeLeft += currTargetWord.Length*4;
+            //timeLeft += currTargetWord.Length*4;
+            timeLeft = 100.0f;
             GameObject[] letters = GameObject.FindGameObjectsWithTag("letter");
             foreach (GameObject letter in letters)
             {
                 Destroy(letter);
             }
-            foreach (GameObject LetterSpawner in LetterSpawners)
+            foreach (GameObject letterSpawner in letterSpawners)
             {
-                LetterSpawner.GetComponent<LetterSpawner>().setScore(score);   
+                letterSpawner.GetComponent<LetterSpawner>().setScore(score);   
             }
-            AntSpawner spawner = Spawner.GetComponent<AntSpawner>();
-            Debug.Log(currTargetWord);
-            spawner.spawnAnt(currTargetWord);
-            changeTargetWord();
+            foreach (GameObject antSpawner in antSpawners)
+            {
+                AntSpawner spawner = antSpawner.GetComponent<AntSpawner>();
+                spawner.spawnAnt(currTargetWord);
+                changeTargetWord();
+            }
+            
 
         }
     }
@@ -270,6 +276,7 @@ public class GameManager : MonoBehaviour
     {
         int random = UnityEngine.Random.Range(0, exercises.Count);
         Utilities.currExercise = exercises[random];
+
         currWord = "";
 
         //int randomIndex = UnityEngine.Random.Range(0, 400);
@@ -283,6 +290,5 @@ public class GameManager : MonoBehaviour
     void hurt()
     {
         lives--;
-        currWord = "";
     }
 }

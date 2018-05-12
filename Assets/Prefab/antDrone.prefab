@@ -309,9 +309,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 17775a6bc825cc5488d206455e002818, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myQueen: {fileID: 0}
   foodProjectile: {fileID: 1772869478133540, guid: 021c9f7fae023174ba28648bf3d85a66,
     type: 2}
-  movementSpeed: 10
+  movementSpeed: 0
   originalPosition: {x: 0, y: 0, z: 0}
 --- !u!212 &212098014661184520
 SpriteRenderer:

@@ -28,5 +28,7 @@ public class AntSpawner : MonoBehaviour
         antScript.setQueenAnimator(queenAnimator);
 
         antScript.setCargo(currTargetWord);
+        antScript.myQueen = this.QueenAnt;
+        antScript.mySpawner = this.gameObject;
     }
 }

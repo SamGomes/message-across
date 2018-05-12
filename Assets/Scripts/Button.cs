@@ -46,8 +46,6 @@ public class Button : MonoBehaviour {
             }
         }
 
-        Debug.Log(playerIndex);
-
         this.clicked = false;
         this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
 
