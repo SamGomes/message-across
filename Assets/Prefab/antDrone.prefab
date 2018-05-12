@@ -56,7 +56,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1191294187309696}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.7623086, y: -0.18889153, z: 0}
+  m_LocalPosition: {x: -5.798216, y: -3.4, z: -9.171089}
   m_LocalScale: {x: 0.7, y: 0.7, z: 1}
   m_Children:
   - {fileID: 4568683926193748}
@@ -70,8 +70,8 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1123163794142318}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.895, y: -0.109, z: 0}
-  m_LocalScale: {x: 0.13449869, y: 0.13449864, z: 0.13449864}
+  m_LocalPosition: {x: -0.05, y: -0.21, z: 0}
+  m_LocalScale: {x: 0.1981835, y: 0.18016683, z: 0.18016683}
   m_Children: []
   m_Father: {fileID: 4179650984673640}
   m_RootOrder: 0
@@ -310,6 +310,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   myQueen: {fileID: 0}
+  mySpawner: {fileID: 0}
   foodProjectile: {fileID: 1772869478133540, guid: 021c9f7fae023174ba28648bf3d85a66,
     type: 2}
   movementSpeed: 0

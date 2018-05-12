@@ -5,30 +5,23 @@ using UnityEngine;
 public class AntSpawner : MonoBehaviour
 {
 
+    public Utilities.AntId spawnedAntId;
+    public GameObject spawnedParticleSystem;
+
     public GameObject antPrefab;
     public GameObject QueenAnt;
-
-    // Use this for initialization
-    void Start()
-    {
-        /// spawnAnt();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 
     public void spawnAnt(string currTargetWord)
     {
         GameObject ant = Instantiate(antPrefab, this.transform.position, Quaternion.identity);
         Ant antScript = ant.GetComponent<Ant>();
         Animator queenAnimator = QueenAnt.GetComponent<Animator>();
-        antScript.setQueenAnimator(queenAnimator);
 
         antScript.setCargo(currTargetWord);
         antScript.myQueen = this.QueenAnt;
         antScript.mySpawner = this.gameObject;
+        antScript.myAntId = spawnedAntId;
+        antScript.myParticleSystem = spawnedParticleSystem.GetComponent<ParticleSystem>();
+
     }
 }

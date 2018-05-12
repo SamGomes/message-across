@@ -4,16 +4,23 @@ using UnityEngine;
 
 public class Ant : MonoBehaviour
 {
-    public GameObject myQueen;
-    public GameObject mySpawner;
+    public GameObject gameManager;
+    public Utilities.AntId myAntId;
 
+    public GameObject myQueen;
+    Animator queenAnimator;
+
+    public GameObject mySpawner;
+    public ParticleSystem myParticleSystem;
 
     public GameObject foodProjectile;
     private Sprite foodProjectileSprite;
 
     Animator animator;
-    Animator queenAnimator;
+
     public float movementSpeed;
+    float currMovementSpeed;
+
     public Vector3 originalPosition;
     private float throwingStartTime = -1;
 
@@ -21,10 +28,12 @@ public class Ant : MonoBehaviour
 
     float differenceFromQueen;
 
+    private Utilities.OutputRestriction myRestriction;
+
     // Use this for initialization
     void Start()
     {
-        this.movementSpeed = -5;
+        this.movementSpeed = 5;
 
         animator = this.gameObject.GetComponent<Animator>();
         this.originalPosition = this.transform.position;
@@ -34,44 +43,66 @@ public class Ant : MonoBehaviour
 
         if(differenceFromQueen < 0)
         {
+            movementSpeed = -movementSpeed;
             this.gameObject.GetComponent<SpriteRenderer>().flipX = false;
         }
         else
         {
-            movementSpeed = -movementSpeed;
             this.gameObject.GetComponent<SpriteRenderer>().flipX = true;
         }
+        this.queenAnimator = myQueen.GetComponent<Animator>();
+        currMovementSpeed = movementSpeed;
+
+        myRestriction = Utilities.currExercise.getOutputRestrictionsForEachAnt()[(int)this.myAntId];
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(movementSpeed);
-        this.transform.Translate(Vector3.right * movementSpeed * Time.deltaTime);
-        if (throwingStartTime < 0)
+        if (myRestriction == Utilities.OutputRestriction.NONE)
         {
             return;
         }
-        else
-        {
-            float currenTime = Time.time;
-            float difference = currenTime - throwingStartTime;
-            if (difference > 4)
-            {
-                this.animator.SetTrigger("walk");
-                gameObject.GetComponents<AudioSource>()[1].Play();
-                if (queenAnimator != null)
-                {
-                    queenAnimator.SetTrigger("rest");
-                }
-                
-                throwingStartTime = -1;
-                this.gameObject.GetComponent<SpriteRenderer>().flipX = !this.gameObject.GetComponent<SpriteRenderer>().flipX;
 
+        //STAR POWER
+        if (myRestriction == Utilities.OutputRestriction.STARPOWER)
+        {
+            myParticleSystem.Play();
+        }
+        
+        
+        //EAT ANIMATION
+        if (myRestriction == Utilities.OutputRestriction.EAT)
+        {
+
+            Debug.Log(movementSpeed);
+            this.transform.Translate(Vector3.right * currMovementSpeed * Time.deltaTime);
+            if (throwingStartTime < 0)
+            {
+                return;
+            }
+            else
+            {
+                float currenTime = Time.time;
+                float difference = currenTime - throwingStartTime;
+                if (difference > 4)
+                {
+                    this.animator.SetTrigger("walk");
+                    gameObject.GetComponents<AudioSource>()[1].Play();
+                    if (queenAnimator != null)
+                    {
+                        queenAnimator.SetTrigger("rest");
+                    }
+
+                    throwingStartTime = -1;
+                    this.gameObject.GetComponent<SpriteRenderer>().flipX = !this.gameObject.GetComponent<SpriteRenderer>().flipX;
+                    currMovementSpeed = -movementSpeed;
+                }
             }
         }
     }
+
 
     public void setCargo(string currTargetWord)
     {
@@ -98,12 +129,10 @@ public class Ant : MonoBehaviour
             queenAnimator.SetTrigger("beginEating");
             gameObject.GetComponents<AudioSource>()[0].Play();
         }
-        movementSpeed = 0;
+
+        currMovementSpeed = 0;
         throwingStartTime = Time.time;
     }
 
-    public void setQueenAnimator(Animator queen)
-    {
-        this.queenAnimator = queen;
-    }
+   
 }

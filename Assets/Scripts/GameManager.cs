@@ -24,6 +24,12 @@ public static class Utilities
         NONE
     }
 
+    public enum AntId
+    {
+        ANT_0,
+        ANT_1
+    }
+
     public static Dictionary<PlayerId, string[]> xboxInputKeyCodes = new Dictionary<PlayerId, string[]> {
         { PlayerId.PLAYER_0, new string[] { "YButtonJoy1", "BButtonJoy1" } },
         { PlayerId.PLAYER_1, new string[] { "YButtonJoy2", "BButtonJoy2" } }
@@ -47,9 +53,9 @@ public static class Utilities
 
     public enum OutputRestriction
     {
-        ANT1_ANIM1,
-        ANT1_ANIM2,
-        ANT1_ANIM3
+        EAT,
+        STARPOWER,
+        NONE
     }
 
     public static InputRestriction[] inputRestrictions = (InputRestriction[]) Enum.GetValues(typeof(Utilities.InputRestriction));
@@ -70,7 +76,7 @@ public struct Exercise
     public string targetWord;
     private List<Utilities.InputRestriction> inputRestrictionsForEachPlayer;
     private List<Utilities.InputMod> inputModsForEachPlayer;
-    private Utilities.OutputRestriction outputRestriction;
+    private List<Utilities.OutputRestriction> outputRestrictionsForEachAnt;
 
     public Exercise(string displayMessage, string targetWord) : this()
     {
@@ -80,6 +86,8 @@ public struct Exercise
         inputRestrictionsForEachPlayer = new List<Utilities.InputRestriction>();
         inputModsForEachPlayer = new List<Utilities.InputMod>();
 
+        outputRestrictionsForEachAnt = new List<Utilities.OutputRestriction>();
+
         //init restrictions for all players
         int numPlayers = 2;
         for (int i=0; i < numPlayers; i++)
@@ -88,7 +96,14 @@ public struct Exercise
             inputModsForEachPlayer.Add(chooseInputMod());
 
         }
-        this.outputRestriction = chooseOutputRestriction();
+
+        //init restrictions for all players
+        int numAnts = 2;
+        for (int i = 0; i < numAnts; i++)
+        {
+            outputRestrictionsForEachAnt.Add(chooseOutputRestriction());
+        }
+
     }
     private Utilities.InputRestriction chooseInputRestriction()
     {
@@ -122,9 +137,9 @@ public struct Exercise
 
     }
 
-    private Utilities.OutputRestriction getOutputRestriction()
+    public List<Utilities.OutputRestriction> getOutputRestrictionsForEachAnt()
     {
-        return this.outputRestriction;
+        return this.outputRestrictionsForEachAnt;
     }
 
 }
