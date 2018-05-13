@@ -11,12 +11,6 @@ public static class Utilities
 {
     public static Exercise currExercise { get; set; }
 
-    public enum PlayerId
-    {
-        PLAYER_0,
-        PLAYER_1
-    }
-
     public enum ButtonId
     {
         BTN_0,
@@ -30,22 +24,20 @@ public static class Utilities
         ANT_1
     }
 
-    public static Dictionary<PlayerId, string[]> xboxInputKeyCodes = new Dictionary<PlayerId, string[]> {
-        { PlayerId.PLAYER_0, new string[] { "YButtonJoy1", "BButtonJoy1" } },
-        { PlayerId.PLAYER_1, new string[] { "YButtonJoy2", "BButtonJoy2" } }
-    };
+    public static int numAnts = ((AntId[])Enum.GetValues(typeof(Utilities.AntId))).Length - 1;
 
     public enum InputRestriction
     {
         BTN_0_ONLY,
         BTN_1_ONLY,
-        NONE,
-        ALL_BTNS
+        NONE
+        //ALL_BTNS
     }
 
     public enum InputMod
     {
         BTN_OPPOSITION,
+        BTN_EXCHANGE,
         BTN_ALL_ACTIONS,
         NONE
     }
@@ -70,12 +62,28 @@ public static class Utilities
     public static int numOutputRestriction = outputRestrictions.Length;
 }
 
+public class Player
+{
+    public Utilities.InputMod inputMod;
+    public Utilities.InputRestriction inputRestriction;
+
+    public string[] xboxInputKeyCodes;
+    public int score;
+
+    public Player(string[] xboxInputKeyCodes)
+    {
+        this.inputMod = Utilities.InputMod.NONE;
+        this.inputRestriction = Utilities.InputRestriction.NONE;
+        this.xboxInputKeyCodes = xboxInputKeyCodes;
+        this.score = 0;
+    }
+}
+
+
 public struct Exercise
 {
     public string displayMessage;
     public string targetWord;
-    private List<Utilities.InputRestriction> inputRestrictionsForEachPlayer;
-    private List<Utilities.InputMod> inputModsForEachPlayer;
     private List<Utilities.OutputRestriction> outputRestrictionsForEachAnt;
 
     public Exercise(string displayMessage, string targetWord) : this()
@@ -83,38 +91,15 @@ public struct Exercise
         this.displayMessage = displayMessage;
         this.targetWord = targetWord;
 
-        inputRestrictionsForEachPlayer = new List<Utilities.InputRestriction>();
-        inputModsForEachPlayer = new List<Utilities.InputMod>();
-
         outputRestrictionsForEachAnt = new List<Utilities.OutputRestriction>();
 
-        //init restrictions for all players
-        int numPlayers = 2;
-        for (int i=0; i < numPlayers; i++)
-        {
-            inputRestrictionsForEachPlayer.Add(chooseInputRestriction());
-            inputModsForEachPlayer.Add(chooseInputMod());
-
-        }
+        
 
         //init restrictions for all players
-        int numAnts = 2;
-        for (int i = 0; i < numAnts; i++)
+        for (int i = 0; i < Utilities.numAnts; i++)
         {
             outputRestrictionsForEachAnt.Add(chooseOutputRestriction());
         }
-
-    }
-    private Utilities.InputRestriction chooseInputRestriction()
-    {
-        int randomIndex = UnityEngine.Random.Range(0, Utilities.numInputRestrictions);
-        return Utilities.inputRestrictions[randomIndex];
-
-    }
-    private Utilities.InputMod chooseInputMod()
-    {
-        int randomIndex = UnityEngine.Random.Range(0, Utilities.numInputMods);
-        return Utilities.inputMods[randomIndex];
 
     }
 
@@ -122,19 +107,6 @@ public struct Exercise
     {
         int randomIndex = UnityEngine.Random.Range(0, Utilities.numOutputRestriction);
         return Utilities.outputRestrictions[randomIndex];
-    }
-
-
-
-    public List<Utilities.InputRestriction> getInputRestrictionsForEachPlayer()
-    {
-        return this.inputRestrictionsForEachPlayer;
-
-    }
-    public List<Utilities.InputMod> getInputModsForEachPlayer()
-    {
-        return this.inputModsForEachPlayer;
-
     }
 
     public List<Utilities.OutputRestriction> getOutputRestrictionsForEachAnt()
@@ -152,7 +124,9 @@ public class GameManager : MonoBehaviour
     public GameObject scorePanel;
     public GameObject timePanel;
     public GameObject reqPanel;
-    
+
+    public GameObject playersPanel;
+
     public GameObject[] antSpawners;
     public GameObject[] letterSpawners;
 
@@ -167,9 +141,40 @@ public class GameManager : MonoBehaviour
     private int score;
     private List<Exercise> exercises;
 
+    private List<Player> players;
+
+
+
+
+
+
+    private Utilities.InputRestriction chooseInputRestriction()
+    {
+        int randomIndex = UnityEngine.Random.Range(0, Utilities.numInputRestrictions);
+        return Utilities.inputRestrictions[randomIndex];
+
+    }
+    private Utilities.InputMod chooseInputMod()
+    {
+        int randomIndex = UnityEngine.Random.Range(0, Utilities.numInputMods);
+        return Utilities.inputMods[randomIndex];
+
+    }
+
+    
+    public List<Player> getPlayers()
+    {
+        return this.players;
+    }
+
+
     // Use this for initialization
     void Start()
     {
+        players = new List<Player>();
+        players.Add(new Player( new string[] { "YButtonJoy1", "BButtonJoy1" }));
+        players.Add(new Player( new string[] { "YButtonJoy2", "BButtonJoy2" }));
+
         exercises = new List<Exercise>();
         exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
         exercises.Add(new Exercise("Word to match: BANANA \n Your Word:_", "BANANA"));
@@ -186,7 +191,7 @@ public class GameManager : MonoBehaviour
         exercises.Add(new Exercise("Word to match: VANILLA \n Your Word:_", "VANILLA"));
         exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
 
-        lives = 5;
+        lives = 50;
 
         InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
         Application.targetFrameRate = 60;
@@ -203,6 +208,11 @@ public class GameManager : MonoBehaviour
         hpPanel.GetComponent<UnityEngine.UI.Text>().text = "Lifes: "+ lives;
         scorePanel.GetComponent<UnityEngine.UI.Text>().text = "Score: "+ score;
         timePanel.GetComponent<UnityEngine.UI.Text>().text = "Time: "+ timeLeft;
+
+        for(int i=0; i < players.Count; i++)
+        {
+            playersPanel.transform.GetComponentsInChildren<UnityEngine.UI.Text>()[i].text = "Score of player "+i+": " + players[i].score;
+        }
 
         //update curr display message
         int missingLength = Utilities.currExercise.targetWord.Length - currWord.Length;
@@ -249,7 +259,7 @@ public class GameManager : MonoBehaviour
         if (currWord == ""){
             return;
         }
-        if (currTargetWord[currWord.Length-1]!=currWord[currWord.Length - 1])
+        if ((currWord.Length > currTargetWord.Length) || currTargetWord[currWord.Length-1]!=currWord[currWord.Length - 1])
         {
             hurt();
             currWord = currWord.Remove(currWord.Length - 1);
@@ -289,6 +299,15 @@ public class GameManager : MonoBehaviour
 
     void changeTargetWord()
     {
+
+        //init restrictions for all players
+        for(int i=0; i<players.Count; i++)
+        {
+            players[i].inputRestriction = chooseInputRestriction();
+            players[i].inputMod = chooseInputMod();
+
+        }
+
         int random = UnityEngine.Random.Range(0, exercises.Count);
         Utilities.currExercise = exercises[random];
 
@@ -306,4 +325,11 @@ public class GameManager : MonoBehaviour
     {
         lives--;
     }
+
+    public void incrementPlayerScore(int playerIndex)
+    {
+        players[playerIndex].score += 1;
+    }   
 }
+
+

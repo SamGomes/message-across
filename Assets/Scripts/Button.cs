@@ -7,9 +7,10 @@ public class Button : MonoBehaviour {
 
     public GameObject gameManager;
     public Utilities.ButtonId buttonCode;
-    private string xboxCodeJoy1;
 
     private bool clicked;
+
+    private int playerIndex;
 
 	// Use this for initialization
 	void Start () {
@@ -19,14 +20,14 @@ public class Button : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
 
-        int playerIndex = -1;
+        playerIndex = -1;
+
         List<Utilities.ButtonId> pressedButtonCodes = new List<Utilities.ButtonId>();
 
+        List<Player> players = gameManager.GetComponent<GameManager>().getPlayers();
 
-        List<Utilities.InputRestriction> currIRestr = Utilities.currExercise.getInputRestrictionsForEachPlayer();
-
-        var xboxKeyCodesPL0 = Utilities.xboxInputKeyCodes[Utilities.PlayerId.PLAYER_0];
-        var xboxKeyCodesPL1 = Utilities.xboxInputKeyCodes[Utilities.PlayerId.PLAYER_1];
+        var xboxKeyCodesPL0 = players[0].xboxInputKeyCodes;
+        var xboxKeyCodesPL1 = players[1].xboxInputKeyCodes;
 
         for (int i = 0; i < xboxKeyCodesPL0.Length; i++)
         {
@@ -46,6 +47,7 @@ public class Button : MonoBehaviour {
             }
         }
 
+
         this.clicked = false;
         this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
 
@@ -56,14 +58,25 @@ public class Button : MonoBehaviour {
         }
 
         //------------------ MODS ---------------------
-        if (Utilities.currExercise.getInputModsForEachPlayer()[playerIndex] == Utilities.InputMod.BTN_ALL_ACTIONS)
-        {
-            pressedButtonCodes = new List<Utilities.ButtonId>();
-            pressedButtonCodes.AddRange(Utilities.buttonIds);
-        }
+        var inputModForThisPlayer = players[playerIndex].inputMod;
+        
         bool buttonIsPressed = pressedButtonCodes.Contains(this.buttonCode);
 
-        if (Utilities.currExercise.getInputModsForEachPlayer()[playerIndex] == Utilities.InputMod.BTN_OPPOSITION)
+        if (inputModForThisPlayer == Utilities.InputMod.BTN_ALL_ACTIONS)
+        {
+            buttonIsPressed = true;
+        }
+
+        Debug.Log("pressedButtons: " + pressedButtonCodes.ToArray().ToString());
+
+
+        if (inputModForThisPlayer == Utilities.InputMod.BTN_OPPOSITION)
+        {
+            buttonIsPressed = !buttonIsPressed;
+        }
+
+
+        if (inputModForThisPlayer == Utilities.InputMod.BTN_EXCHANGE)
         {
             buttonIsPressed = !buttonIsPressed;
         }
@@ -75,14 +88,14 @@ public class Button : MonoBehaviour {
         }
 
         //------------------ RESTRICTIONS ---------------------
-        Utilities.InputRestriction iRestCurrPL = currIRestr[playerIndex];
-        
+        Utilities.InputRestriction iRestCurrPL = players[playerIndex].inputRestriction;
+
         bool validateBtn0Input = (this.buttonCode == Utilities.ButtonId.BTN_0)
-            &&(iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
+            //&&(iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
             && (iRestCurrPL != Utilities.InputRestriction.BTN_0_ONLY);
 
         bool validateBtn1Input = (this.buttonCode == Utilities.ButtonId.BTN_1)
-            && (iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
+           // && (iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
             && (iRestCurrPL != Utilities.InputRestriction.BTN_1_ONLY);
 
         //(uRestPL1 == Utilities.InputRestriction.BTN_EXCHANGE)
@@ -108,6 +121,7 @@ public class Button : MonoBehaviour {
             otherObject.gameObject.GetComponent<SpriteRenderer>().color = Color.cyan;
 
             gameManager.GetComponent<GameManager>().currWord+=otherObject.gameObject.GetComponent<Letter>().letterText;
+            gameManager.GetComponent<GameManager>().incrementPlayerScore(this.playerIndex);
 
             gameObject.GetComponent<AudioSource>().Play();
         }
