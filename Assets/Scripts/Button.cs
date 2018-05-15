@@ -5,105 +5,90 @@ using UnityEngine;
 
 public class Button : MonoBehaviour {
 
-    public GameObject gameManager;
+    public GameManager gameManager;
     public Utilities.ButtonId buttonCode;
 
+    private bool keyPressed;
     private bool clicked;
 
-    private int playerIndex;
-
-	// Use this for initialization
-	void Start () {
-        
-    }
-	
-	// Update is called once per frame
-	void FixedUpdate () {
-
-        playerIndex = -1;
-
-        List<Utilities.ButtonId> pressedButtonCodes = new List<Utilities.ButtonId>();
-
-        List<Player> players = gameManager.GetComponent<GameManager>().getPlayers();
-
-        string[] xboxKeyCodesPL0 = players[0].xboxInputKeyCodes;
-        string[] xboxKeyCodesPL1 = players[1].xboxInputKeyCodes;
-
-        string[] keyboardKeyCodesPL0 = players[0].keyboardInputKeyCodes;
-        string[] keyboardKeyCodesPL1 = players[1].keyboardInputKeyCodes;
-
-        for (int i = 0; i < xboxKeyCodesPL0.Length; i++)
-        {
-            if (Input.GetButton(xboxKeyCodesPL0[i]) || Input.GetKey(keyboardKeyCodesPL0[i]))
-            {
-                playerIndex = 0;
-                pressedButtonCodes.Add(Utilities.buttonIds[i]);
-            }
-        }
-
-        for (int i = 0; i < xboxKeyCodesPL1.Length; i++)
-        {
-            if (Input.GetButton(xboxKeyCodesPL1[i]) || Input.GetKey(keyboardKeyCodesPL1[i]))
-            {
-                playerIndex = 1;
-                pressedButtonCodes.Add(Utilities.buttonIds[i]);
-            }
-        }
+    private Utilities.PlayerId playerIndex;
 
 
-        this.clicked = false;
-        this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+    public void registerUserButtonPress(Utilities.PlayerId playerIndex) {
 
-
-        if (playerIndex == -1)
-        {
-            return;
-        }
-
+        List<Player> players = gameManager.getPlayers();
         //------------------ MODS ---------------------
-        var inputModForThisPlayer = players[playerIndex].inputMod;
-        
-        bool buttonIsPressed = pressedButtonCodes.Contains(this.buttonCode);
+        var inputModForThisPlayer = players[(int)playerIndex].inputMod;
 
-        if (inputModForThisPlayer == Utilities.InputMod.BTN_ALL_ACTIONS)
-        {
-            buttonIsPressed = true;
+        foreach(Button button in gameManager.gameButtons) {
+            if(button.buttonCode == this.buttonCode)
+            {
+                if (inputModForThisPlayer != Utilities.InputMod.BTN_EXCHANGE)
+                {
+                    registerUserButtonPressed();
+                }
+            }
+            else
+            {
+                if (inputModForThisPlayer == Utilities.InputMod.BTN_ALL_ACTIONS || inputModForThisPlayer == Utilities.InputMod.BTN_EXCHANGE)
+                {
+                    button.registerUserButtonPressed();
+                }
+            }
         }
-
-
-        if (inputModForThisPlayer == Utilities.InputMod.BTN_EXCHANGE)
-        {
-            buttonIsPressed = !buttonIsPressed;
-        }
-        
-
-        if (!buttonIsPressed)
-        {
-            return;
-        }
-
-        //------------------ RESTRICTIONS ---------------------
-        Utilities.InputRestriction iRestCurrPL = players[playerIndex].inputRestriction;
-
-        bool validateBtn0Input = (this.buttonCode == Utilities.ButtonId.BTN_0)
-            //&&(iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
-            && (iRestCurrPL != Utilities.InputRestriction.BTN_0_ONLY);
-
-        bool validateBtn1Input = (this.buttonCode == Utilities.ButtonId.BTN_1)
-           // && (iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
-            && (iRestCurrPL != Utilities.InputRestriction.BTN_1_ONLY);
-
-        //(uRestPL1 == Utilities.InputRestriction.BTN_EXCHANGE)
-
-        if (validateBtn0Input || validateBtn1Input)
-        {
-            this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            this.clicked = true;
-        }
-        
-
     }
 
+    public void registerUserButtonPressed()
+    {
+        this.keyPressed = true;
+    }
+
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+        if (this.keyPressed)
+        {
+
+            this.playerIndex = playerIndex;
+
+            List<Utilities.ButtonId> pressedButtonCodes = new List<Utilities.ButtonId>();
+
+            List<Player> players = gameManager.getPlayers();
+
+            pressedButtonCodes.Add(buttonCode);
+
+            this.clicked = false;
+            this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+
+
+            //------------------ RESTRICTIONS ---------------------
+            Utilities.InputRestriction iRestCurrPL = players[(int)playerIndex].inputRestriction;
+
+            bool validateBtn0Input = (this.buttonCode == Utilities.ButtonId.BTN_0)
+                //&&(iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
+                && (iRestCurrPL != Utilities.InputRestriction.BTN_0_ONLY);
+
+            bool validateBtn1Input = (this.buttonCode == Utilities.ButtonId.BTN_1)
+                // && (iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
+                && (iRestCurrPL != Utilities.InputRestriction.BTN_1_ONLY);
+
+            //(uRestPL1 == Utilities.InputRestriction.BTN_EXCHANGE)
+
+            if (validateBtn0Input || validateBtn1Input)
+            {
+                this.clicked = true;
+                this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            }
+            this.keyPressed = false;
+        }
+        else
+        {
+            this.clicked = false;
+            this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+        }
+
+    }
+    
 
     void OnTriggerEnter(Collider otherObject)
     {

@@ -11,6 +11,14 @@ public static class Utilities
 {
     public static Exercise currExercise { get; set; }
 
+
+    public enum PlayerId
+    {
+        PLAYER_0,
+        PLAYER_1,
+        NONE
+    }
+
     public enum ButtonId
     {
         BTN_0,
@@ -54,44 +62,12 @@ public static class Utilities
     public static int numOutputRestriction = outputRestrictions.Length;
 }
 
-public class Player
-{
-    public int id;
-    public Utilities.InputMod inputMod;
-    public Utilities.InputRestriction inputRestriction;
-
-    public string[] xboxInputKeyCodes;
-    public string[] keyboardInputKeyCodes;
-    public int score;
-
-    public Player(int id, string[] xboxInputKeyCodes, string[] keyboardInputKeyCodes)
-    {
-        this.id = id;
-        this.inputMod = Utilities.InputMod.NONE;
-        this.inputRestriction = Utilities.InputRestriction.NONE;
-        this.xboxInputKeyCodes = xboxInputKeyCodes;
-        this.keyboardInputKeyCodes = keyboardInputKeyCodes;
-        this.score = 0;
-    }
-}
-
-public struct Exercise
-{
-    public string displayMessage;
-    public string targetWord;
-
-    public Exercise(string displayMessage, string targetWord) : this()
-    {
-        this.displayMessage = displayMessage;
-        this.targetWord = targetWord;
-    }
-
-
-}
 
 public class GameManager : MonoBehaviour
 {
-    
+
+    public bool isGameplayPaused;
+
     public GameObject hpPanel;
     public GameObject displayPanel;
     public GameObject scorePanel;
@@ -102,7 +78,7 @@ public class GameManager : MonoBehaviour
 
     public GameObject[] antSpawners;
     public GameObject[] letterSpawners;
-
+    public List<Button> gameButtons;
 
     public string currWord;
 
@@ -115,21 +91,35 @@ public class GameManager : MonoBehaviour
     private List<Exercise> exercises;
 
     private List<Player> players;
-    private int lastPlayerToPressIndex = 0;
+    private Utilities.PlayerId lastPlayerToPressIndex = Utilities.PlayerId.NONE;
 
     private List<Utilities.OutputRestriction> prevAntOutputs;
 
+    public void pauseGame()
+    {
+        CancelInvoke();
+        isGameplayPaused = true;
+    }
+
+    public void resumeGame()
+    {
+        InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
+        isGameplayPaused = false;
+    }
 
     // Use this for initialization
     void Start()
     {
+
+        isGameplayPaused = false;
+
         prevAntOutputs = new List<Utilities.OutputRestriction>(2);
         prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
         prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
 
         players = new List<Player>();
-        players.Add(new Player(0 , new string[] { "YButtonJoy1", "BButtonJoy1" }, new string[] { "q", "w" }));
-        players.Add(new Player(1,  new string[] { "YButtonJoy2", "BButtonJoy2" }, new string[] { "o", "p" }));
+        players.Add(new Player(Utilities.PlayerId.PLAYER_0));
+        players.Add(new Player(Utilities.PlayerId.PLAYER_1));
 
         exercises = new List<Exercise>();
         exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
@@ -149,17 +139,26 @@ public class GameManager : MonoBehaviour
 
         lifes = 50;
 
-        InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
         Application.targetFrameRate = 60;
 
         timeLeft = 100.0f;
+        InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
 
         changeTargetWord();
+
+        GameObject pauseMenu = GameObject.Find("Canvas/PauseCanvas");
+        pauseMenu.SetActive(false);
+
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
+        if (isGameplayPaused)
+        {
+            return;
+        }
+
 
         if (lifes < 1)
         {
@@ -219,7 +218,7 @@ public class GameManager : MonoBehaviour
         if (currWord.CompareTo(currTargetWord) == 0)
         {
             score += currTargetWord.Length;
-            players[lastPlayerToPressIndex].score += currTargetWord.Length;
+            players[(int)lastPlayerToPressIndex].score += currTargetWord.Length;
             //timeLeft += currTargetWord.Length*4;
             timeLeft = 100.0f;
             GameObject[] letters = GameObject.FindGameObjectsWithTag("letter");
@@ -262,7 +261,6 @@ public class GameManager : MonoBehaviour
         {
             players[i].inputRestriction = chooseInputRestriction();
             players[i].inputMod = chooseInputMod();
-
         }
         
         prevAntOutputs = new List<Utilities.OutputRestriction>();
@@ -302,7 +300,7 @@ public class GameManager : MonoBehaviour
 
 
 
-    public void setLastPlayerToPressIndex(int playerIndex)
+    public void setLastPlayerToPressIndex(Utilities.PlayerId playerIndex)
     {
        this.lastPlayerToPressIndex = playerIndex;
     }
