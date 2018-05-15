@@ -12,25 +12,25 @@ public class LetterSpawner : MonoBehaviour
 
     private float randomInterval;
 
+    private string currStarredWord;
 
-    private string[] letters = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "L", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-                                 "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+
+    private string[] letters = { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "L", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
+                                 //"1", "2", "3", "4", "5", "6", "7", "8", "9"};
     private List<string> lettersPool;
 
     // Use this for initialization
     void Start()
     {
         resetPool();
-
         float initialDelayInSeconds = 1.0f;
         StartCoroutine(spawnLetterWithDelay(initialDelayInSeconds));
     }
 
 
-    private void FixedUpdate()
+    public void updateCurrStarredtWord(string currTargetWord)
     {
-        //CustomWaitForSeconds(Random.Range(minIntervalRange, maxIntervalRange));
-        
+        this.currStarredWord = currTargetWord;
     }
 
     IEnumerator spawnLetterWithDelay(float sec)
@@ -52,6 +52,10 @@ public class LetterSpawner : MonoBehaviour
         string path = "Textures/Alphabet/" + currLetter;
 
         newLetter.GetComponent<Letter>().letterText = currLetter;
+        if (currStarredWord.Contains(currLetter.ToUpper()))
+        {
+            newLetter.GetComponent<SpriteRenderer>().color = Color.cyan;
+        }
         newLetter.GetComponent<Letter>().speed = newLetter.GetComponent<Letter>().speed + ((score + 1) * 0.05f);
 
         letterRenderer.sprite = (Sprite) Resources.Load(path, typeof(Sprite));

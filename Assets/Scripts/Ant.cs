@@ -5,41 +5,37 @@ using UnityEngine;
 public class Ant : MonoBehaviour
 {
     public GameObject gameManager;
-    public Utilities.AntId myAntId;
 
     public GameObject myQueen;
     Animator queenAnimator;
 
     public GameObject mySpawner;
     public ParticleSystem myParticleSystem;
+    Animator myAnimator;
 
     public GameObject foodProjectile;
     private Sprite foodProjectileSprite;
 
-    Animator animator;
 
-    public float movementSpeed;
-    float currMovementSpeed;
-
-    public Vector3 originalPosition;
-    private float throwingStartTime = -1;
+    private float movementSpeed;
+    private float currMovementSpeed;
 
     private float lifetime = 10;
+    private float differenceFromQueen;
 
-    float differenceFromQueen;
+    private float throwingStartTime = -1;
 
-    private Utilities.OutputRestriction myRestriction;
+    public Utilities.OutputRestriction outputRestriction;
 
     // Use this for initialization
     void Start()
     {
         this.movementSpeed = 5;
 
-        animator = this.gameObject.GetComponent<Animator>();
-        this.originalPosition = this.transform.position;
+        myAnimator = this.gameObject.GetComponent<Animator>();
+        Vector3 spawnPosition = this.transform.position;
+        differenceFromQueen = myQueen.transform.position.x - spawnPosition.x;
         Destroy(gameObject, lifetime);
-        differenceFromQueen = myQueen.transform.position.x - originalPosition.x;
-        Debug.Log(differenceFromQueen);
 
         if(differenceFromQueen < 0)
         {
@@ -53,30 +49,27 @@ public class Ant : MonoBehaviour
         this.queenAnimator = myQueen.GetComponent<Animator>();
         currMovementSpeed = movementSpeed;
 
-        myRestriction = Utilities.currExercise.getOutputRestrictionsForEachAnt()[(int)this.myAntId];
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (myRestriction == Utilities.OutputRestriction.NONE)
+        if (outputRestriction == Utilities.OutputRestriction.NONE)
         {
             return;
         }
 
         //STAR POWER
-        if (myRestriction == Utilities.OutputRestriction.STARPOWER)
+        if (outputRestriction == Utilities.OutputRestriction.STARPOWER)
         {
             myParticleSystem.Play();
         }
         
         
         //EAT ANIMATION
-        if (myRestriction == Utilities.OutputRestriction.EAT)
+        if (outputRestriction == Utilities.OutputRestriction.EAT)
         {
-
-            Debug.Log(movementSpeed);
+            
             this.transform.Translate(Vector3.right * currMovementSpeed * Time.deltaTime);
             if (throwingStartTime < 0)
             {
@@ -88,7 +81,7 @@ public class Ant : MonoBehaviour
                 float difference = currenTime - throwingStartTime;
                 if (difference > 4)
                 {
-                    this.animator.SetTrigger("walk");
+                    this.myAnimator.SetTrigger("walk");
                     gameObject.GetComponents<AudioSource>()[1].Play();
                     if (queenAnimator != null)
                     {
@@ -119,7 +112,7 @@ public class Ant : MonoBehaviour
             return;
         }
 
-        this.animator.SetTrigger("throw");
+        this.myAnimator.SetTrigger("throw");
         GameObject child = gameObject.transform.GetChild(0).gameObject;
         Destroy(child);
         Instantiate(foodProjectile, gameObject.transform.position, Quaternion.identity).GetComponent<SpriteRenderer>().sprite = foodProjectileSprite;

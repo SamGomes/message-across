@@ -26,12 +26,15 @@ public class Button : MonoBehaviour {
 
         List<Player> players = gameManager.GetComponent<GameManager>().getPlayers();
 
-        var xboxKeyCodesPL0 = players[0].xboxInputKeyCodes;
-        var xboxKeyCodesPL1 = players[1].xboxInputKeyCodes;
+        string[] xboxKeyCodesPL0 = players[0].xboxInputKeyCodes;
+        string[] xboxKeyCodesPL1 = players[1].xboxInputKeyCodes;
+
+        string[] keyboardKeyCodesPL0 = players[0].keyboardInputKeyCodes;
+        string[] keyboardKeyCodesPL1 = players[1].keyboardInputKeyCodes;
 
         for (int i = 0; i < xboxKeyCodesPL0.Length; i++)
         {
-            if (Input.GetButton(xboxKeyCodesPL0[i]))
+            if (Input.GetButton(xboxKeyCodesPL0[i]) || Input.GetKey(keyboardKeyCodesPL0[i]))
             {
                 playerIndex = 0;
                 pressedButtonCodes.Add(Utilities.buttonIds[i]);
@@ -40,7 +43,7 @@ public class Button : MonoBehaviour {
 
         for (int i = 0; i < xboxKeyCodesPL1.Length; i++)
         {
-            if (Input.GetButton(xboxKeyCodesPL1[i]))
+            if (Input.GetButton(xboxKeyCodesPL1[i]) || Input.GetKey(keyboardKeyCodesPL1[i]))
             {
                 playerIndex = 1;
                 pressedButtonCodes.Add(Utilities.buttonIds[i]);
@@ -65,14 +68,6 @@ public class Button : MonoBehaviour {
         if (inputModForThisPlayer == Utilities.InputMod.BTN_ALL_ACTIONS)
         {
             buttonIsPressed = true;
-        }
-
-        Debug.Log("pressedButtons: " + pressedButtonCodes.ToArray().ToString());
-
-
-        if (inputModForThisPlayer == Utilities.InputMod.BTN_OPPOSITION)
-        {
-            buttonIsPressed = !buttonIsPressed;
         }
 
 
@@ -121,7 +116,7 @@ public class Button : MonoBehaviour {
             otherObject.gameObject.GetComponent<SpriteRenderer>().color = Color.cyan;
 
             gameManager.GetComponent<GameManager>().currWord+=otherObject.gameObject.GetComponent<Letter>().letterText;
-            gameManager.GetComponent<GameManager>().incrementPlayerScore(this.playerIndex);
+            gameManager.GetComponent<GameManager>().setLastPlayerToPressIndex(this.playerIndex);
 
             gameObject.GetComponent<AudioSource>().Play();
         }
