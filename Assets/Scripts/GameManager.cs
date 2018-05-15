@@ -240,7 +240,7 @@ public class GameManager : MonoBehaviour
             //spawn questionnaires before changing word
             foreach (Player player in players)
             {
-                Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.2097900814=" + player.id+"&entry.159491668="+ (int) player.inputRestriction+"&entry.978719613="+(int) player.inputMod+"&entry.1620449534="+ (int) prevAntOutputs[players.IndexOf(player)]); //spawn questionaire
+                Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.2097900814=" + player.id+"&entry.159491668="+ (int) player.inputRestriction+"&entry.978719613="+(int) player.inputMod+"&entry.1620449534="+ (int) prevAntOutputs[players.IndexOf(player)]+"');"); //spawn questionaire
             }
             changeTargetWord();
         }

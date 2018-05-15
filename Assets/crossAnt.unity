@@ -4234,15 +4234,15 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4213606187066916, guid: d36b6842e39844964aec23f69b1870ff, type: 2}
       propertyPath: m_LocalPosition.x
-      value: -9.91846
+      value: -21.4
       objectReference: {fileID: 0}
     - target: {fileID: 4213606187066916, guid: d36b6842e39844964aec23f69b1870ff, type: 2}
       propertyPath: m_LocalPosition.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4213606187066916, guid: d36b6842e39844964aec23f69b1870ff, type: 2}
       propertyPath: m_LocalPosition.z
-      value: 4.1
+      value: 2.7
       objectReference: {fileID: 0}
     - target: {fileID: 4213606187066916, guid: d36b6842e39844964aec23f69b1870ff, type: 2}
       propertyPath: m_LocalRotation.x
@@ -4272,12 +4272,12 @@ Prefab:
     - target: {fileID: 61123650150532726, guid: d36b6842e39844964aec23f69b1870ff,
         type: 2}
       propertyPath: m_Offset.x
-      value: 11.77133
+      value: 14.823824
       objectReference: {fileID: 0}
     - target: {fileID: 61123650150532726, guid: d36b6842e39844964aec23f69b1870ff,
         type: 2}
       propertyPath: m_Size.x
-      value: 1.3130684
+      value: 1.3879623
       objectReference: {fileID: 0}
     - target: {fileID: 4213606187066916, guid: d36b6842e39844964aec23f69b1870ff, type: 2}
       propertyPath: m_LocalScale.x
@@ -4585,7 +4585,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4722657177228748, guid: 8f99c89e50de144699d24b03396638d9, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 2.92
+      value: 3.18
       objectReference: {fileID: 0}
     - target: {fileID: 4722657177228748, guid: 8f99c89e50de144699d24b03396638d9, type: 2}
       propertyPath: m_LocalPosition.y
@@ -9283,7 +9283,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4213606187066916, guid: d36b6842e39844964aec23f69b1870ff, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 14.63
+      value: 15.42
       objectReference: {fileID: 0}
     - target: {fileID: 4213606187066916, guid: d36b6842e39844964aec23f69b1870ff, type: 2}
       propertyPath: m_LocalPosition.y
