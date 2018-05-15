@@ -66,6 +66,8 @@ public static class Utilities
 public class GameManager : MonoBehaviour
 {
 
+    public GameSceneManager gameSceneManager;
+
     public bool isGameplayPaused;
 
     public GameObject hpPanel;
@@ -112,6 +114,7 @@ public class GameManager : MonoBehaviour
     {
 
         isGameplayPaused = false;
+        gameSceneManager.mainSceneLoadedNotification();
 
         prevAntOutputs = new List<Utilities.OutputRestriction>(2);
         prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
@@ -145,10 +148,7 @@ public class GameManager : MonoBehaviour
         InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
 
         changeTargetWord();
-
-        GameObject pauseMenu = GameObject.Find("Canvas/PauseCanvas");
-        pauseMenu.SetActive(false);
-
+    
     }
 
     // Update is called once per frame
@@ -166,7 +166,7 @@ public class GameManager : MonoBehaviour
         }
 
         hpPanel.GetComponent<UnityEngine.UI.Text>().text = "Lifes: "+ lifes;
-        scorePanel.GetComponent<UnityEngine.UI.Text>().text = "Score: "+ score;
+        scorePanel.GetComponent<UnityEngine.UI.Text>().text = "Team Score: "+ score;
         timePanel.GetComponent<UnityEngine.UI.Text>().text = "Time: "+ timeLeft;
 
         for(int i=0; i < players.Count; i++)
@@ -236,6 +236,7 @@ public class GameManager : MonoBehaviour
                 spawner.spawnAnt(currTargetWord);
             }
 
+            gameSceneManager.pauseForQuestionnaires(Utilities.PlayerId.NONE);
             //spawn questionnaires before changing word
             foreach (Player player in players)
             {

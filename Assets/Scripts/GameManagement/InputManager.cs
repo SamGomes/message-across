@@ -13,7 +13,7 @@ public class InputManager : MonoBehaviour {
     }
 
     public GameManager gameManager;
-    public StartQuitScript startQuitScript;
+    public GameSceneManager gameSceneManager;
 
     public delegate void CallBack();
 
@@ -25,15 +25,15 @@ public class InputManager : MonoBehaviour {
         keyBindings = new Dictionary<KeyCode, KeyValuePair<ButtonPressType, CallBack>>();
         buttonBindings = new Dictionary<string, KeyValuePair<ButtonPressType, CallBack>>();
         
-        this.addKeyBinding(KeyCode.S, ButtonPressType.DOWN, delegate () { startQuitScript.startGame(Utilities.PlayerId.PLAYER_0); });
-        this.addKeyBinding(KeyCode.Space, ButtonPressType.DOWN, delegate () { startQuitScript.pauseGame(Utilities.PlayerId.PLAYER_0); });
+        this.addKeyBinding(KeyCode.S, ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
+        //this.addKeyBinding(KeyCode.Space, ButtonPressType.DOWN, delegate () { startQuitScript.pauseGame(Utilities.PlayerId.NONE); });
         this.addKeyBinding(KeyCode.Q, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
         this.addKeyBinding(KeyCode.W, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
         this.addKeyBinding(KeyCode.O, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
         this.addKeyBinding(KeyCode.P, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
 
-        this.addButtonBinding("Start", ButtonPressType.DOWN, delegate () { startQuitScript.pauseGame(Utilities.PlayerId.PLAYER_0); });
-        this.addButtonBinding("Pause", ButtonPressType.DOWN, delegate () { startQuitScript.startGame(Utilities.PlayerId.PLAYER_0); });
+        this.addButtonBinding("Start", ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
+        //this.addButtonBinding("Pause", ButtonPressType.DOWN, delegate () { startQuitScript.startGame(Utilities.PlayerId.NONE); });
         this.addButtonBinding("YButtonJoy1", ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
         this.addButtonBinding("BButtonJoy1", ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
         this.addButtonBinding("YButtonJoy2", ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });

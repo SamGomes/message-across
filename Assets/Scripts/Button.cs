@@ -16,6 +16,8 @@ public class Button : MonoBehaviour {
 
     public void registerUserButtonPress(Utilities.PlayerId playerIndex) {
 
+        this.playerIndex = playerIndex;
+
         List<Player> players = gameManager.getPlayers();
         //------------------ MODS ---------------------
         var inputModForThisPlayer = players[(int)playerIndex].inputMod;
@@ -25,21 +27,22 @@ public class Button : MonoBehaviour {
             {
                 if (inputModForThisPlayer != Utilities.InputMod.BTN_EXCHANGE)
                 {
-                    registerUserButtonPressed();
+                    registerUserButtonPressed(playerIndex);
                 }
             }
             else
             {
                 if (inputModForThisPlayer == Utilities.InputMod.BTN_ALL_ACTIONS || inputModForThisPlayer == Utilities.InputMod.BTN_EXCHANGE)
                 {
-                    button.registerUserButtonPressed();
+                    button.registerUserButtonPressed(playerIndex);
                 }
             }
         }
     }
 
-    public void registerUserButtonPressed()
+    public void registerUserButtonPressed(Utilities.PlayerId playerIndex)
     {
+        this.playerIndex = playerIndex;
         this.keyPressed = true;
     }
 
@@ -48,8 +51,6 @@ public class Button : MonoBehaviour {
     {
         if (this.keyPressed)
         {
-
-            this.playerIndex = playerIndex;
 
             List<Utilities.ButtonId> pressedButtonCodes = new List<Utilities.ButtonId>();
 
