@@ -94,7 +94,7 @@ public class GameManager : MonoBehaviour
     private List<Exercise> exercises;
 
     private List<Player> players;
-    private Utilities.PlayerId lastPlayerToPressIndex = Utilities.PlayerId.NONE;
+    private Utilities.PlayerId lastPlayerToPressIndex = Utilities.PlayerId.PLAYER_0;
 
     private List<Utilities.OutputRestriction> prevAntOutputs;
 
@@ -163,7 +163,7 @@ public class GameManager : MonoBehaviour
 
         if (lifes < 1)
         {
-            SceneManager.LoadScene("gameover");
+            gameSceneManager.endGame();
         }
 
         hpPanel.GetComponent<UnityEngine.UI.Text>().text = "Lifes: "+ lifes;
