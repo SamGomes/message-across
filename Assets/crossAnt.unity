@@ -457,6 +457,7 @@ MonoBehaviour:
   scorePanel: {fileID: 1184651748}
   timePanel: {fileID: 130794679}
   reqPanel: {fileID: 19847077}
+  track: {fileID: 310652115}
   playersPanel: {fileID: 1942357765}
   antSpawners:
   - {fileID: 320422555}
@@ -508,14 +509,14 @@ RectTransform:
   m_GameObject: {fileID: 130794679}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.1010537, y: 0.15386774, z: 0.9347469}
+  m_LocalScale: {x: 0.07456418, y: 0.097471155, z: 0.9347469}
   m_Children: []
   m_Father: {fileID: 1240623165}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.14718628, y: -5.4739456}
+  m_AnchoredPosition: {x: -2.37, y: -5.51}
   m_SizeDelta: {x: 170.98, y: 32.93}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &130794681
@@ -4795,14 +4796,14 @@ RectTransform:
   m_GameObject: {fileID: 797586246}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.10106548, y: 0.15388566, z: 0.9348558}
+  m_LocalScale: {x: 0.07457286, y: 0.09748251, z: 0.93485576}
   m_Children: []
   m_Father: {fileID: 1240623165}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.59088135, y: 3.7678528}
+  m_AnchoredPosition: {x: -2.6973825, y: 5.28}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &797586248
@@ -5216,7 +5217,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Congratiolations! you got the word right! \n\nBefore you continue, please
+  m_Text: "Congratulations! you got the word right! \n\nBefore you continue, please
     fill the little questionnaires which were popped up. \n\nTo continue to the next
     word, you can simply unpause the game using the 'S' key or the 'Start' xbox button."
 --- !u!222 &1003167691
@@ -5429,15 +5430,15 @@ RectTransform:
   m_GameObject: {fileID: 1184651748}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.10106548, y: 0.15388566, z: 0.9348558}
+  m_LocalScale: {x: 0.073640645, y: 0.122432105, z: 0.9348558}
   m_Children: []
   m_Father: {fileID: 1240623165}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.68136597, y: -0.417511}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: 0.010496616, y: -0.29}
+  m_SizeDelta: {x: 234.421, y: 26.133}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1184651750
 MonoBehaviour:
@@ -5471,7 +5472,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Score:'
+  m_Text: 'Team Score:'
 --- !u!222 &1184651751
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5502,18 +5503,18 @@ RectTransform:
   m_GameObject: {fileID: 1240623164}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 11.238378, y: 7.424914, z: 0.8137878}
+  m_LocalScale: {x: 15.319569, y: 11.398394, z: 0.8137878}
   m_Children:
   - {fileID: 130794680}
-  - {fileID: 797586247}
   - {fileID: 1184651749}
+  - {fileID: 797586247}
   m_Father: {fileID: 1723295599}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -276, y: 137.15}
-  m_SizeDelta: {x: 15.46, y: 10.24}
+  m_AnchoredPosition: {x: -238, y: 177}
+  m_SizeDelta: {x: 15.3, y: 10.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!212 &1240623166
 SpriteRenderer:

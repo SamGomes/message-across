@@ -25,7 +25,7 @@ public class InputManager : MonoBehaviour {
         keyBindings = new Dictionary<KeyCode, KeyValuePair<ButtonPressType, CallBack>>();
         buttonBindings = new Dictionary<string, KeyValuePair<ButtonPressType, CallBack>>();
         
-        this.addKeyBinding(KeyCode.S, ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
+        this.addKeyBinding(KeyCode.Space, ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
         //this.addKeyBinding(KeyCode.Space, ButtonPressType.DOWN, delegate () { startQuitScript.pauseGame(Utilities.PlayerId.NONE); });
         this.addKeyBinding(KeyCode.Q, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
         this.addKeyBinding(KeyCode.W, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });

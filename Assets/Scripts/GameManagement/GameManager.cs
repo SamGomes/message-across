@@ -75,6 +75,7 @@ public class GameManager : MonoBehaviour
     public GameObject scorePanel;
     public GameObject timePanel;
     public GameObject reqPanel;
+    public GameObject track;
 
     public GameObject playersPanel;
 
@@ -271,6 +272,7 @@ public class GameManager : MonoBehaviour
         Utilities.currExercise = exercises[random];
 
         string targetWord = Utilities.currExercise.targetWord;
+        track.GetComponent<SpriteRenderer>().sprite = (Sprite)Resources.Load("Textures/track", typeof(Sprite));
 
         //init restrictions for all players
         for (int i = 0; i < antSpawners.Length; i++)
@@ -281,6 +283,8 @@ public class GameManager : MonoBehaviour
             string starredWord = "";
             if (currOutputRestriction==Utilities.OutputRestriction.STARPOWER)
             {
+                //change the track on star power
+                track.GetComponent<SpriteRenderer>().sprite = (Sprite)Resources.Load("Textures/starTrack", typeof(Sprite));
                 starredWord = targetWord;
             }
             letterSpawners[i%antSpawners.Length].GetComponent<LetterSpawner>().updateCurrStarredtWord(starredWord);

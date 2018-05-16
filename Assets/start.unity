@@ -124,7 +124,7 @@ GameObject:
   - component: {fileID: 29409311}
   - component: {fileID: 29409313}
   m_Layer: 0
-  m_Name: StartQuitManager
+  m_Name: GameSceneManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -141,6 +141,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a105d239f7176f145aabb1d763392931, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameManager: {fileID: 0}
 --- !u!4 &29409312
 Transform:
   m_ObjectHideFlags: 0
@@ -234,6 +235,81 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+--- !u!1 &108642309
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 108642310}
+  - component: {fileID: 108642312}
+  - component: {fileID: 108642311}
+  m_Layer: 5
+  m_Name: copyrightStuff
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &108642310
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 108642309}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.85319984, y: 0.96719986, z: 0.42179996}
+  m_Children: []
+  m_Father: {fileID: 1723295599}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.6293169, y: 0.20700002}
+  m_AnchorMax: {x: 0.6293169, y: 0.20700002}
+  m_AnchoredPosition: {x: 95, y: -115}
+  m_SizeDelta: {x: 479.8, y: 38.6}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &108642311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 108642309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 708705254, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 20
+    m_FontStyle: 1
+    m_BestFit: 1
+    m_MinSize: 0
+    m_MaxSize: 243
+    m_Alignment: 0
+    m_AlignByGeometry: 1
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: Game originally made for GGJ'18 by Samuel Gomes, Elio Freitas and Miguel
+    Marques and later adapted for scientific studies by Samuel Gomes. All rights reserved.
+--- !u!222 &108642312
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 108642309}
 --- !u!1 &360825187
 GameObject:
   m_ObjectHideFlags: 0
@@ -266,7 +342,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.6293169, y: 0.20700002}
   m_AnchorMax: {x: 0.6293169, y: 0.20700002}
-  m_AnchoredPosition: {x: -1.52, y: 2.76}
+  m_AnchoredPosition: {x: -1.52, y: 2.77}
   m_SizeDelta: {x: 287.98, y: 161.979}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &360825189
@@ -296,11 +372,11 @@ MonoBehaviour:
     m_MinSize: 0
     m_MaxSize: 243
     m_Alignment: 0
-    m_AlignByGeometry: 0
+    m_AlignByGeometry: 1
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
-    m_LineSpacing: 0.8
+    m_LineSpacing: 0.7
   m_Text: 'Objective: Complete each word by pressing the letters on the rolling letter
     soup
 
@@ -346,7 +422,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 243.07, y: 161.75}
+  m_AnchoredPosition: {x: 243.07, y: 186}
   m_SizeDelta: {x: 14.2, y: 10.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!212 &361953395
@@ -384,8 +460,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: cfeb5fd6574dd3c4b882296fd4ecf209, type: 3}
-  m_Color: {r: 0.9348959, g: 0.97794116, b: 0.53211504, a: 1}
-  m_FlipX: 0
+  m_Color: {r: 0.9588235, g: 1, b: 0.5735294, a: 1}
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 15.46, y: 10.24}
@@ -425,7 +501,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 5, y: -103}
+  m_AnchoredPosition: {x: -8, y: -72}
   m_SizeDelta: {x: 180, y: 180}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &413251948
@@ -592,6 +668,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1240623165}
   - component: {fileID: 1240623166}
+  - component: {fileID: 1240623167}
   m_Layer: 5
   m_Name: startPanel
   m_TagString: Untagged
@@ -615,7 +692,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 11, y: -211}
+  m_AnchoredPosition: {x: -16.009039, y: -188}
   m_SizeDelta: {x: 15.46, y: 10.24}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!212 &1240623166
@@ -662,6 +739,23 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
+--- !u!95 &1240623167
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1240623164}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: af67f4f41aeeb0342a92f594a1fd3aa3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
 --- !u!1 &1333988246
 GameObject:
   m_ObjectHideFlags: 0
@@ -714,7 +808,7 @@ SpriteRenderer:
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: cfeb5fd6574dd3c4b882296fd4ecf209, type: 3}
   m_Color: {r: 0.9348959, g: 0.97794116, b: 0.53211504, a: 1}
-  m_FlipX: 0
+  m_FlipX: 1
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 15.46, y: 10.24}
@@ -738,7 +832,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -243, y: 158.25}
+  m_AnchoredPosition: {x: -243, y: 182.5}
   m_SizeDelta: {x: 14.2, y: 10.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1417287410
@@ -842,8 +936,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 708a8fa93aedee148849863f67151e34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  startQuitScript: {fileID: 29409311}
-  gameButtons: []
+  gameManager: {fileID: 0}
+  gameSceneManager: {fileID: 29409311}
 --- !u!4 &1436545522
 Transform:
   m_ObjectHideFlags: 0
@@ -948,6 +1042,7 @@ RectTransform:
   - {fileID: 588259841}
   - {fileID: 1333988248}
   - {fileID: 361953394}
+  - {fileID: 108642310}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -980,8 +1075,8 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1822767550}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -73, z: 0}
-  m_LocalScale: {x: 50.838436, y: 76.457184, z: 37.19319}
+  m_LocalPosition: {x: 1.4, y: -55, z: 0}
+  m_LocalScale: {x: 50.662827, y: 89.34693, z: 37.19319}
   m_Children: []
   m_Father: {fileID: 1723295599}
   m_RootOrder: 1
@@ -1056,11 +1151,11 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4722657177228748, guid: 8f99c89e50de144699d24b03396638d9, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 194
+      value: 182
       objectReference: {fileID: 0}
     - target: {fileID: 4722657177228748, guid: 8f99c89e50de144699d24b03396638d9, type: 2}
       propertyPath: m_LocalPosition.y
-      value: -92
+      value: -70
       objectReference: {fileID: 0}
     - target: {fileID: 4722657177228748, guid: 8f99c89e50de144699d24b03396638d9, type: 2}
       propertyPath: m_LocalPosition.z
@@ -1258,8 +1353,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0.8
-  m_Text: "Keys:\n\n- S to Start\n\n- SPACE to Pause\n\n- Q and W for 1st Player \nto
-    Press Track Buttons\n\n- O and P for 2nd Player \nto Press Track Buttons"
+  m_Text: "Keys:\n\n- SPACE to Start/Pause\n\n- Q and W for 1st Player \nto Press
+    Track Buttons\n\n- O and P for 2nd Player \nto Press Track Buttons"
 --- !u!222 &1987144855
 CanvasRenderer:
   m_ObjectHideFlags: 0
