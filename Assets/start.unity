@@ -377,8 +377,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0.7
-  m_Text: 'Objective: Complete each word by pressing the letters on the rolling letter
-    soup
+  m_Text: 'Objective: Complete each word by pressing the letters on a rolling letter
+    soup.
 
 
 
@@ -1388,7 +1388,7 @@ MonoBehaviour:
     m_VerticalOverflow: 0
     m_LineSpacing: 0.8
   m_Text: "Keys:\n\n- SPACE to Start/Pause\n\n- Q and W for 1st Player \nto Press
-    Track Buttons\n\n- O and P for 2nd Player \nto Press Track Buttons"
+    Track Buttons\n\n- O and P for 2nd Player \nto Press Track Buttons\n"
 --- !u!222 &1987144855
 CanvasRenderer:
   m_ObjectHideFlags: 0

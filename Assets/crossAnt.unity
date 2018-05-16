@@ -5217,9 +5217,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Congratulations! you got the word right! \n\nBefore you continue, please
+  m_Text: "Congratulations! You got the word right! \n\nBefore you continue, please
     fill the little questionnaires which were popped up. \n\nTo continue to the next
-    word, you can simply unpause the game using the 'S' key or the 'Start' xbox button."
+    word, you can simply unpause the game using the 'Space' key."
 --- !u!222 &1003167691
 CanvasRenderer:
   m_ObjectHideFlags: 0
