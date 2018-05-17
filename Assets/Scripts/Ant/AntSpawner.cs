@@ -10,6 +10,7 @@ public class AntSpawner : MonoBehaviour
 
     public GameObject antPrefab;
     public GameObject QueenAnt;
+    
 
     public void spawnAnt(string currTargetWord)
     {
@@ -24,4 +25,5 @@ public class AntSpawner : MonoBehaviour
         antScript.myParticleSystem = spawnedParticleSystem.GetComponent<ParticleSystem>();
 
     }
+
 }

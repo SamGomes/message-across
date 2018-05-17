@@ -9,9 +9,6 @@ using UnityEngine.SceneManagement;
 
 public static class Utilities
 {
-    public static Exercise currExercise { get; set; }
-
-
     public enum PlayerId
     {
         PLAYER_0,
@@ -26,7 +23,7 @@ public static class Utilities
         NONE
     }
 
-    public enum InputRestriction
+    public enum PlayerInputRestriction
     {
         BTN_0_ONLY,
         BTN_1_ONLY,
@@ -34,14 +31,18 @@ public static class Utilities
         //ALL_BTNS
     }
 
-    public enum InputMod
+    public enum PlayerInputMod
     {
-        //BTN_OPPOSITION,
         BTN_EXCHANGE,
         BTN_ALL_ACTIONS,
         NONE
     }
 
+    public enum GlobalInputMod
+    {
+        BTN_MIXEDINPUT,
+        NONE
+    }
 
     public enum OutputRestriction
     {
@@ -50,14 +51,16 @@ public static class Utilities
         NONE
     }
 
-    public static InputRestriction[] inputRestrictions = (InputRestriction[]) Enum.GetValues(typeof(Utilities.InputRestriction));
-    public static InputMod[] inputMods = (InputMod[]) Enum.GetValues(typeof(Utilities.InputMod));
+    public static PlayerInputRestriction[] playerInputRestrictions = (PlayerInputRestriction[]) Enum.GetValues(typeof(Utilities.PlayerInputRestriction));
+    public static PlayerInputMod[] playerInputMods = (PlayerInputMod[]) Enum.GetValues(typeof(Utilities.PlayerInputMod));
+    public static GlobalInputMod[] globalInputMods = (GlobalInputMod[]) Enum.GetValues(typeof(Utilities.GlobalInputMod));
     public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Utilities.ButtonId));
 
     public static OutputRestriction[] outputRestrictions = (OutputRestriction[])Enum.GetValues(typeof(Utilities.OutputRestriction));
 
-    public static int numInputRestrictions = inputRestrictions.Length;
-    public static int numInputMods = inputMods.Length;
+    public static int numPlayerInputRestrictions = playerInputRestrictions.Length;
+    public static int numPlayerInputMods = playerInputMods.Length;
+    public static int numGlobalInputMods = globalInputMods.Length;
 
     public static int numOutputRestriction = outputRestrictions.Length;
 }
@@ -94,25 +97,30 @@ public class GameManager : MonoBehaviour
     private List<Exercise> exercises;
 
     private List<Player> players;
-    private Utilities.PlayerId lastPlayerToPressIndex = Utilities.PlayerId.PLAYER_0;
+    private List<Utilities.PlayerId> lastPlayersToPressIndexes;
 
     private List<Utilities.OutputRestriction> prevAntOutputs;
+    public Utilities.GlobalInputMod currGlobalInputMod;
+
+    public Exercise currExercise { get; set; }
 
     public void pauseGame()
     {
-        CancelInvoke();
+        Time.timeScale = 0;
         isGameplayPaused = true;
     }
 
     public void resumeGame()
     {
-        InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
+        Time.timeScale = 1;
         isGameplayPaused = false;
     }
 
     // Use this for initialization
     void Start()
     {
+
+        lastPlayersToPressIndexes = new List<Utilities.PlayerId>();
 
         isGameplayPaused = false;
         gameSceneManager.mainSceneLoadedNotification();
@@ -160,10 +168,19 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-
+        //if no lifes end game immediately
         if (lifes < 1)
         {
             gameSceneManager.endGame();
+        }
+
+        //if time's up change word
+        if (timeLeft == 0.0f)
+        {
+            poppupQuestionnaires();
+            changeTargetWord();
+            timeLeft = 100.0f;
+            hurt();
         }
 
         hpPanel.GetComponent<UnityEngine.UI.Text>().text = "Lifes: "+ lifes;
@@ -176,8 +193,8 @@ public class GameManager : MonoBehaviour
         }
 
         //update curr display message
-        int missingLength = Utilities.currExercise.targetWord.Length - currWord.Length;
-        string[] substrings = Utilities.currExercise.displayMessage.Split('_');
+        int missingLength = this.currExercise.targetWord.Length - currWord.Length;
+        string[] substrings = this.currExercise.displayMessage.Split('_');
 
         string displayString = "";
         if (substrings.Length > 0)
@@ -195,57 +212,6 @@ public class GameManager : MonoBehaviour
         }
         reqPanel.GetComponent<reqScript>().updateRequirement(displayString);
 
-        currWord = currWord.ToUpper();
-
-        if (timeLeft == 0.0f)
-        {
-            changeTargetWord();
-            timeLeft = 100.0f;
-            hurt();
-        }
-
-        string currTargetWord = Utilities.currExercise.targetWord;
-
-        if (currWord == ""){
-            return;
-        }
-        if ((currWord.Length > currTargetWord.Length) || currTargetWord[currWord.Length-1]!=currWord[currWord.Length - 1])
-        {
-            hurt();
-            currWord = currWord.Remove(currWord.Length - 1);
-            return;
-        }
-        
-        if (currWord.CompareTo(currTargetWord) == 0)
-        {
-            score += currTargetWord.Length;
-            players[(int)lastPlayerToPressIndex].score += currTargetWord.Length;
-            //timeLeft += currTargetWord.Length*4;
-            timeLeft = 100.0f;
-            GameObject[] letters = GameObject.FindGameObjectsWithTag("letter");
-            foreach (GameObject letter in letters)
-            {
-                Destroy(letter);
-            }
-            foreach (GameObject letterSpawner in letterSpawners)
-            {
-                letterSpawner.GetComponent<LetterSpawner>().setScore(score);   
-            }
-            foreach (GameObject antSpawner in antSpawners)
-            {
-                AntSpawner spawner = antSpawner.GetComponent<AntSpawner>();
-                spawner.spawnAnt(currTargetWord);
-            }
-
-            gameSceneManager.pauseForQuestionnaires(Utilities.PlayerId.NONE);
-            //spawn questionnaires before changing word
-            foreach (Player player in players)
-            {
-                Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.2097900814=" + player.id+"&entry.159491668="+ (int) player.inputRestriction+"&entry.978719613="+(int) player.inputMod+"&entry.1620449534="+ (int) prevAntOutputs[players.IndexOf(player)]+"');"); //spawn questionaire
-            }
-            changeTargetWord();
-        }
-
     }
 
     void decrementTimeLeft()
@@ -255,23 +221,34 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    void poppupQuestionnaires()
+    {
+        gameSceneManager.pauseForQuestionnaires(Utilities.PlayerId.NONE);
+        //spawn questionnaires before changing word
+        foreach (Player player in players)
+        {
+            Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.2097900814=" + player.id + "&entry.159491668=" + (int)this.currGlobalInputMod + "&entry.1857287181=" + (int)player.inputRestriction + "&entry.978719613=" + (int)player.inputMod + "&entry.1620449534=" + (int)prevAntOutputs[players.IndexOf(player)] + "');"); //spawn questionaires
+        }
+    }
+
     void changeTargetWord()
     {
 
         //init restrictions for all players
         for (int i = 0; i < players.Count; i++) 
         {
-            players[i].inputRestriction = chooseInputRestriction();
-            players[i].inputMod = chooseInputMod();
+            players[i].inputRestriction = Utilities.PlayerInputRestriction.NONE; //choosePlayerInputRestriction(); Utilities.PlayerInputRestriction.BTN_0_ONLY;
+            players[i].inputMod = choosePlayerInputMod(); //Utilities.PlayerInputMod.NONE; 
         }
+        currGlobalInputMod = chooseGlobalInputMod(); //Utilities.GlobalInputMod.BTN_MIXEDINPUT;
         
         prevAntOutputs = new List<Utilities.OutputRestriction>();
 
 
         int random = UnityEngine.Random.Range(0, exercises.Count);
-        Utilities.currExercise = exercises[random];
+        this.currExercise = exercises[random];
 
-        string targetWord = Utilities.currExercise.targetWord;
+        string targetWord = this.currExercise.targetWord;
         track.GetComponent<SpriteRenderer>().sprite = (Sprite)Resources.Load("Textures/track", typeof(Sprite));
 
         //init restrictions for all players
@@ -305,25 +282,77 @@ public class GameManager : MonoBehaviour
 
 
 
-    public void setLastPlayerToPressIndex(Utilities.PlayerId playerIndex)
+    public void recordHit(List<Utilities.PlayerId> hitters, char letterText)
     {
-       this.lastPlayerToPressIndex = playerIndex;
+        this.lastPlayersToPressIndexes = hitters;
+
+        this.currWord += letterText;
+        this.currWord = this.currWord.ToUpper();
+        string currTargetWord = this.currExercise.targetWord;
+
+
+        if (currWord.Length <= currTargetWord.Length && currTargetWord[currWord.Length - 1] == currWord[currWord.Length - 1])
+        {
+            score += 100;
+            foreach (Utilities.PlayerId playerId in lastPlayersToPressIndexes)
+            {
+                players[(int)playerId].score += 50;
+            }
+        }
+        else
+        {
+            hurt();
+            currWord = currWord.Remove(currWord.Length - 1);
+            return;
+        }
+        
+
+        if (currWord.CompareTo(currTargetWord) == 0)
+        {
+            //timeLeft += currTargetWord.Length*4;
+            timeLeft = 100.0f;
+
+            //init track and play ant anims
+            GameObject[] letters = GameObject.FindGameObjectsWithTag("letter");
+            foreach (GameObject letter in letters)
+            {
+                Destroy(letter);
+            }
+            foreach (GameObject letterSpawner in letterSpawners)
+            {
+                letterSpawner.GetComponent<LetterSpawner>().setScore(score);
+            }
+            foreach (GameObject antSpawner in antSpawners)
+            {
+                AntSpawner spawner = antSpawner.GetComponent<AntSpawner>();
+                spawner.spawnAnt(currTargetWord);
+            }
+
+            poppupQuestionnaires();
+            changeTargetWord();
+        }
     }
 
 
-    private Utilities.InputRestriction chooseInputRestriction()
+    private Utilities.PlayerInputRestriction choosePlayerInputRestriction()
     {
-        int randomIndex = UnityEngine.Random.Range(0, Utilities.numInputRestrictions);
-        return Utilities.inputRestrictions[randomIndex];
+        int randomIndex = UnityEngine.Random.Range(0, Utilities.numPlayerInputRestrictions);
+        return Utilities.playerInputRestrictions[randomIndex];
 
     }
-    private Utilities.InputMod chooseInputMod()
+    private Utilities.PlayerInputMod choosePlayerInputMod()
     {
-        int randomIndex = UnityEngine.Random.Range(0, Utilities.numInputMods);
-        return Utilities.inputMods[randomIndex];
+        int randomIndex = UnityEngine.Random.Range(0, Utilities.numPlayerInputMods);
+        return Utilities.playerInputMods[randomIndex];
 
     }
 
+    private Utilities.GlobalInputMod chooseGlobalInputMod()
+    {
+        int randomIndex = UnityEngine.Random.Range(0, Utilities.numGlobalInputMods);
+        return Utilities.globalInputMods[randomIndex];
+
+    }
     private Utilities.OutputRestriction chooseOutputRestriction()
     {
         int randomIndex = UnityEngine.Random.Range(0, Utilities.numOutputRestriction);

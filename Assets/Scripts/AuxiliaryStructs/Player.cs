@@ -5,16 +5,16 @@ using UnityEngine;
 public class Player
 {
     public Utilities.PlayerId id;
-    public Utilities.InputMod inputMod;
-    public Utilities.InputRestriction inputRestriction;
+    public Utilities.PlayerInputMod inputMod;
+    public Utilities.PlayerInputRestriction inputRestriction;
   
     public int score;
 
     public Player(Utilities.PlayerId id)
     {
         this.id = id;
-        this.inputMod = Utilities.InputMod.NONE;
-        this.inputRestriction = Utilities.InputRestriction.NONE;
+        this.inputMod = Utilities.PlayerInputMod.NONE;
+        this.inputRestriction = Utilities.PlayerInputRestriction.NONE;
         this.score = 0;
     }
 }

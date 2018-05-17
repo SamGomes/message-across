@@ -41,7 +41,7 @@ public class InputManager : MonoBehaviour {
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         foreach(KeyCode key in keyBindings.Keys)
         {
