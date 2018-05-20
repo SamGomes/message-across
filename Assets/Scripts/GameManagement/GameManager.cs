@@ -151,7 +151,7 @@ public class GameManager : MonoBehaviour
 
         lifes = 50;
 
-        Application.targetFrameRate = 60;
+        //Application.targetFrameRate = 60;
 
         timeLeft = 100.0f;
         InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
