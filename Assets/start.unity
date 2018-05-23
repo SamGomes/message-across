@@ -335,15 +335,15 @@ RectTransform:
   m_GameObject: {fileID: 360825187}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.06334873, y: 0.041941456, z: 0.011160138}
+  m_LocalScale: {x: 0.043886546, y: 0.024906425, z: 0.011160134}
   m_Children: []
   m_Father: {fileID: 361953394}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.6293169, y: 0.20700002}
   m_AnchorMax: {x: 0.6293169, y: 0.20700002}
-  m_AnchoredPosition: {x: -1.52, y: 2.77}
-  m_SizeDelta: {x: 287.98, y: 161.979}
+  m_AnchoredPosition: {x: -2.331726, y: 2.7950134}
+  m_SizeDelta: {x: 442, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &360825189
 MonoBehaviour:
@@ -376,14 +376,14 @@ MonoBehaviour:
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
-    m_LineSpacing: 0.7
-  m_Text: 'Objective: Complete each word by pressing the letters on a rolling letter
-    soup.
-
-
-
-    IMPORTANT: Enable pop-ups so that the study questionnaires can be filled after
-    the players complete each word'
+    m_LineSpacing: 0.9
+  m_Text: "Objectives for each level: \n\n(1) Discover the relations between both
+    of the players' keys and the game (account for key combinations, not only single
+    keys);\n\n(2) Complete a word by finding the letters on a rolling letter soup.
+    A letter is found if a track button is down when the letter reaches it.\n\n(3)
+    Achieve the higher individual score\n\nIMPORTANT: Enable pop-ups on this site
+    so that the study questionnaires can be filled after the players complete each
+    word."
 --- !u!222 &360825190
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -414,7 +414,7 @@ RectTransform:
   m_GameObject: {fileID: 361953393}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 13.473, y: 23.060345, z: 37.815598}
+  m_LocalScale: {x: 17.04145, y: 28.89658, z: 37.815598}
   m_Children:
   - {fileID: 360825188}
   m_Father: {fileID: 1723295599}
@@ -422,7 +422,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 243.07, y: 186}
+  m_AnchoredPosition: {x: 205, y: 164}
   m_SizeDelta: {x: 14.2, y: 10.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!212 &361953395
@@ -501,7 +501,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -8, y: -72}
+  m_AnchoredPosition: {x: 5.1819487, y: -88}
   m_SizeDelta: {x: 180, y: 180}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &413251948
@@ -859,7 +859,7 @@ RectTransform:
   m_GameObject: {fileID: 1333988246}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 13.473085, y: 23.060448, z: 37.815742}
+  m_LocalScale: {x: 12.830639, y: 23.37406, z: 42.681534}
   m_Children:
   - {fileID: 1987144853}
   m_Father: {fileID: 1723295599}
@@ -867,8 +867,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -243, y: 182.5}
-  m_SizeDelta: {x: 14.2, y: 10.3}
+  m_AnchoredPosition: {x: -237, y: 185}
+  m_SizeDelta: {x: 17.6, y: 10.6}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1417287410
 GameObject:
@@ -1189,7 +1189,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4722657177228748, guid: 8f99c89e50de144699d24b03396638d9, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 75
+      value: 74
       objectReference: {fileID: 0}
     - target: {fileID: 4722657177228748, guid: 8f99c89e50de144699d24b03396638d9, type: 2}
       propertyPath: m_LocalPosition.z
@@ -1345,15 +1345,15 @@ RectTransform:
   m_GameObject: {fileID: 1987144852}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.06334873, y: 0.041941456, z: 0.011160138}
+  m_LocalScale: {x: 0.0565085, y: 0.030651094, z: 0.011213311}
   m_Children: []
   m_Father: {fileID: 1333988248}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.6293169, y: 0.20700002}
   m_AnchorMax: {x: 0.6293169, y: 0.20700002}
-  m_AnchoredPosition: {x: -1.52, y: 2.76}
-  m_SizeDelta: {x: 287.98, y: 161.979}
+  m_AnchoredPosition: {x: -0.8, y: 2.9752197}
+  m_SizeDelta: {x: 386.48, y: 232.901}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1987144854
 MonoBehaviour:

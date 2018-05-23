@@ -156,6 +156,7 @@ public class GameManager : MonoBehaviour
         timeLeft = 100.0f;
         InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
 
+        changeGameParametrizations();
         changeTargetWord();
     
     }
@@ -189,7 +190,7 @@ public class GameManager : MonoBehaviour
 
         for(int i=0; i < players.Count; i++)
         {
-            playersPanel.transform.GetComponentsInChildren<UnityEngine.UI.Text>()[i].text = "Score of player "+i+": " + players[i].score;
+            playersPanel.transform.GetComponentsInChildren<UnityEngine.UI.Text>()[i].text = "Player "+i+" Score: " + players[i].score;
         }
 
         //update curr display message
@@ -227,24 +228,24 @@ public class GameManager : MonoBehaviour
         //spawn questionnaires before changing word
         foreach (Player player in players)
         {
-            Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.2097900814=" + player.id + "&entry.159491668=" + (int)this.currGlobalInputMod + "&entry.1857287181=" + (int)player.inputRestriction + "&entry.978719613=" + (int)player.inputMod + "&entry.1620449534=" + (int)prevAntOutputs[players.IndexOf(player)] + "');"); //spawn questionaires
+            Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.2097900814=" + player.id + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currGlobalInputMod + "&entry.1857287181=" + (int)player.inputRestriction + "&entry.978719613=" + (int)player.inputMod + "&entry.1620449534=" + (int)prevAntOutputs[players.IndexOf(player)] + "');"); //spawn questionaires
         }
     }
 
-    void changeTargetWord()
+    void changeGameParametrizations()
     {
-
         //init restrictions for all players
-        for (int i = 0; i < players.Count; i++) 
+        for (int i = 0; i < players.Count; i++)
         {
             players[i].inputRestriction = Utilities.PlayerInputRestriction.NONE; //choosePlayerInputRestriction(); Utilities.PlayerInputRestriction.BTN_0_ONLY;
             players[i].inputMod = choosePlayerInputMod(); //Utilities.PlayerInputMod.NONE; 
         }
         currGlobalInputMod = chooseGlobalInputMod(); //Utilities.GlobalInputMod.BTN_MIXEDINPUT;
-        
         prevAntOutputs = new List<Utilities.OutputRestriction>();
+    }
 
-
+    void changeTargetWord()
+    {
         int random = UnityEngine.Random.Range(0, exercises.Count);
         this.currExercise = exercises[random];
 
@@ -272,7 +273,6 @@ public class GameManager : MonoBehaviour
         currWord = "";
 
         displayPanel.GetComponent<DisplayPanel>().setTargetImage(targetWord);
-
     }
 
     void hurt()
@@ -329,6 +329,7 @@ public class GameManager : MonoBehaviour
             }
 
             poppupQuestionnaires();
+            changeGameParametrizations();
             changeTargetWord();
         }
     }
@@ -350,6 +351,7 @@ public class GameManager : MonoBehaviour
     private Utilities.GlobalInputMod chooseGlobalInputMod()
     {
         int randomIndex = UnityEngine.Random.Range(0, Utilities.numGlobalInputMods);
+        Debug.Log(randomIndex);
         return Utilities.globalInputMods[randomIndex];
 
     }

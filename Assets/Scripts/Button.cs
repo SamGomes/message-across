@@ -95,6 +95,14 @@ public class Button : MonoBehaviour {
                     this.clicked = true;
                     this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
                 }
+
+                //if no mixed input register only first player to press
+                if (playersPressingThisButton.Count > 1 &&  currGlobalInputMod != Utilities.GlobalInputMod.BTN_MIXEDINPUT)
+                {
+                    List<Utilities.PlayerId> auxList = new List<Utilities.PlayerId>();
+                    auxList.Add(this.playersPressingThisButton[0]);
+                    this.playersPressingThisButton = auxList;
+                }
             }
 
             this.keyPressed = false;
