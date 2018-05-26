@@ -12,6 +12,7 @@ public class GameSceneManager : MonoBehaviour {
     private GameObject currPauseMenu;
     private GameObject plainPauseMenu;
     private GameObject questionnairesMenu;
+    private GameObject initialConfigMenu;
 
     public void startAndPauseGame(Utilities.PlayerId caller)
     {
@@ -31,9 +32,11 @@ public class GameSceneManager : MonoBehaviour {
         isGameLoaded = true;
         this.plainPauseMenu = GameObject.Find("Canvas/PauseCanvas");
         this.questionnairesMenu = GameObject.Find("Canvas/QuestionnairePauseCanvas");
+        this.initialConfigMenu = GameObject.Find("Canvas/InitialConfigPauseCanvas");
         plainPauseMenu.SetActive(false);
         questionnairesMenu.SetActive(false);
-        this.currPauseMenu = plainPauseMenu;
+        initialConfigMenu.SetActive(false);
+        this.currPauseMenu = initialConfigMenu;
     }
 
     private void startGame(Utilities.PlayerId caller)

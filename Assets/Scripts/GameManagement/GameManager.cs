@@ -89,8 +89,6 @@ public class GameManager : MonoBehaviour
     public string currWord;
 
     public float timeLeft;
-    //public float timeLeft = -1.0f;
-
 
     public int lifes;
     private int score;
@@ -115,6 +113,17 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 1;
         isGameplayPaused = false;
     }
+
+
+    public void PL1NameBoxTextChanged(string newText)
+    {
+        players[0].name = newText;
+    }
+    public void PL2NameBoxTextChanged(string newText)
+    {
+        players[1].name = newText;
+    }
+
 
     // Use this for initialization
     void Start()
@@ -158,6 +167,8 @@ public class GameManager : MonoBehaviour
 
         changeGameParametrizations();
         changeTargetWord();
+
+        gameSceneManager.startAndPauseGame(Utilities.PlayerId.PLAYER_0); //for the initial screen
     
     }
 
@@ -190,7 +201,7 @@ public class GameManager : MonoBehaviour
 
         for(int i=0; i < players.Count; i++)
         {
-            playersPanel.transform.GetComponentsInChildren<UnityEngine.UI.Text>()[i].text = "Player "+i+" Score: " + players[i].score;
+            playersPanel.transform.GetComponentsInChildren<UnityEngine.UI.Text>()[i].text = "Player "+players[i].name+" Score: " + players[i].score;
         }
 
         //update curr display message
@@ -228,7 +239,7 @@ public class GameManager : MonoBehaviour
         //spawn questionnaires before changing word
         foreach (Player player in players)
         {
-            Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.2097900814=" + player.id + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currGlobalInputMod + "&entry.1857287181=" + (int)player.inputRestriction + "&entry.978719613=" + (int)player.inputMod + "&entry.1620449534=" + (int)prevAntOutputs[players.IndexOf(player)] + "');"); //spawn questionaires
+            Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100="+ player.name + "&entry.2097900814=" + player.id + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currGlobalInputMod + "&entry.1857287181=" + (int)player.inputRestriction + "&entry.978719613=" + (int)player.inputMod + "&entry.1620449534=" + (int)prevAntOutputs[players.IndexOf(player)] + "');"); //spawn questionaires
         }
     }
 

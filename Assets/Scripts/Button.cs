@@ -97,7 +97,7 @@ public class Button : MonoBehaviour {
                 }
 
                 //if no mixed input register only first player to press
-                if (playersPressingThisButton.Count > 1 &&  currGlobalInputMod != Utilities.GlobalInputMod.BTN_MIXEDINPUT)
+                if (playersPressingThisButton.Count > 1 && currGlobalInputMod != Utilities.GlobalInputMod.BTN_MIXEDINPUT)
                 {
                     List<Utilities.PlayerId> auxList = new List<Utilities.PlayerId>();
                     auxList.Add(this.playersPressingThisButton[0]);
