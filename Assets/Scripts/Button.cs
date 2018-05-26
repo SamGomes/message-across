@@ -13,16 +13,9 @@ public class Button : MonoBehaviour {
 
     private List<Utilities.PlayerId> playersPressingThisButton;
 
-
-    public void registerUserButtonPress(Utilities.PlayerId playerIndex) {
-
-        if (!this.playersPressingThisButton.Contains(playerIndex))
-        {
-            this.playersPressingThisButton.Add(playerIndex);
-        }
-
+    public void registerUserButtonPress(Utilities.PlayerId[] playersPressingThisButton) {
+        this.playersPressingThisButton = new List<Utilities.PlayerId>(playersPressingThisButton);
         List<Player> players = gameManager.getPlayers();
-
         this.keyPressed = true;
     }
 
@@ -31,7 +24,6 @@ public class Button : MonoBehaviour {
     {
         if (this.keyPressed)
         {
-            List<Player> players = gameManager.getPlayers();
 
             this.clicked = false;
             this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);

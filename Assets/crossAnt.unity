@@ -458,6 +458,7 @@ MonoBehaviour:
   timePanel: {fileID: 130794679}
   reqPanel: {fileID: 19847077}
   track: {fileID: 310652115}
+  inputManager: {fileID: 1263921786}
   playersPanel: {fileID: 1942357765}
   antSpawners:
   - {fileID: 320422555}
@@ -471,7 +472,7 @@ MonoBehaviour:
   currWord: 
   timeLeft: 0
   lifes: 0
-  currGlobalInputMod: 0
+  currNumPlayersCombo: 0
 --- !u!4 &75445756
 Transform:
   m_ObjectHideFlags: 0

@@ -23,13 +23,18 @@ public static class Utilities
         NONE
     }
 
-    public enum NumPlayersCombo
+    public enum PlayersToPressButtonAlternative
     {
-        ONE_PL,
-        TWO_PL,
-        NONE
+        SINGLE_PLAYER,
+        MULTIPLAYER_COMBO
     }
 
+    public enum MultiplayerKeysAlternative
+    {
+        K_2 = 2
+        //,K_3 = 3
+
+    }
     public enum OutputRestriction
     {
         EAT,
@@ -37,12 +42,15 @@ public static class Utilities
         NONE
     }
 
-    public static NumPlayersCombo[] numPlayerCombos = (NumPlayersCombo[]) Enum.GetValues(typeof(Utilities.NumPlayersCombo));
+    public static PlayersToPressButtonAlternative[] playersToPressButtonAlternatives = (PlayersToPressButtonAlternative[]) Enum.GetValues(typeof(Utilities.PlayersToPressButtonAlternative));
+    public static MultiplayerKeysAlternative[] multiplayerKeysAlternatives = (MultiplayerKeysAlternative[]) Enum.GetValues(typeof(Utilities.MultiplayerKeysAlternative));
+
     public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Utilities.ButtonId));
 
     public static OutputRestriction[] outputRestrictions = (OutputRestriction[])Enum.GetValues(typeof(Utilities.OutputRestriction));
 
-    public static int numNumPlayerCombos = numPlayerCombos.Length;
+    public static int numPlayersToPressButtonAlternatives = playersToPressButtonAlternatives.Length;
+    public static int numMultiplayerKeysAlternatives = multiplayerKeysAlternatives.Length;
 
     public static int numOutputRestriction = outputRestrictions.Length;
 }
@@ -62,8 +70,10 @@ public class GameManager : MonoBehaviour
     public GameObject reqPanel;
     public GameObject track;
 
-    public GameObject playersPanel;
+    public InputManager inputManager;
 
+
+    public GameObject playersPanel;
     public GameObject[] antSpawners;
     public GameObject[] letterSpawners;
     public List<Button> gameButtons;
@@ -80,7 +90,7 @@ public class GameManager : MonoBehaviour
     private List<Utilities.PlayerId> lastPlayersToPressIndexes;
 
     private List<Utilities.OutputRestriction> prevAntOutputs;
-    public Utilities.NumPlayersCombo currNumPlayersCombo;
+    public Utilities.PlayersToPressButtonAlternative currNumPlayersCombo;
 
     public Exercise currExercise { get; set; }
 
@@ -99,13 +109,31 @@ public class GameManager : MonoBehaviour
 
     public void PL1NameBoxTextChanged(string newText)
     {
-        players[0].name = newText;
+        players[0].setName(newText);
     }
     public void PL2NameBoxTextChanged(string newText)
     {
-        players[1].name = newText;
+        players[1].setName(newText);
     }
 
+    public void initKeys()
+    {
+        inputManager.addKeyBinding(new KeyCode[] { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
+        inputManager.addButtonBinding(new string[] { "Start" }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
+
+
+
+        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.Q }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
+        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.W }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
+        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.O }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
+        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.P }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
+
+        //    inputManager.addButtonBinding(new string[] { "YButtonJoy1" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
+        //    inputManager.addButtonBinding(new string[] { "BButtonJoy1" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
+        //    inputManager.addButtonBinding(new string[] { "YButtonJoy2" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
+        //    inputManager.addButtonBinding(new string[] { "BButtonJoy2" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
+        //
+    }
 
     // Use this for initialization
     void Start()
@@ -121,8 +149,9 @@ public class GameManager : MonoBehaviour
         prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
 
         players = new List<Player>();
-        players.Add(new Player(Utilities.PlayerId.PLAYER_0));
-        players.Add(new Player(Utilities.PlayerId.PLAYER_1));
+        players.Add(new Player(Utilities.PlayerId.PLAYER_0, new KeyCode[] { KeyCode.Q, KeyCode.W }, new string[] { "YButtonJoy1" , "BButtonJoy1" }));
+        players.Add(new Player(Utilities.PlayerId.PLAYER_1, new KeyCode[] { KeyCode.O, KeyCode.P }, new string[] { "YButtonJoy2" , "BButtonJoy2" }));
+
 
         exercises = new List<Exercise>();
         exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
@@ -183,7 +212,7 @@ public class GameManager : MonoBehaviour
 
         for(int i=0; i < players.Count; i++)
         {
-            playersPanel.transform.GetComponentsInChildren<UnityEngine.UI.Text>()[i].text = "Player "+players[i].name+" Score: " + players[i].score;
+            playersPanel.transform.GetComponentsInChildren<UnityEngine.UI.Text>()[i].text = "Player "+players[i].getName()+" Score: " + players[i].score;
         }
 
         //update curr display message
@@ -228,6 +257,58 @@ public class GameManager : MonoBehaviour
     void changeGameParametrizations()
     {
         this.currNumPlayersCombo = chooseNumPlayersCombo();
+        Debug.Log("currNumPlayersCombo: " + currNumPlayersCombo);
+
+        //could be more efficient
+        inputManager.removeAllKeyBindings();
+        initKeys();
+
+        if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
+        {
+            foreach (Player player in this.players)
+            {
+                List<KeyCode> unassignedPlayerKeys = new List<KeyCode>(player.getMyKeys());
+                foreach (Button button in this.gameButtons)
+                {
+                    int randomIndex = UnityEngine.Random.Range(0, unassignedPlayerKeys.Count);
+                    KeyCode currCode = unassignedPlayerKeys[randomIndex];
+                    unassignedPlayerKeys.RemoveAt(randomIndex);
+                    inputManager.addKeyBinding(new KeyCode[] { currCode }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)button.buttonCode].registerUserButtonPress(new Utilities.PlayerId[] { player.getId() }); });
+                }
+            }
+        }
+        else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER_COMBO)
+        {
+            foreach (Button button in this.gameButtons)
+            {
+                int randomNumKeysToPressIndex = UnityEngine.Random.Range(0, Utilities.numMultiplayerKeysAlternatives);
+                Utilities.MultiplayerKeysAlternative numKeysToPress = Utilities.multiplayerKeysAlternatives[randomNumKeysToPressIndex];
+
+                List<KeyCode> buttonKeyCombo = new List<KeyCode>();
+                List<List< KeyCode >> buttonKeyCombos = new List<List<KeyCode>>();
+                List<Utilities.PlayerId> playersPressingThisButton = new List<Utilities.PlayerId>();
+
+                int currPlayerIndex = 0;
+                while (buttonKeyCombo.Count < (int)numKeysToPress)
+                {
+                    KeyCode currCode = KeyCode.A;
+                    bool codeAlreadyExists = true;
+                    while (codeAlreadyExists)
+                    {
+                        Player currPlayer = this.players[currPlayerIndex % this.players.Count];
+                        playersPressingThisButton.Add(currPlayer.getId());
+                        KeyCode[] playerKeys = currPlayer.getMyKeys();
+                        int randomIndex = UnityEngine.Random.Range(0, playerKeys.Length);
+                        currCode = playerKeys[randomIndex];
+                        codeAlreadyExists = buttonKeyCombos.Contains(buttonKeyCombo);
+                    }
+                    buttonKeyCombo.Add(currCode);
+                    currPlayerIndex++;
+                }
+                inputManager.addKeyBinding(buttonKeyCombo.ToArray(), InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)button.buttonCode].registerUserButtonPress(playersPressingThisButton.ToArray());  });
+            }
+        }
+       
 
         prevAntOutputs = new List<Utilities.OutputRestriction>();
         track.GetComponent<SpriteRenderer>().sprite = (Sprite)Resources.Load("Textures/track", typeof(Sprite));
@@ -322,11 +403,10 @@ public class GameManager : MonoBehaviour
     }
 
 
-    private Utilities.NumPlayersCombo chooseNumPlayersCombo()
+    private Utilities.PlayersToPressButtonAlternative chooseNumPlayersCombo()
     {
-        int randomIndex = UnityEngine.Random.Range(0, Utilities.numNumPlayerCombos);
-        Debug.Log(randomIndex);
-        return Utilities.numPlayerCombos[randomIndex];
+        int randomIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
+        return Utilities.playersToPressButtonAlternatives[randomIndex];
 
     }
     private Utilities.OutputRestriction chooseOutputRestriction()

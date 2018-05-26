@@ -17,28 +17,9 @@ public class InputManager : MonoBehaviour {
 
     public delegate void CallBack();
 
-    Dictionary<KeyCode[], KeyValuePair< ButtonPressType, CallBack> > keyBindings;
-    Dictionary<string[], KeyValuePair< ButtonPressType, CallBack> > buttonBindings;
+    Dictionary<KeyCode[], KeyValuePair< ButtonPressType, CallBack> > keyBindings = new Dictionary<KeyCode[], KeyValuePair<ButtonPressType, CallBack>>();
+    Dictionary<string[], KeyValuePair< ButtonPressType, CallBack> > buttonBindings = new Dictionary<string[], KeyValuePair<ButtonPressType, CallBack>>();
 
-    void Start()
-    {
-        keyBindings = new Dictionary<KeyCode[], KeyValuePair<ButtonPressType, CallBack>>();
-        buttonBindings = new Dictionary<string[], KeyValuePair<ButtonPressType, CallBack>>();
-        
-        this.addKeyBinding(new KeyCode[] { KeyCode.Space }, ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
-        //this.addKeyBinding(KeyCode.Space, ButtonPressType.DOWN, delegate () { startQuitScript.pauseGame(Utilities.PlayerId.NONE); });
-        this.addKeyBinding(new KeyCode[] { KeyCode.Q }, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
-        this.addKeyBinding(new KeyCode[] { KeyCode.W }, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
-        this.addKeyBinding(new KeyCode[] { KeyCode.O }, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
-        this.addKeyBinding(new KeyCode[] { KeyCode.P }, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
-
-        this.addButtonBinding(new string[] { "Start" }, ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
-        //this.addButtonBinding("Pause", ButtonPressType.DOWN, delegate () { startQuitScript.startGame(Utilities.PlayerId.NONE); });
-        this.addButtonBinding(new string[] { "YButtonJoy1" }, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
-        this.addButtonBinding(new string[] { "BButtonJoy1" }, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
-        this.addButtonBinding(new string[] { "YButtonJoy2" }, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
-        this.addButtonBinding(new string[] { "BButtonJoy2" }, ButtonPressType.ALL, delegate () { gameManager.gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
-    }
 
     // Update is called once per frame
     void Update()
@@ -89,10 +70,50 @@ public class InputManager : MonoBehaviour {
     {
         keyBindings.Add(keys, new KeyValuePair < ButtonPressType, CallBack >(pressType, callback));
     }
-
     public void addButtonBinding(string[] keys, ButtonPressType pressType, CallBack callback)
     {
         buttonBindings.Add(keys, new KeyValuePair<ButtonPressType, CallBack>(pressType, callback));
+    }
+
+    public void changeKeyBinding(KeyCode[] keys, ButtonPressType pressType, CallBack callback)
+    {
+        if (keyBindings.ContainsKey(keys))
+        {
+            keyBindings[keys] = new KeyValuePair<ButtonPressType, CallBack>(pressType, callback);
+        }
+            
+    }
+    public void changeButtonBinding(string[] keys, ButtonPressType pressType, CallBack callback)
+    {
+        if (buttonBindings.ContainsKey(keys))
+        {
+            buttonBindings[keys] = new KeyValuePair<ButtonPressType, CallBack>(pressType, callback);
+        }
+    }
+
+    public void removeKeyBinding(KeyCode[] keys)
+    {
+        if (keyBindings.ContainsKey(keys))
+        {
+            keyBindings.Remove(keys);
+        }
+
+    }
+    public void removeButtonBinding(string[] keys)
+    {
+        if (buttonBindings.ContainsKey(keys))
+        {
+            buttonBindings.Remove(keys);
+        }
+    }
+
+    public void removeAllKeyBindings()
+    {
+        keyBindings = new Dictionary<KeyCode[], KeyValuePair<ButtonPressType, CallBack>>();
+    }
+    public void removeAllButtonBindings()
+    {
+        buttonBindings = new Dictionary<string[], KeyValuePair<ButtonPressType, CallBack>>();
     }
 
 }
