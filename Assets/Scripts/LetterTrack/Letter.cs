@@ -8,10 +8,8 @@ public class Letter : MonoBehaviour {
     public char letterText;
     private float totalTranslation = 0;
 
-
-	// Use this for initialization
-	void Start () {
-        this.speed = 2;
+	void Awake() {
+        this.speed = 1.5f;
     }
 	
 	// Update is called once per frame

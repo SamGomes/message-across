@@ -17,9 +17,36 @@ public class InputManager : MonoBehaviour {
 
     public delegate void CallBack();
 
-    Dictionary<KeyCode[], KeyValuePair< ButtonPressType, CallBack> > keyBindings = new Dictionary<KeyCode[], KeyValuePair<ButtonPressType, CallBack>>();
-    Dictionary<string[], KeyValuePair< ButtonPressType, CallBack> > buttonBindings = new Dictionary<string[], KeyValuePair<ButtonPressType, CallBack>>();
+    Dictionary<KeyCode[], KeyValuePair< ButtonPressType, CallBack> > keyBindings;
+    Dictionary<string[], KeyValuePair< ButtonPressType, CallBack> > buttonBindings;
 
+    public void initKeys()
+    {
+        this.removeAllKeyBindings();
+        this.addKeyBinding(new KeyCode[] { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
+        this.addButtonBinding(new string[] { "Start" }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
+
+        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.Q }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
+        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.W }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
+        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.O }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
+        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.P }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
+
+        //    inputManager.addButtonBinding(new string[] { "YButtonJoy1" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
+        //    inputManager.addButtonBinding(new string[] { "BButtonJoy1" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
+        //    inputManager.addButtonBinding(new string[] { "YButtonJoy2" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
+        //    inputManager.addButtonBinding(new string[] { "BButtonJoy2" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
+        //
+    }
+
+    void Awake() //before any start init stuff
+    {
+        keyBindings = new Dictionary<KeyCode[], KeyValuePair<ButtonPressType, CallBack>>();
+        buttonBindings = new Dictionary<string[], KeyValuePair<ButtonPressType, CallBack>>();
+        initKeys();
+    }
+    void Start()
+    {
+    }
 
     // Update is called once per frame
     void Update()
@@ -27,7 +54,7 @@ public class InputManager : MonoBehaviour {
         foreach(KeyCode[] simultaneouskeys in keyBindings.Keys)
         {
             var pair = keyBindings[simultaneouskeys];
-
+            
             bool allKeysPressed=true;
             foreach (KeyCode key in simultaneouskeys)
             {

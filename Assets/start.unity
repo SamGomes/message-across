@@ -377,13 +377,10 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0.9
-  m_Text: "Objectives for each level: \n\n(1) Discover the relations between both
-    of the players' keys and the game (account for key combinations, not only single
-    keys);\n\n(2) Complete a word by finding the letters on a rolling letter soup.
-    A letter is found if a track button is down when the letter reaches it.\n\n(3)
-    Achieve the higher individual score\n\nIMPORTANT: Enable pop-ups on this site
-    so that the study questionnaires can be filled after the players complete each
-    word."
+  m_Text: "Objectives for each level: \n\n(1) Discover how to control the game!\n\n(2)
+    Complete a word by finding the letters on a rolling letter soup!\n\n(3) HAVE FUN!\n\nIMPORTANT:
+    Enable pop-ups on this site so that the study questionnaires can be filled after
+    the players complete each word."
 --- !u!222 &360825190
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1387,8 +1384,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0.8
-  m_Text: "Keys:\n\n- SPACE to Start/Pause\n\n- Q and W for 1st Player \nto Press
-    Track Buttons\n\n- O and P for 2nd Player \nto Press Track Buttons\n"
+  m_Text: "Keys:\n\n- SPACE to Start/Pause\n\n- Q, W and E for 1st Player \nto Press
+    Track Buttons\n\n- I, O and P for 2nd Player \nto Press Track Buttons\n"
 --- !u!222 &1987144855
 CanvasRenderer:
   m_ObjectHideFlags: 0

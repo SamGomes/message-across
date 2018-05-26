@@ -21,10 +21,14 @@ public class LetterSpawner : MonoBehaviour
                                  //"1", "2", "3", "4", "5", "6", "7", "8", "9"};
     private List<char> lettersPool;
 
+    private void Awake()
+    {
+        lettersPool = new List<char>();
+    }
+
     // Use this for initialization
     void Start()
     {
-        resetPool();
         float initialDelayInSeconds = 1.0f;
         StartCoroutine(spawnLetterWithDelay(initialDelayInSeconds));
     }

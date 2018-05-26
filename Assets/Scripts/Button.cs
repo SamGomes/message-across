@@ -24,22 +24,13 @@ public class Button : MonoBehaviour {
     {
         if (this.keyPressed)
         {
-
-            this.clicked = false;
-            this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+            this.clicked = true;
+            this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
             
-            bool validateBtn0Input = (this.buttonCode == Utilities.ButtonId.BTN_0);
-            bool validateBtn1Input = (this.buttonCode == Utilities.ButtonId.BTN_1);
-
-            if (validateBtn0Input || validateBtn1Input)
-            {
-                this.clicked = true;
-                this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            }
         }
         else
         {
-            this.playersPressingThisButton = new List<Utilities.PlayerId>(2);
+            this.playersPressingThisButton = new List<Utilities.PlayerId>();
             this.clicked = false;
             this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
         }
