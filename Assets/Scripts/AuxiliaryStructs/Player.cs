@@ -6,8 +6,6 @@ public class Player
 {
     public Utilities.PlayerId id;
     public string name;
-    public Utilities.PlayerInputMod inputMod;
-    public Utilities.PlayerInputRestriction inputRestriction;
   
     public int score;
 
@@ -15,8 +13,6 @@ public class Player
     {
         this.id = id;
         this.name = "";
-        this.inputMod = Utilities.PlayerInputMod.NONE;
-        this.inputRestriction = Utilities.PlayerInputRestriction.NONE;
         this.score = 0;
     }
 }

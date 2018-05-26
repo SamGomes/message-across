@@ -23,38 +23,11 @@ public class Button : MonoBehaviour {
 
         List<Player> players = gameManager.getPlayers();
 
-        //------------------ MODS ---------------------
-        Utilities.PlayerInputMod inputModForThisPlayer = players[(int)playerIndex].inputMod;
-
-        foreach(Button button in gameManager.gameButtons) {
-            if(button.buttonCode == this.buttonCode)
-            {
-                if (inputModForThisPlayer != Utilities.PlayerInputMod.BTN_EXCHANGE)
-                {
-                    registerUserButtonPressed(playerIndex);
-                }
-            }
-            else
-            {
-                if (inputModForThisPlayer == Utilities.PlayerInputMod.BTN_ALL_ACTIONS || inputModForThisPlayer == Utilities.PlayerInputMod.BTN_EXCHANGE)
-                {
-                    button.registerUserButtonPressed(playerIndex);
-                }
-            }
-        }
-    }
-
-    public void registerUserButtonPressed(Utilities.PlayerId playerIndex)
-    {
-        if (!this.playersPressingThisButton.Contains(playerIndex))
-        {
-            this.playersPressingThisButton.Add(playerIndex);
-        }
         this.keyPressed = true;
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    void Update()
     {
         if (this.keyPressed)
         {
@@ -62,50 +35,15 @@ public class Button : MonoBehaviour {
 
             this.clicked = false;
             this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+            
+            bool validateBtn0Input = (this.buttonCode == Utilities.ButtonId.BTN_0);
+            bool validateBtn1Input = (this.buttonCode == Utilities.ButtonId.BTN_1);
 
-
-            Utilities.GlobalInputMod currGlobalInputMod = gameManager.currGlobalInputMod;
-
-            //------------------ RESTRICTIONS (AND GLOBAL INPUT MODS)---------------------
-            bool buttonWasValidByAll = true;
-            foreach (Utilities.PlayerId playerIndex in playersPressingThisButton)
+            if (validateBtn0Input || validateBtn1Input)
             {
-                Utilities.PlayerInputRestriction iRestCurrPL = players[(int)playerIndex].inputRestriction;
-
-                bool validateBtn0Input = (this.buttonCode == Utilities.ButtonId.BTN_0)
-                    //&&(iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
-                    && (iRestCurrPL != Utilities.PlayerInputRestriction.BTN_0_ONLY);
-
-                bool validateBtn1Input = (this.buttonCode == Utilities.ButtonId.BTN_1)
-                    // && (iRestCurrPL != Utilities.InputRestriction.ALL_BTNS)
-                    && (iRestCurrPL != Utilities.PlayerInputRestriction.BTN_1_ONLY);
-                
-
-                if (!(validateBtn0Input || validateBtn1Input))
-                {
-                    buttonWasValidByAll = false;
-                }
+                this.clicked = true;
+                this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
             }
-
-            if (buttonWasValidByAll)
-            {
-                if ((currGlobalInputMod != Utilities.GlobalInputMod.BTN_MIXEDINPUT) || 
-                   (playersPressingThisButton.Count==2 && (currGlobalInputMod==Utilities.GlobalInputMod.BTN_MIXEDINPUT)))
-                {
-                    this.clicked = true;
-                    this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-                }
-
-                //if no mixed input register only first player to press
-                if (playersPressingThisButton.Count > 1 && currGlobalInputMod != Utilities.GlobalInputMod.BTN_MIXEDINPUT)
-                {
-                    List<Utilities.PlayerId> auxList = new List<Utilities.PlayerId>();
-                    auxList.Add(this.playersPressingThisButton[0]);
-                    this.playersPressingThisButton = auxList;
-                }
-            }
-
-            this.keyPressed = false;
         }
         else
         {
@@ -113,9 +51,10 @@ public class Button : MonoBehaviour {
             this.clicked = false;
             this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
         }
+        this.keyPressed = false;
 
     }
-    
+
 
     void OnTriggerEnter(Collider otherObject)
     {
