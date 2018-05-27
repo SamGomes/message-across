@@ -80,6 +80,7 @@ public class LetterSpawner : MonoBehaviour
 
         //bias generation of letters in word
         lettersPool.AddRange(currWordLetters);
+        lettersPool.AddRange(currWordLetters);
     }
 
     public void setScore(int score) {
