@@ -153,11 +153,12 @@ public class GameManager : MonoBehaviour
         InvokeRepeating("DecrementTimeLeft", 0.0f, 1.0f);
 
         ChangeTargetWord();
-        ChangeGameParametrizations();
+        ChangeGameParametrizations(true);
 
         gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); //for the initial screen
     
     }
+
 
     // Update is called once per frame
     void Update()
@@ -176,8 +177,7 @@ public class GameManager : MonoBehaviour
         //if time's up change word
         if (timeLeft == 0.0f)
         {
-            PoppupQuestionnaires();
-            ChangeTargetWord();
+            ChangeLevel();
             timeLeft = 100.0f;
             Hurt();
         }
@@ -209,8 +209,17 @@ public class GameManager : MonoBehaviour
                 displayString += substrings[1];
             }
         }
-        reqPanel.GetComponent<reqScript>().UpdateRequirement(displayString);
+        reqPanel.GetComponent<ReqScript>().UpdateRequirement(displayString);
 
+    }
+
+
+
+    void ChangeLevel()
+    {
+        PoppupQuestionnaires();
+        ChangeTargetWord();
+        ChangeGameParametrizations(false);
     }
 
     void DecrementTimeLeft()
@@ -230,15 +239,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void ChangeGameParametrizations()
+    void ChangeGameParametrizations(bool firstTimeCall)
     {
-        this.currNumPlayersCombo = ChooseNumPlayersCombo();
-        Debug.Log("currNumPlayersCombo: " + currNumPlayersCombo);
-
-        //could be more efficient
         inputManager.InitKeys();
         
         int numKeysToPress = Utilities.simultaneousKeysToPress;
+        this.currNumPlayersCombo = firstTimeCall? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : ChooseNumPlayersCombo();
         foreach (Player player in this.players)
         {
             List<KeyCode> possibleKeys = new List<KeyCode>();
@@ -276,10 +282,19 @@ public class GameManager : MonoBehaviour
                     }
                 }
                 buttonKeyCombos.Add(buttonKeyCombo);
-                Debug.Log(buttonKeyCombo.ToString());
                 inputManager.AddKeyBinding(new List<KeyCode>(buttonKeyCombo).ToArray(), InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)button.buttonCode].RegisterUserButtonPress(new Utilities.PlayerId[] { player.GetId() }); });
             }
         }
+
+        for(int i=0; i<letterSpawners.Length; i++)
+        {
+            if(!firstTimeCall && letterSpawners[i].minIntervalRange > 0.3 && letterSpawners[i].maxIntervalRange > 0.4)
+            {
+                letterSpawners[i].minIntervalRange -= 0.1f;
+                letterSpawners[i].maxIntervalRange -= 0.1f;
+            }
+        }
+
 
         //change ants modes
         prevAntOutputs = new List<Utilities.OutputRestriction>();
@@ -301,7 +316,7 @@ public class GameManager : MonoBehaviour
             {
                 //change the track on star power
                 track.GetComponent<SpriteRenderer>().sprite = (Sprite)Resources.Load("Textures/starTrack", typeof(Sprite));
-                //letterSpawners[UnityEngine.Random.Range(0,letterSpawners.Length)].updateCurrStarredtWord(targetWord);
+                letterSpawners[UnityEngine.Random.Range(0,letterSpawners.Length)].UpdateCurrStarredWord(targetWord);
             }
 
             antSpawners[i].GetComponent<AntSpawner>().outputRestriction = Utilities.OutputRestriction.STARPOWER; // chooseOutputRestriction(); //Utilities.OutputRestriction.STARPOWER;
@@ -352,7 +367,7 @@ public class GameManager : MonoBehaviour
 
         if (currWord.CompareTo(currTargetWord) == 0)
         {
-            //timeLeft += currTargetWord.Length*4;
+            timeLeft += currTargetWord.Length*4;
             timeLeft = 100.0f;
 
             //init track and play ant anims
@@ -370,9 +385,7 @@ public class GameManager : MonoBehaviour
                 antSpawner.SpawnAnt(currTargetWord);
             }
 
-            PoppupQuestionnaires();
-            ChangeTargetWord();
-            ChangeGameParametrizations();
+            ChangeLevel();
 
         }
     }

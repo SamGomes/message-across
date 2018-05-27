@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class reqScript : MonoBehaviour {
+public class ReqScript : MonoBehaviour {
 	public void UpdateRequirement(string word){
 		gameObject.GetComponent<Text>().text = word;
 	}

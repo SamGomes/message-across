@@ -16,7 +16,6 @@ public class GameSceneManager : MonoBehaviour {
 
     public void StartAndPauseGame(Utilities.PlayerId caller)
     {
-        Debug.Log("pause");
         if (!isGameLoaded)
         {
             this.StartGame(caller);
