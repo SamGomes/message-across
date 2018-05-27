@@ -286,7 +286,6 @@ public class GameManager : MonoBehaviour
         track.GetComponent<SpriteRenderer>().sprite = (Sprite)Resources.Load("Textures/track", typeof(Sprite));
 
         string targetWord = this.currExercise.targetWord;
-        
 
         for (int i = 0; i < letterSpawners.Length; i++)
         {
