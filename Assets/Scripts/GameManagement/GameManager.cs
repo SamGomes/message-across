@@ -27,15 +27,9 @@ public static class Utilities
     public enum PlayersToPressButtonAlternative
     {
         SINGLE_PLAYER,
-        MULTIPLAYER_COMBO
+        MULTIPLAYER
     }
 
-    public enum MultiplayerKeysAlternative
-    {
-        //K_2 = 2,
-        K_3 = 3
-
-    }
     public enum OutputRestriction
     {
         EAT,
@@ -44,14 +38,13 @@ public static class Utilities
     }
 
     public static PlayersToPressButtonAlternative[] playersToPressButtonAlternatives = (PlayersToPressButtonAlternative[]) Enum.GetValues(typeof(Utilities.PlayersToPressButtonAlternative));
-    public static MultiplayerKeysAlternative[] multiplayerKeysAlternatives = (MultiplayerKeysAlternative[]) Enum.GetValues(typeof(Utilities.MultiplayerKeysAlternative));
 
     public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Utilities.ButtonId));
 
     public static OutputRestriction[] outputRestrictions = (OutputRestriction[])Enum.GetValues(typeof(Utilities.OutputRestriction));
 
     public static int numPlayersToPressButtonAlternatives = playersToPressButtonAlternatives.Length;
-    public static int numMultiplayerKeysAlternatives = multiplayerKeysAlternatives.Length;
+    public static int simultaneousKeysToPress = 2;
 
     public static int numOutputRestriction = outputRestrictions.Length;
 }
@@ -244,55 +237,49 @@ public class GameManager : MonoBehaviour
 
         //could be more efficient
         inputManager.initKeys();
-
-        if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
+        
+        int numKeysToPress = Utilities.simultaneousKeysToPress;
+        foreach (Player player in this.players)
         {
-            foreach (Player player in this.players)
+            List<KeyCode> possibleKeys = new List<KeyCode>();
+            if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
             {
-                List<KeyCode> unassignedPlayerKeys = new List<KeyCode>(player.getMyKeys());
-                foreach (Button button in this.gameButtons)
+                possibleKeys = new List<KeyCode>(player.getMyKeys());
+            }
+            else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
+            {
+                possibleKeys = new List<KeyCode>();
+                foreach (Player innerPlayer in this.players)
                 {
-                    int randomIndex = UnityEngine.Random.Range(0, unassignedPlayerKeys.Count);
-                    KeyCode currCode = unassignedPlayerKeys[randomIndex];
-                    unassignedPlayerKeys.RemoveAt(randomIndex);
-                    inputManager.addKeyBinding(new KeyCode[] { currCode }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)button.buttonCode].registerUserButtonPress(new Utilities.PlayerId[] { player.getId() }); });
+                    possibleKeys.AddRange(innerPlayer.getMyKeys());
                 }
             }
-        }
-        else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER_COMBO)
-        {
-            int randomNumKeysToPressIndex = UnityEngine.Random.Range(0, Utilities.numMultiplayerKeysAlternatives);
-            Utilities.MultiplayerKeysAlternative numKeysToPress = Utilities.multiplayerKeysAlternatives[randomNumKeysToPressIndex];
+
+            List<HashSet<KeyCode>> buttonKeyCombos = new List<HashSet<KeyCode>>();
             foreach (Button button in this.gameButtons)
             {
                 HashSet<KeyCode> buttonKeyCombo = new HashSet<KeyCode>();
-                List<HashSet< KeyCode >> buttonKeyCombos = new List<HashSet<KeyCode>>();
-                List<Utilities.PlayerId> playersPressingThisButton = new List<Utilities.PlayerId>();
-
-                int currPlayerIndex = 0;
-                while (buttonKeyCombo.Count < (int)numKeysToPress)
+                while (buttonKeyCombo.Count < numKeysToPress)
                 {
-                    KeyCode currCode = KeyCode.A;
-                    bool codeAlreadyExists = true;
-                    bool comboAlreadyExists = true;
-                    while (codeAlreadyExists || comboAlreadyExists)
-                    {
-                        Player currPlayer = this.players[currPlayerIndex % this.players.Count];
-                        playersPressingThisButton.Add(currPlayer.getId());
-                        KeyCode[] playerKeys = currPlayer.getMyKeys();
-                        int randomIndex = UnityEngine.Random.Range(0, playerKeys.Length);
-                        currCode = playerKeys[randomIndex];
-                        codeAlreadyExists = buttonKeyCombo.Contains(currCode);
-                        comboAlreadyExists = buttonKeyCombos.Contains(buttonKeyCombo);
-                    }
+                    int randomIndex = UnityEngine.Random.Range(0, possibleKeys.Count);
+                    KeyCode currCode = possibleKeys[randomIndex];
+                    //possibleKeys.RemoveAt(randomIndex);
                     buttonKeyCombo.Add(currCode);
-                    buttonKeyCombos.Add(buttonKeyCombo);
-                    currPlayerIndex++;
+
+                    //ensure that no two equal key combinations are generated
+                    foreach (HashSet<KeyCode> hash in buttonKeyCombos)
+                    {
+                        if (hash.SetEquals(buttonKeyCombo))
+                        {
+                            buttonKeyCombo = new HashSet<KeyCode>();
+                        }
+                    }
                 }
-                inputManager.addKeyBinding(new List<KeyCode>(buttonKeyCombo).ToArray(), InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)button.buttonCode].registerUserButtonPress(playersPressingThisButton.ToArray());  });
+                buttonKeyCombos.Add(buttonKeyCombo);
+                Debug.Log(buttonKeyCombo.ToString());
+                inputManager.addKeyBinding(new List<KeyCode>(buttonKeyCombo).ToArray(), InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)button.buttonCode].registerUserButtonPress(new Utilities.PlayerId[] { player.getId() }); });
             }
         }
-       
 
         //change ants modes
         prevAntOutputs = new List<Utilities.OutputRestriction>();
