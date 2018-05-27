@@ -97,7 +97,7 @@ public class Ant : MonoBehaviour
     }
 
 
-    public void setCargo(string currTargetWord)
+    public void SetCargo(string currTargetWord)
     {
         GameObject child = gameObject.transform.GetChild(0).gameObject;
         SpriteRenderer childRenderer = child.GetComponent<SpriteRenderer>();

@@ -20,7 +20,7 @@ public class Letter : MonoBehaviour {
         
     }
 
-    void destroyLetter() {
+    void DestroyLetter() {
         Destroy(GetComponent<SpriteRenderer>().gameObject);
         Destroy(this.gameObject);
     }

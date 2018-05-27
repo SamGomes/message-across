@@ -22,23 +22,23 @@ public class Player
         this.score = 0;
     }
 
-    public Utilities.PlayerId getId()
+    public Utilities.PlayerId GetId()
     {
         return this.id;
     }
-    public string getName()
+    public string GetName()
     {
         return this.name;
     }
-    public KeyCode[] getMyKeys() {
+    public KeyCode[] GetMyKeys() {
         return myKeys;
     }
-    public string[] getMyButtons()
+    public string[] GetMyButtons()
     {
         return myButtons;
     }
 
-    public void setName(string name)
+    public void SetName(string name)
     {
         this.name = name;
     }

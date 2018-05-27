@@ -13,9 +13,9 @@ public class Button : MonoBehaviour {
 
     private List<Utilities.PlayerId> playersPressingThisButton;
 
-    public void registerUserButtonPress(Utilities.PlayerId[] playersPressingThisButton) {
+    public void RegisterUserButtonPress(Utilities.PlayerId[] playersPressingThisButton) {
         this.playersPressingThisButton = new List<Utilities.PlayerId>(playersPressingThisButton);
-        List<Player> players = gameManager.getPlayers();
+        List<Player> players = gameManager.GetPlayers();
         this.keyPressed = true;
     }
 
@@ -49,7 +49,7 @@ public class Button : MonoBehaviour {
             otherObject.gameObject.transform.localScale = new Vector3(0.3f, 0.3f, 1.0f);
             otherObject.gameObject.GetComponent<SpriteRenderer>().color = Color.cyan;
 
-            gameManager.recordHit(this.playersPressingThisButton, otherObject.gameObject.GetComponent<Letter>().letterText);
+            gameManager.RecordHit(this.playersPressingThisButton, otherObject.gameObject.GetComponent<Letter>().letterText);
 
             gameObject.GetComponent<AudioSource>().Play();
         }

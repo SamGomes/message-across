@@ -88,13 +88,13 @@ public class GameManager : MonoBehaviour
 
     public Exercise currExercise { get; set; }
 
-    public void pauseGame()
+    public void PauseGame()
     {
         Time.timeScale = 0;
         isGameplayPaused = true;
     }
 
-    public void resumeGame()
+    public void ResumeGame()
     {
         Time.timeScale = 1;
         isGameplayPaused = false;
@@ -103,11 +103,11 @@ public class GameManager : MonoBehaviour
 
     public void PL1NameBoxTextChanged(string newText)
     {
-        players[0].setName(newText);
+        players[0].SetName(newText);
     }
     public void PL2NameBoxTextChanged(string newText)
     {
-        players[1].setName(newText);
+        players[1].SetName(newText);
     }
    
 
@@ -118,7 +118,7 @@ public class GameManager : MonoBehaviour
         lastPlayersToPressIndexes = new List<Utilities.PlayerId>();
 
         isGameplayPaused = false;
-        gameSceneManager.mainSceneLoadedNotification();
+        gameSceneManager.MainSceneLoadedNotification();
 
         prevAntOutputs = new List<Utilities.OutputRestriction>(2);
         prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
@@ -150,12 +150,12 @@ public class GameManager : MonoBehaviour
         //Application.targetFrameRate = 60;
 
         timeLeft = 100.0f;
-        InvokeRepeating("decrementTimeLeft", 0.0f, 1.0f);
+        InvokeRepeating("DecrementTimeLeft", 0.0f, 1.0f);
 
-        changeTargetWord();
-        changeGameParametrizations();
+        ChangeTargetWord();
+        ChangeGameParametrizations();
 
-        gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); //for the initial screen
+        gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); //for the initial screen
     
     }
 
@@ -170,16 +170,16 @@ public class GameManager : MonoBehaviour
         //if no lifes end game immediately
         if (lifes < 1)
         {
-            gameSceneManager.endGame();
+            gameSceneManager.EndGame();
         }
 
         //if time's up change word
         if (timeLeft == 0.0f)
         {
-            poppupQuestionnaires();
-            changeTargetWord();
+            PoppupQuestionnaires();
+            ChangeTargetWord();
             timeLeft = 100.0f;
-            hurt();
+            Hurt();
         }
 
         hpPanel.GetComponent<UnityEngine.UI.Text>().text = "Lifes: "+ lifes;
@@ -188,7 +188,7 @@ public class GameManager : MonoBehaviour
 
         for(int i=0; i < players.Count; i++)
         {
-            playersPanel.transform.GetComponentsInChildren<UnityEngine.UI.Text>()[i].text = "Player "+players[i].getName()+" Score: " + players[i].score;
+            playersPanel.transform.GetComponentsInChildren<UnityEngine.UI.Text>()[i].text = "Player "+players[i].GetName()+" Score: " + players[i].score;
         }
 
         //update curr display message
@@ -209,18 +209,18 @@ public class GameManager : MonoBehaviour
                 displayString += substrings[1];
             }
         }
-        reqPanel.GetComponent<reqScript>().updateRequirement(displayString);
+        reqPanel.GetComponent<reqScript>().UpdateRequirement(displayString);
 
     }
 
-    void decrementTimeLeft()
+    void DecrementTimeLeft()
     {
         if(timeLeft > 0.0f){
             timeLeft--; 
         }
     }
 
-    void poppupQuestionnaires()
+    void PoppupQuestionnaires()
     {
         gameSceneManager.pauseForQuestionnaires(Utilities.PlayerId.NONE);
         //spawn questionnaires before changing word
@@ -230,13 +230,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void changeGameParametrizations()
+    void ChangeGameParametrizations()
     {
-        this.currNumPlayersCombo = chooseNumPlayersCombo();
+        this.currNumPlayersCombo = ChooseNumPlayersCombo();
         Debug.Log("currNumPlayersCombo: " + currNumPlayersCombo);
 
         //could be more efficient
-        inputManager.initKeys();
+        inputManager.InitKeys();
         
         int numKeysToPress = Utilities.simultaneousKeysToPress;
         foreach (Player player in this.players)
@@ -244,14 +244,14 @@ public class GameManager : MonoBehaviour
             List<KeyCode> possibleKeys = new List<KeyCode>();
             if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
             {
-                possibleKeys = new List<KeyCode>(player.getMyKeys());
+                possibleKeys = new List<KeyCode>(player.GetMyKeys());
             }
             else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
             {
                 possibleKeys = new List<KeyCode>();
                 foreach (Player innerPlayer in this.players)
                 {
-                    possibleKeys.AddRange(innerPlayer.getMyKeys());
+                    possibleKeys.AddRange(innerPlayer.GetMyKeys());
                 }
             }
 
@@ -277,7 +277,7 @@ public class GameManager : MonoBehaviour
                 }
                 buttonKeyCombos.Add(buttonKeyCombo);
                 Debug.Log(buttonKeyCombo.ToString());
-                inputManager.addKeyBinding(new List<KeyCode>(buttonKeyCombo).ToArray(), InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)button.buttonCode].registerUserButtonPress(new Utilities.PlayerId[] { player.getId() }); });
+                inputManager.AddKeyBinding(new List<KeyCode>(buttonKeyCombo).ToArray(), InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)button.buttonCode].RegisterUserButtonPress(new Utilities.PlayerId[] { player.GetId() }); });
             }
         }
 
@@ -289,7 +289,7 @@ public class GameManager : MonoBehaviour
 
         for (int i = 0; i < letterSpawners.Length; i++)
         {
-            letterSpawners[i].updateCurrStarredtWord("");
+            letterSpawners[i].UpdateCurrStarredWord("");
 
         }
         for (int i = 0; i < antSpawners.Length; i++)
@@ -309,23 +309,23 @@ public class GameManager : MonoBehaviour
 
     }
 
-    void changeTargetWord()
+    void ChangeTargetWord()
     {
         int random = UnityEngine.Random.Range(0, exercises.Count);
         Exercise newExercise = exercises[random];
 
         currWord = "";
-        displayPanel.GetComponent<DisplayPanel>().setTargetImage(newExercise.targetWord);
+        displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
 
         this.currExercise = newExercise;
     }
 
-    void hurt()
+    void Hurt()
     {
         lifes--;
     }
 
-    public void recordHit(List<Utilities.PlayerId> hitters, char letterText)
+    public void RecordHit(List<Utilities.PlayerId> hitters, char letterText)
     {
         this.lastPlayersToPressIndexes = hitters;
 
@@ -344,7 +344,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            hurt();
+            Hurt();
             currWord = currWord.Remove(currWord.Length - 1);
             return;
         }
@@ -363,35 +363,35 @@ public class GameManager : MonoBehaviour
             }
             foreach (LetterSpawner letterSpawner in letterSpawners)
             {
-                letterSpawner.setScore(score);
+                letterSpawner.SetScore(score);
             }
             foreach (AntSpawner antSpawner in antSpawners)
             {
-                antSpawner.spawnAnt(currTargetWord);
+                antSpawner.SpawnAnt(currTargetWord);
             }
 
-            poppupQuestionnaires();
-            changeTargetWord();
-            changeGameParametrizations();
+            PoppupQuestionnaires();
+            ChangeTargetWord();
+            ChangeGameParametrizations();
 
         }
     }
 
 
-    private Utilities.PlayersToPressButtonAlternative chooseNumPlayersCombo()
+    private Utilities.PlayersToPressButtonAlternative ChooseNumPlayersCombo()
     {
         int randomIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
         return Utilities.playersToPressButtonAlternatives[randomIndex];
 
     }
-    private Utilities.OutputRestriction chooseOutputRestriction()
+    private Utilities.OutputRestriction ChooseOutputRestriction()
     {
         int randomIndex = UnityEngine.Random.Range(0, Utilities.numOutputRestriction);
         return Utilities.outputRestrictions[randomIndex];
     }
 
 
-    public List<Player> getPlayers()
+    public List<Player> GetPlayers()
     {
         return this.players;
     }

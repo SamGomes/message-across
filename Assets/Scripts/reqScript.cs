@@ -4,10 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class reqScript : MonoBehaviour {
-
-
-	public void updateRequirement(string word){
+	public void UpdateRequirement(string word){
 		gameObject.GetComponent<Text>().text = word;
 	}
-
 }

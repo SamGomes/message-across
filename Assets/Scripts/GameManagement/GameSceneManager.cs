@@ -14,20 +14,20 @@ public class GameSceneManager : MonoBehaviour {
     private GameObject questionnairesMenu;
     private GameObject initialConfigMenu;
 
-    public void startAndPauseGame(Utilities.PlayerId caller)
+    public void StartAndPauseGame(Utilities.PlayerId caller)
     {
         Debug.Log("pause");
         if (!isGameLoaded)
         {
-            this.startGame(caller);
+            this.StartGame(caller);
         }
         else
         {
-            this.pauseGame(caller);
+            this.PauseGame(caller);
         }
     }
 
-    public void mainSceneLoadedNotification()
+    public void MainSceneLoadedNotification()
     {
         isGameLoaded = true;
         this.plainPauseMenu = GameObject.Find("Canvas/PauseCanvas");
@@ -39,7 +39,7 @@ public class GameSceneManager : MonoBehaviour {
         this.currPauseMenu = initialConfigMenu;
     }
 
-    private void startGame(Utilities.PlayerId caller)
+    private void StartGame(Utilities.PlayerId caller)
     {
         //set stuff
         isGamePaused = false;
@@ -48,7 +48,7 @@ public class GameSceneManager : MonoBehaviour {
         gameObject.GetComponent<AudioSource>().Play();
         SceneManager.LoadScene("crossAnt");
     }
-    public void endGame()
+    public void EndGame()
     {
         //reset stuff
         isGamePaused = false;
@@ -57,16 +57,16 @@ public class GameSceneManager : MonoBehaviour {
         SceneManager.LoadScene("gameover");
     }
 
-    private void pauseGame(Utilities.PlayerId caller)
+    private void PauseGame(Utilities.PlayerId caller)
     {
         if (!isGamePaused)
         {
-            gameManager.pauseGame();
+            gameManager.PauseGame();
             currPauseMenu.SetActive(true);
         }
         else
         {
-            gameManager.resumeGame();
+            gameManager.ResumeGame();
             currPauseMenu.SetActive(false);
 
             //regain pause menu everytime user unpauses the questionnaire menu
@@ -86,6 +86,6 @@ public class GameSceneManager : MonoBehaviour {
     public void pauseForQuestionnaires(Utilities.PlayerId caller)
     {
         this.currPauseMenu = questionnairesMenu;
-        this.pauseGame(caller);
+        this.PauseGame(caller);
     }
 }

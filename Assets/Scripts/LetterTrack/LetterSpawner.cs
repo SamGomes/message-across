@@ -30,22 +30,22 @@ public class LetterSpawner : MonoBehaviour
     void Start()
     {
         float initialDelayInSeconds = 1.0f;
-        StartCoroutine(spawnLetterWithDelay(initialDelayInSeconds));
+        StartCoroutine(SpawnLetterWithDelay(initialDelayInSeconds));
     }
 
 
-    public void updateCurrStarredtWord(string currTargetWord)
+    public void UpdateCurrStarredWord(string currTargetWord)
     {
         this.currStarredWord = currTargetWord;
     }
 
-    IEnumerator spawnLetterWithDelay(float sec)
+    IEnumerator SpawnLetterWithDelay(float sec)
     {
 
         yield return new WaitForSeconds(sec);
         if (lettersPool.Count == 0)
         {
-            resetPool();
+            ResetPool();
         }
         GameObject newLetter = Instantiate(letterPrefab);
 
@@ -70,10 +70,10 @@ public class LetterSpawner : MonoBehaviour
         newLetter.transform.rotation = gameObject.transform.rotation;
 
         randomInterval = Random.Range(minIntervalRange, maxIntervalRange);
-        StartCoroutine(spawnLetterWithDelay(randomInterval));
+        StartCoroutine(SpawnLetterWithDelay(randomInterval));
     }
 
-    private void resetPool()
+    private void ResetPool()
     {
         lettersPool = letters.ToList<char>();
         List<char> currWordLetters = gameManager.currExercise.targetWord.ToCharArray().ToList<char>();
@@ -83,7 +83,7 @@ public class LetterSpawner : MonoBehaviour
         lettersPool.AddRange(currWordLetters);
     }
 
-    public void setScore(int score) {
+    public void SetScore(int score) {
         this.score = score;
     }
 

@@ -12,13 +12,13 @@ public class AntSpawner : MonoBehaviour
     public GameObject QueenAnt;
     
 
-    public void spawnAnt(string currTargetWord)
+    public void SpawnAnt(string currTargetWord)
     {
         GameObject ant = Instantiate(antPrefab, this.transform.position, Quaternion.identity);
         Ant antScript = ant.GetComponent<Ant>();
         Animator queenAnimator = QueenAnt.GetComponent<Animator>();
 
-        antScript.setCargo(currTargetWord);
+        antScript.SetCargo(currTargetWord);
         antScript.myQueen = this.QueenAnt;
         antScript.mySpawner = this.gameObject;
         antScript.outputRestriction = outputRestriction;

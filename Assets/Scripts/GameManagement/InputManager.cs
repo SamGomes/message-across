@@ -20,11 +20,11 @@ public class InputManager : MonoBehaviour {
     Dictionary<KeyCode[], KeyValuePair< ButtonPressType, CallBack> > keyBindings;
     Dictionary<string[], KeyValuePair< ButtonPressType, CallBack> > buttonBindings;
 
-    public void initKeys()
+    public void InitKeys()
     {
-        this.removeAllKeyBindings();
-        this.addKeyBinding(new KeyCode[] { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
-        this.addButtonBinding(new string[] { "Start" }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.startAndPauseGame(Utilities.PlayerId.NONE); });
+        this.RemoveAllKeyBindings();
+        this.AddKeyBinding(new KeyCode[] { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); });
+        this.AddButtonBinding(new string[] { "Start" }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); });
 
         //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.Q }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
         //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.W }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
@@ -42,7 +42,7 @@ public class InputManager : MonoBehaviour {
     {
         keyBindings = new Dictionary<KeyCode[], KeyValuePair<ButtonPressType, CallBack>>();
         buttonBindings = new Dictionary<string[], KeyValuePair<ButtonPressType, CallBack>>();
-        initKeys();
+        InitKeys();
     }
     void Start()
     {
@@ -93,16 +93,16 @@ public class InputManager : MonoBehaviour {
 
     }
 
-    public void addKeyBinding(KeyCode[] keys, ButtonPressType pressType, CallBack callback)
+    public void AddKeyBinding(KeyCode[] keys, ButtonPressType pressType, CallBack callback)
     {
         keyBindings.Add(keys, new KeyValuePair < ButtonPressType, CallBack >(pressType, callback));
     }
-    public void addButtonBinding(string[] keys, ButtonPressType pressType, CallBack callback)
+    public void AddButtonBinding(string[] keys, ButtonPressType pressType, CallBack callback)
     {
         buttonBindings.Add(keys, new KeyValuePair<ButtonPressType, CallBack>(pressType, callback));
     }
 
-    public void changeKeyBinding(KeyCode[] keys, ButtonPressType pressType, CallBack callback)
+    public void ChangeKeyBinding(KeyCode[] keys, ButtonPressType pressType, CallBack callback)
     {
         if (keyBindings.ContainsKey(keys))
         {
@@ -110,7 +110,7 @@ public class InputManager : MonoBehaviour {
         }
             
     }
-    public void changeButtonBinding(string[] keys, ButtonPressType pressType, CallBack callback)
+    public void ChangeButtonBinding(string[] keys, ButtonPressType pressType, CallBack callback)
     {
         if (buttonBindings.ContainsKey(keys))
         {
@@ -118,7 +118,7 @@ public class InputManager : MonoBehaviour {
         }
     }
 
-    public void removeKeyBinding(KeyCode[] keys)
+    public void RemoveKeyBinding(KeyCode[] keys)
     {
         if (keyBindings.ContainsKey(keys))
         {
@@ -126,7 +126,7 @@ public class InputManager : MonoBehaviour {
         }
 
     }
-    public void removeButtonBinding(string[] keys)
+    public void RemoveButtonBinding(string[] keys)
     {
         if (buttonBindings.ContainsKey(keys))
         {
@@ -134,11 +134,11 @@ public class InputManager : MonoBehaviour {
         }
     }
 
-    public void removeAllKeyBindings()
+    public void RemoveAllKeyBindings()
     {
         keyBindings = new Dictionary<KeyCode[], KeyValuePair<ButtonPressType, CallBack>>();
     }
-    public void removeAllButtonBindings()
+    public void RemoveAllButtonBindings()
     {
         buttonBindings = new Dictionary<string[], KeyValuePair<ButtonPressType, CallBack>>();
     }
