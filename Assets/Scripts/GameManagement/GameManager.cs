@@ -245,7 +245,7 @@ public class GameManager : MonoBehaviour
         inputManager.InitKeys();
         
         int numKeysToPress = Utilities.simultaneousKeysToPress;
-        this.currNumPlayersCombo = Utilities.PlayersToPressButtonAlternative.MULTIPLAYER; //firstTimeCall ? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : ChooseNumPlayersCombo();
+        this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : ChooseNumPlayersCombo();
         foreach (Player player in this.players)
         {
             List<KeyCode> possibleKeys = new List<KeyCode>();
