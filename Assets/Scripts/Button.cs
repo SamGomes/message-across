@@ -10,6 +10,7 @@ public class Button : MonoBehaviour {
 
     private bool keyPressed;
     private bool clicked;
+    private bool locked;
 
     private List<Utilities.PlayerId> playersPressingThisButton;
 
@@ -19,14 +20,18 @@ public class Button : MonoBehaviour {
         this.keyPressed = true;
     }
 
+    private void Start()
+    {
+        this.locked = false;
+    }
+
     // Update is called once per frame
     void Update()
     {
-        if (this.keyPressed)
+        if (this.keyPressed && !this.locked)
         {
             this.clicked = true;
             this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            
         }
         else
         {
@@ -34,6 +39,12 @@ public class Button : MonoBehaviour {
             this.clicked = false;
             this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
         }
+
+        if (!this.keyPressed)
+        {
+            this.locked = false;
+        }
+
         this.keyPressed = false;
 
     }
@@ -53,5 +64,6 @@ public class Button : MonoBehaviour {
 
             gameObject.GetComponent<AudioSource>().Play();
         }
+        this.locked = true;
     }
 }

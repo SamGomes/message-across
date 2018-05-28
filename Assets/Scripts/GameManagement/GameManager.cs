@@ -120,10 +120,6 @@ public class GameManager : MonoBehaviour
         isGameplayPaused = false;
         gameSceneManager.MainSceneLoadedNotification();
 
-        prevAntOutputs = new List<Utilities.OutputRestriction>(2);
-        prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
-        prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
-
         players = new List<Player>();
         players.Add(new Player(Utilities.PlayerId.PLAYER_0, new KeyCode[] { KeyCode.Q, KeyCode.W, KeyCode.E }, new string[] { "YButtonJoy1" , "BButtonJoy1" }));
         players.Add(new Player(Utilities.PlayerId.PLAYER_1, new KeyCode[] { KeyCode.I, KeyCode.O, KeyCode.P }, new string[] { "YButtonJoy2" , "BButtonJoy2" }));
@@ -154,6 +150,10 @@ public class GameManager : MonoBehaviour
 
         ChangeTargetWord();
         ChangeGameParametrizations(true);
+
+        prevAntOutputs = new List<Utilities.OutputRestriction>(2);
+        prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
+        prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
 
         gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); //for the initial screen
     
@@ -235,6 +235,7 @@ public class GameManager : MonoBehaviour
         //spawn questionnaires before changing word
         foreach (Player player in players)
         {
+            //Debug.Log("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.2097900814=" + player.GetId() + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currNumPlayersCombo + "&entry.1472728103=" + (int)prevAntOutputs[players.IndexOf(player)] + "');");
             Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.2097900814=" + player.GetId() + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currNumPlayersCombo+ "&entry.1472728103=" + (int)prevAntOutputs[players.IndexOf(player)] + "');"); //spawn questionaires
         }
     }
@@ -244,7 +245,7 @@ public class GameManager : MonoBehaviour
         inputManager.InitKeys();
         
         int numKeysToPress = Utilities.simultaneousKeysToPress;
-        this.currNumPlayersCombo = firstTimeCall? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : ChooseNumPlayersCombo();
+        this.currNumPlayersCombo = Utilities.PlayersToPressButtonAlternative.MULTIPLAYER; //firstTimeCall ? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : ChooseNumPlayersCombo();
         foreach (Player player in this.players)
         {
             List<KeyCode> possibleKeys = new List<KeyCode>();
@@ -319,7 +320,7 @@ public class GameManager : MonoBehaviour
                 letterSpawners[UnityEngine.Random.Range(0,letterSpawners.Length)].UpdateCurrStarredWord(targetWord);
             }
 
-            antSpawners[i].GetComponent<AntSpawner>().outputRestriction = Utilities.OutputRestriction.STARPOWER; // chooseOutputRestriction(); //Utilities.OutputRestriction.STARPOWER;
+            antSpawners[i].GetComponent<AntSpawner>().outputRestriction = ChooseOutputRestriction(); //Utilities.OutputRestriction.STARPOWER;
         }
 
     }
