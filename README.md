@@ -1,4 +1,4 @@
-# behaviour-changing-crossAnt
+# Interaction mechanics crossAnt
 This is a modified version of CrossAnt, which aims to allow players to interact in certain ways through different key mappings.
 
 ## Adaptation made by:
