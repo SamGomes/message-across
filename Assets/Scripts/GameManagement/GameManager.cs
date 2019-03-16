@@ -6,6 +6,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public static class Utilities
 {
@@ -13,6 +14,7 @@ public static class Utilities
     {
         PLAYER_0,
         PLAYER_1,
+        PLAYER_2,
         NONE
     }
 
@@ -57,6 +59,9 @@ public class GameManager : MonoBehaviour
 
     public bool isGameplayPaused;
 
+    public GameObject namesInputLocation;
+    public GameObject playerNameInputFieldPrefabRef;
+
     public GameObject hpPanel;
     public GameObject displayPanel;
     public GameObject scorePanel;
@@ -100,16 +105,23 @@ public class GameManager : MonoBehaviour
         isGameplayPaused = false;
     }
 
-
-    public void PL1NameBoxTextChanged(string newText)
+    public string OrderedFormOfNumber(int i)
     {
-        players[0].SetName(newText);
+        string suffix = "th";
+        switch (i)
+        {
+            case 1:
+                suffix = "st";
+                break;
+            case 2:
+                suffix = "nd";
+                break;
+            case 3:
+                suffix = "rd";
+                break;
+        }
+        return i + suffix;
     }
-    public void PL2NameBoxTextChanged(string newText)
-    {
-        players[1].SetName(newText);
-    }
-   
 
     // Use this for initialization
     void Start()
@@ -123,6 +135,7 @@ public class GameManager : MonoBehaviour
         players = new List<Player>();
         players.Add(new Player(Utilities.PlayerId.PLAYER_0, new KeyCode[] { KeyCode.Q, KeyCode.W, KeyCode.E }, new string[] { "YButtonJoy1" , "BButtonJoy1" }));
         players.Add(new Player(Utilities.PlayerId.PLAYER_1, new KeyCode[] { KeyCode.I, KeyCode.O, KeyCode.P }, new string[] { "YButtonJoy2" , "BButtonJoy2" }));
+        players.Add(new Player(Utilities.PlayerId.PLAYER_2, new KeyCode[] { KeyCode.V, KeyCode.B, KeyCode.N }, new string[] { "YButtonJoy3" , "BButtonJoy3" }));
 
 
         exercises = new List<Exercise>();
@@ -156,7 +169,22 @@ public class GameManager : MonoBehaviour
         prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
 
         gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); //for the initial screen
-    
+
+
+        for (int i = 0; i < players.Count; i++)
+        {
+            Player currPlayer = players[i];
+            GameObject newNameInput = Instantiate(playerNameInputFieldPrefabRef,namesInputLocation.transform);
+            InputField input = newNameInput.GetComponent<InputField>();
+            input.placeholder.GetComponent<Text>().text = OrderedFormOfNumber(i+1)+" player name";
+
+
+            input.onValueChanged.AddListener(delegate
+            {
+                List<InputField> inputFields = new List<InputField>(namesInputLocation.GetComponentsInChildren<InputField>());
+                players[inputFields.IndexOf(input)].SetName(input.text);
+            });
+        }
     }
 
 
@@ -186,9 +214,12 @@ public class GameManager : MonoBehaviour
         scorePanel.GetComponent<UnityEngine.UI.Text>().text = "Team Score: "+ score;
         timePanel.GetComponent<UnityEngine.UI.Text>().text = "Time: "+ timeLeft;
 
-        for(int i=0; i < players.Count; i++)
+
+        UnityEngine.UI.Text playerPanelText = playersPanel.transform.GetComponentInChildren<UnityEngine.UI.Text>();
+        playerPanelText.text = "";
+        for (int i=0; i < players.Count; i++)
         {
-            playersPanel.transform.GetComponentsInChildren<UnityEngine.UI.Text>()[i].text = "Player "+players[i].GetName()+" Score: " + players[i].score;
+            playerPanelText.text += "\n Player "+players[i].GetName()+" Score: " + players[i].score;
         }
 
         //update curr display message
