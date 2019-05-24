@@ -51,45 +51,43 @@ public class InputManager : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        foreach(KeyCode[] simultaneouskeys in keyBindings.Keys)
+        List<KeyCode> pressedKeys = new List<KeyCode>();
+        foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
         {
+            if (Input.GetKey(key))
+            {
+                pressedKeys.Add(key);
+            }
+        }
+
+        Debug.Log(pressedKeys.ToArray().ToString());
+
+
+        foreach (KeyCode[] simultaneouskeys in keyBindings.Keys)
+        {
+            List<KeyCode> simultaneouskeysList = new List<KeyCode>(simultaneouskeys);
             var pair = keyBindings[simultaneouskeys];
             
             bool allKeysPressed=true;
-            foreach (KeyCode key in simultaneouskeys)
+
+            foreach (KeyCode key in pressedKeys)
             {
-                if (!((pair.Key == ButtonPressType.ALL && Input.GetKey(key))
+                if (!(simultaneouskeysList.Contains(key) && (
+                    (pair.Key == ButtonPressType.ALL && Input.GetKey(key))
                  || (pair.Key == ButtonPressType.DOWN && Input.GetKeyDown(key))
-                 || (pair.Key == ButtonPressType.UP && Input.GetKeyUp(key))))
+                 || (pair.Key == ButtonPressType.UP && Input.GetKeyUp(key)))))
                 {
                     allKeysPressed = false;
+                    break;
                 }
             }
-            if (allKeysPressed)
+            if (pressedKeys.Count>0 && allKeysPressed)
             {
                 pair.Value();
             }
         }
 
-        foreach (string[] simultaneouskeys in buttonBindings.Keys)
-        {
-            var pair = buttonBindings[simultaneouskeys];
-
-            bool allKeysPressed = true;
-            foreach (string key in simultaneouskeys)
-            {
-                if (!((pair.Key == ButtonPressType.ALL && Input.GetButton(key))
-                 || (pair.Key == ButtonPressType.DOWN && Input.GetButtonDown(key))
-                 || (pair.Key == ButtonPressType.UP && Input.GetButtonUp(key))))
-                {
-                    allKeysPressed = false;
-                }
-            }
-            if (allKeysPressed)
-            {
-                pair.Value();
-            }
-        }
+      
 
     }
 

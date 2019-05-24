@@ -32,23 +32,13 @@ public static class Utilities
         MULTIPLAYER
     }
 
-    public enum OutputRestriction
-    {
-        EAT,
-        STARPOWER,
-        NONE
-    }
-
     public static PlayersToPressButtonAlternative[] playersToPressButtonAlternatives = (PlayersToPressButtonAlternative[]) Enum.GetValues(typeof(Utilities.PlayersToPressButtonAlternative));
 
     public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Utilities.ButtonId));
-
-    public static OutputRestriction[] outputRestrictions = (OutputRestriction[])Enum.GetValues(typeof(Utilities.OutputRestriction));
+    
 
     public static int numPlayersToPressButtonAlternatives = playersToPressButtonAlternatives.Length;
     public static int simultaneousKeysToPress = 2;
-
-    public static int numOutputRestriction = outputRestrictions.Length;
 }
 
 
@@ -87,8 +77,7 @@ public class GameManager : MonoBehaviour
 
     private List<Player> players;
     private List<Utilities.PlayerId> lastPlayersToPressIndexes;
-
-    private List<Utilities.OutputRestriction> prevAntOutputs;
+    
     public Utilities.PlayersToPressButtonAlternative currNumPlayersCombo;
 
     public Exercise currExercise { get; set; }
@@ -135,7 +124,7 @@ public class GameManager : MonoBehaviour
         players = new List<Player>();
         players.Add(new Player(Utilities.PlayerId.PLAYER_0, new KeyCode[] { KeyCode.Q, KeyCode.W, KeyCode.E }, new string[] { "YButtonJoy1" , "BButtonJoy1" }));
         players.Add(new Player(Utilities.PlayerId.PLAYER_1, new KeyCode[] { KeyCode.I, KeyCode.O, KeyCode.P }, new string[] { "YButtonJoy2" , "BButtonJoy2" }));
-        players.Add(new Player(Utilities.PlayerId.PLAYER_2, new KeyCode[] { KeyCode.V, KeyCode.B, KeyCode.N }, new string[] { "YButtonJoy3" , "BButtonJoy3" }));
+        //players.Add(new Player(Utilities.PlayerId.PLAYER_2, new KeyCode[] { KeyCode.V, KeyCode.B, KeyCode.N }, new string[] { "YButtonJoy3" , "BButtonJoy3" }));
 
 
         exercises = new List<Exercise>();
@@ -163,10 +152,6 @@ public class GameManager : MonoBehaviour
 
         ChangeTargetWord();
         ChangeGameParametrizations(true);
-
-        prevAntOutputs = new List<Utilities.OutputRestriction>(2);
-        prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
-        prevAntOutputs.Add(Utilities.OutputRestriction.NONE);
 
         gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); //for the initial screen
 
@@ -267,7 +252,7 @@ public class GameManager : MonoBehaviour
         foreach (Player player in players)
         {
             //Debug.Log("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.2097900814=" + player.GetId() + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currNumPlayersCombo + "&entry.1472728103=" + (int)prevAntOutputs[players.IndexOf(player)] + "');");
-            Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.2097900814=" + player.GetId() + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currNumPlayersCombo+ "&entry.1472728103=" + (int)prevAntOutputs[players.IndexOf(player)] + "');"); //spawn questionaires
+            //Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.2097900814=" + player.GetId() + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currNumPlayersCombo+ "&entry.1472728103=" + (int)prevAntOutputs[players.IndexOf(player)] + "');"); //spawn questionaires
         }
     }
 
@@ -329,7 +314,6 @@ public class GameManager : MonoBehaviour
 
 
         //change ants modes
-        prevAntOutputs = new List<Utilities.OutputRestriction>();
         track.GetComponent<SpriteRenderer>().sprite = (Sprite)Resources.Load("Textures/track", typeof(Sprite));
 
         string targetWord = this.currExercise.targetWord;
@@ -339,20 +323,19 @@ public class GameManager : MonoBehaviour
             letterSpawners[i].UpdateCurrStarredWord("");
 
         }
-        for (int i = 0; i < antSpawners.Length; i++)
-        {
-            Utilities.OutputRestriction currOutputRestriction = antSpawners[i].GetComponent<AntSpawner>().outputRestriction;
-            prevAntOutputs.Add(currOutputRestriction);
+        //for (int i = 0; i < antSpawners.Length; i++)
+        //{
+        //    Utilities.OutputRestriction currOutputRestriction = antSpawners[i].GetComponent<AntSpawner>().outputRestriction;
 
-            if (currOutputRestriction == Utilities.OutputRestriction.STARPOWER)
-            {
-                //change the track on star power
-                track.GetComponent<SpriteRenderer>().sprite = (Sprite)Resources.Load("Textures/starTrack", typeof(Sprite));
-                letterSpawners[UnityEngine.Random.Range(0,letterSpawners.Length)].UpdateCurrStarredWord(targetWord);
-            }
+        //    if (currOutputRestriction == Utilities.OutputRestriction.STARPOWER)
+        //    {
+        //        //change the track on star power
+        //        track.GetComponent<SpriteRenderer>().sprite = (Sprite)Resources.Load("Textures/starTrack", typeof(Sprite));
+        //        letterSpawners[UnityEngine.Random.Range(0,letterSpawners.Length)].UpdateCurrStarredWord(targetWord);
+        //    }
 
-            antSpawners[i].GetComponent<AntSpawner>().outputRestriction = ChooseOutputRestriction(); //Utilities.OutputRestriction.STARPOWER;
-        }
+        //    antSpawners[i].GetComponent<AntSpawner>().outputRestriction = ChooseOutputRestriction(); //Utilities.OutputRestriction.STARPOWER;
+        //}
 
     }
 
@@ -429,11 +412,11 @@ public class GameManager : MonoBehaviour
         return Utilities.playersToPressButtonAlternatives[randomIndex];
 
     }
-    private Utilities.OutputRestriction ChooseOutputRestriction()
-    {
-        int randomIndex = UnityEngine.Random.Range(0, Utilities.numOutputRestriction);
-        return Utilities.outputRestrictions[randomIndex];
-    }
+    //private Utilities.OutputRestriction ChooseOutputRestriction()
+    //{
+    //    int randomIndex = UnityEngine.Random.Range(0, Utilities.numOutputRestriction);
+    //    return Utilities.outputRestrictions[randomIndex];
+    //}
 
 
     public List<Player> GetPlayers()
