@@ -12,11 +12,11 @@ public class Button : MonoBehaviour {
     private bool clicked;
     private bool locked;
 
-    private List<Utilities.PlayerId> playersPressingThisButton;
+    private List<Player> playersPressingThisButton;
 
-    public void RegisterUserButtonPress(Utilities.PlayerId[] playersPressingThisButton) {
-        this.playersPressingThisButton = new List<Utilities.PlayerId>(playersPressingThisButton);
-        List<Player> players = gameManager.GetPlayers();
+    public void RegisterUserButtonPress(List<Player> playersPressingThisButton) {
+        this.playersPressingThisButton = playersPressingThisButton;
+        //List<Player> players = gameManager.GetPlayers();
         this.keyPressed = true;
     }
 
@@ -35,7 +35,7 @@ public class Button : MonoBehaviour {
         }
         else
         {
-            this.playersPressingThisButton = new List<Utilities.PlayerId>();
+            this.playersPressingThisButton = new List<Player>();
             this.clicked = false;
             this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
         }

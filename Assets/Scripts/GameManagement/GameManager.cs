@@ -67,7 +67,7 @@ public class GameManager : MonoBehaviour
     public LetterSpawner[] letterSpawners;
     public List<Button> gameButtons;
 
-    public string currWord;
+    public string currWordState;
 
     public float timeLeft;
 
@@ -76,7 +76,6 @@ public class GameManager : MonoBehaviour
     private List<Exercise> exercises;
 
     private List<Player> players;
-    private List<Utilities.PlayerId> lastPlayersToPressIndexes;
     
     public Utilities.PlayersToPressButtonAlternative currNumPlayersCombo;
 
@@ -115,33 +114,35 @@ public class GameManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        //Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=AAA&entry.631185473=" + currWordState + "&entry.159491668=" + currNumPlayersCombo + "&entry.1252688229=" + 20 + "&entry.1140424083=" + 30); //spawn questionaires
 
-        lastPlayersToPressIndexes = new List<Utilities.PlayerId>();
+
 
         isGameplayPaused = false;
         gameSceneManager.MainSceneLoadedNotification();
 
         players = new List<Player>();
-        players.Add(new Player(Utilities.PlayerId.PLAYER_0, new KeyCode[] { KeyCode.Q, KeyCode.W, KeyCode.E }, new string[] { "YButtonJoy1" , "BButtonJoy1" }));
-        players.Add(new Player(Utilities.PlayerId.PLAYER_1, new KeyCode[] { KeyCode.I, KeyCode.O, KeyCode.P }, new string[] { "YButtonJoy2" , "BButtonJoy2" }));
+        players.Add(new Player(new List<KeyCode>(){ KeyCode.Q, KeyCode.W, KeyCode.E }, new List<string> { "YButtonJoy1" , "BButtonJoy1" }));
+        players.Add(new Player(new List<KeyCode>() { KeyCode.I, KeyCode.O, KeyCode.P }, new List<string> { "YButtonJoy2" , "BButtonJoy2" }));
         //players.Add(new Player(Utilities.PlayerId.PLAYER_2, new KeyCode[] { KeyCode.V, KeyCode.B, KeyCode.N }, new string[] { "YButtonJoy3" , "BButtonJoy3" }));
 
 
         exercises = new List<Exercise>();
-        exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
-        exercises.Add(new Exercise("Word to match: BANANA \n Your Word:_", "BANANA"));
-        exercises.Add(new Exercise("Word to match: PIE \n Your Word:_", "PIE"));
-        exercises.Add(new Exercise("Word to match: PIZZA \n Your Word:_", "PIZZA"));
-        exercises.Add(new Exercise("Word to match: CROISSANT \n Your Word:_", "CROISSANT"));
-        exercises.Add(new Exercise("Word to match: DONUT \n Your Word:_", "DONUT"));
-        exercises.Add(new Exercise("Word to match: CHERRY \n Your Word:_", "CHERRY"));
-        exercises.Add(new Exercise("Word to match: XMASCOOKIES \n Your Word:_", "XMASCOOKIES"));
-        exercises.Add(new Exercise("Word to match: KIWI \n Your Word:_", "KIWI"));
-        exercises.Add(new Exercise("Word to match: QUICHE \n Your Word:_", "QUICHE"));
-        exercises.Add(new Exercise("Word to match: MANGO \n Your Word:_", "MANGO"));
-        exercises.Add(new Exercise("Word to match: FISH \n Your Word:_", "FISH"));
-        exercises.Add(new Exercise("Word to match: VANILLA \n Your Word:_", "VANILLA"));
-        exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
+        exercises.Add(new Exercise("Fck yourself:_", "A"));
+        //exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
+        //exercises.Add(new Exercise("Word to match: BANANA \n Your Word:_", "BANANA"));
+        //exercises.Add(new Exercise("Word to match: PIE \n Your Word:_", "PIE"));
+        //exercises.Add(new Exercise("Word to match: PIZZA \n Your Word:_", "PIZZA"));
+        //exercises.Add(new Exercise("Word to match: CROISSANT \n Your Word:_", "CROISSANT"));
+        //exercises.Add(new Exercise("Word to match: DONUT \n Your Word:_", "DONUT"));
+        //exercises.Add(new Exercise("Word to match: CHERRY \n Your Word:_", "CHERRY"));
+        //exercises.Add(new Exercise("Word to match: XMASCOOKIES \n Your Word:_", "XMASCOOKIES"));
+        //exercises.Add(new Exercise("Word to match: KIWI \n Your Word:_", "KIWI"));
+        //exercises.Add(new Exercise("Word to match: QUICHE \n Your Word:_", "QUICHE"));
+        //exercises.Add(new Exercise("Word to match: MANGO \n Your Word:_", "MANGO"));
+        //exercises.Add(new Exercise("Word to match: FISH \n Your Word:_", "FISH"));
+        //exercises.Add(new Exercise("Word to match: VANILLA \n Your Word:_", "VANILLA"));
+        //exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
 
         lifes = 50;
 
@@ -208,14 +209,14 @@ public class GameManager : MonoBehaviour
         }
 
         //update curr display message
-        int missingLength = this.currExercise.targetWord.Length - currWord.Length;
+        int missingLength = this.currExercise.targetWord.Length - currWordState.Length;
         string[] substrings = this.currExercise.displayMessage.Split('_');
 
         string displayString = "";
         if (substrings.Length > 0)
         {
             displayString = substrings[0];
-            displayString += currWord;
+            displayString += currWordState;
             for (int i = 0; i < missingLength; i++)
             {
                 displayString += "_";
@@ -252,7 +253,7 @@ public class GameManager : MonoBehaviour
         foreach (Player player in players)
         {
             //Debug.Log("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.2097900814=" + player.GetId() + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currNumPlayersCombo + "&entry.1472728103=" + (int)prevAntOutputs[players.IndexOf(player)] + "');");
-            //Application.ExternalEval("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.2097900814=" + player.GetId() + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currNumPlayersCombo+ "&entry.1472728103=" + (int)prevAntOutputs[players.IndexOf(player)] + "');"); //spawn questionaires
+            Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100="+player.GetName()+"&entry.631185473="+currWordState+"&entry.159491668="+ currNumPlayersCombo + "&entry.1252688229="+20+"&entry.1140424083="+30); //spawn questionaires
         }
     }
 
@@ -261,45 +262,55 @@ public class GameManager : MonoBehaviour
         inputManager.InitKeys();
         
         int numKeysToPress = Utilities.simultaneousKeysToPress;
-        this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : ChooseNumPlayersCombo();
-        foreach (Player player in this.players)
-        {
-            List<KeyCode> possibleKeys = new List<KeyCode>();
-            if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
-            {
-                possibleKeys = new List<KeyCode>(player.GetMyKeys());
-            }
-            else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
-            {
-                possibleKeys = new List<KeyCode>();
-                foreach (Player innerPlayer in this.players)
-                {
-                    possibleKeys.AddRange(innerPlayer.GetMyKeys());
-                }
-            }
+        
+        //choose num players combo
+        int randomAltIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
+        Utilities.PlayersToPressButtonAlternative chosenAlternative = Utilities.playersToPressButtonAlternatives[randomAltIndex];
 
-            List<HashSet<KeyCode>> buttonKeyCombos = new List<HashSet<KeyCode>>();
-            foreach (Button button in this.gameButtons)
+        List<HashSet<KeyCode>> buttonKeyCombos = new List<HashSet<KeyCode>>();
+        foreach (Button button in this.gameButtons)
+        {
+            List<Player> selectedKeysPlayers = new List<Player>();
+            this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.MULTIPLAYER : chosenAlternative;
+            foreach (Player player in this.players)
             {
                 HashSet<KeyCode> buttonKeyCombo = new HashSet<KeyCode>();
                 while (buttonKeyCombo.Count < numKeysToPress)
                 {
-                    int randomIndex = UnityEngine.Random.Range(0, possibleKeys.Count);
-                    KeyCode currCode = possibleKeys[randomIndex];
+                    int randomPlayerIndex = UnityEngine.Random.Range(0, players.Count);
+
+                    Player selectedPlayer = player;
+                    if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
+                    {
+                        // do nothing
+                    }
+                    else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
+                    {
+                        selectedPlayer = players[(buttonKeyCombo.Count + randomPlayerIndex) % players.Count];
+                    }
+
+                    List<KeyCode> possibleKeys = selectedPlayer.GetMyKeys();
+
+                    int randomCodeIndex = UnityEngine.Random.Range(0, possibleKeys.Count);
+                    KeyCode currCode = possibleKeys[randomCodeIndex];
                     //possibleKeys.RemoveAt(randomIndex);
-                    buttonKeyCombo.Add(currCode);
 
                     //ensure that no two equal key combinations are generated
                     foreach (HashSet<KeyCode> hash in buttonKeyCombos)
                     {
                         if (hash.SetEquals(buttonKeyCombo))
                         {
-                            buttonKeyCombo = new HashSet<KeyCode>();
+                            continue;
                         }
                     }
+                    buttonKeyCombo.Add(currCode);
+                    selectedKeysPlayers.Add(selectedPlayer);
                 }
                 buttonKeyCombos.Add(buttonKeyCombo);
-                inputManager.AddKeyBinding(new List<KeyCode>(buttonKeyCombo).ToArray(), InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)button.buttonCode].RegisterUserButtonPress(new Utilities.PlayerId[] { player.GetId() }); });
+                inputManager.AddKeyBinding(
+                    new List<KeyCode>(buttonKeyCombo), InputManager.ButtonPressType.ALL, delegate () {
+                        gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
+                });
             }
         }
 
@@ -344,7 +355,7 @@ public class GameManager : MonoBehaviour
         int random = UnityEngine.Random.Range(0, exercises.Count);
         Exercise newExercise = exercises[random];
 
-        currWord = "";
+        currWordState = "";
         displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
 
         this.currExercise = newExercise;
@@ -355,32 +366,31 @@ public class GameManager : MonoBehaviour
         lifes--;
     }
 
-    public void RecordHit(List<Utilities.PlayerId> hitters, char letterText)
+    public void RecordHit(List<Player> hitters, char letterText)
     {
-        this.lastPlayersToPressIndexes = hitters;
-
-        this.currWord += letterText;
-        this.currWord = this.currWord.ToUpper();
+        this.currWordState += letterText;
+        this.currWordState = this.currWordState.ToUpper();
         string currTargetWord = this.currExercise.targetWord;
 
 
-        if (currWord.Length <= currTargetWord.Length && currTargetWord[currWord.Length - 1] == currWord[currWord.Length - 1])
+        if (currWordState.Length <= currTargetWord.Length && currTargetWord[currWordState.Length - 1] == currWordState[currWordState.Length - 1])
         {
             score += 100;
-            foreach (Utilities.PlayerId playerId in lastPlayersToPressIndexes)
+            foreach (Player player in hitters)
             {
-                players[(int)playerId].score += 50;
+                player.AddHitToStatistics(hitters);
+                player.score += 50;
             }
         }
         else
         {
             Hurt();
-            currWord = currWord.Remove(currWord.Length - 1);
+            currWordState = currWordState.Remove(currWordState.Length - 1);
             return;
         }
         
 
-        if (currWord.CompareTo(currTargetWord) == 0)
+        if (currWordState.CompareTo(currTargetWord) == 0)
         {
             timeLeft += currTargetWord.Length*4;
             timeLeft = 100.0f;
@@ -405,13 +415,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
-    private Utilities.PlayersToPressButtonAlternative ChooseNumPlayersCombo()
-    {
-        int randomIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
-        return Utilities.playersToPressButtonAlternatives[randomIndex];
-
-    }
+    
     //private Utilities.OutputRestriction ChooseOutputRestriction()
     //{
     //    int randomIndex = UnityEngine.Random.Range(0, Utilities.numOutputRestriction);

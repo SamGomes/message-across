@@ -4,36 +4,45 @@ using UnityEngine;
 
 public class Player
 {
-    private Utilities.PlayerId id;
     private string name;
 
-    private KeyCode[] myKeys;
-    private string[] myButtons;
+    private List<KeyCode> myKeys;
+    private List<string> myButtons;
 
     public int score;
 
-    public Player(Utilities.PlayerId id, KeyCode[] myKeys, string[] myButtons)
+
+    //performance metrics
+    public Dictionary<List<Player>, int> buttonHits;
+
+    public Player(List<KeyCode> myKeys, List<string> myButtons)
     {
         this.myKeys = myKeys;
         this.myButtons = myButtons;
-
-        this.id = id;
+        
         this.name = "";
         this.score = 0;
+
+        this.buttonHits = new Dictionary<List<Player>, int>();
+    }
+    
+    public void AddHitToStatistics(List<Player> players)
+    {
+        if (!buttonHits.ContainsKey(players))
+        {
+            buttonHits.Add(players, 1);
+        }
+        buttonHits[players]++;
     }
 
-    public Utilities.PlayerId GetId()
-    {
-        return this.id;
-    }
     public string GetName()
     {
         return this.name;
     }
-    public KeyCode[] GetMyKeys() {
+    public List<KeyCode> GetMyKeys() {
         return myKeys;
     }
-    public string[] GetMyButtons()
+    public List<string> GetMyButtons()
     {
         return myButtons;
     }

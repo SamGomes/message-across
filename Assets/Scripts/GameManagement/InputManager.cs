@@ -17,15 +17,15 @@ public class InputManager : MonoBehaviour {
 
     public delegate void CallBack();
 
-    Dictionary<KeyCode[], KeyValuePair< ButtonPressType, CallBack> > keyBindings;
-    Dictionary<string[], KeyValuePair< ButtonPressType, CallBack> > buttonBindings;
+    Dictionary<List<KeyCode>, KeyValuePair< ButtonPressType, CallBack> > keyBindings;
+    Dictionary<List<string>, KeyValuePair< ButtonPressType, CallBack> > buttonBindings;
 
     public void InitKeys()
     {
         this.RemoveAllKeyBindings();
-        this.AddKeyBinding(new KeyCode[] { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); });
-        this.AddButtonBinding(new string[] { "Start" }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); });
-
+        this.AddKeyBinding(new List<KeyCode> { KeyCode.Space, KeyCode.A }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); });
+        this.AddButtonBinding(new List<string> { "Start" }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); });
+        
         //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.Q }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
         //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.W }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
         //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.O }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
@@ -40,13 +40,11 @@ public class InputManager : MonoBehaviour {
 
     void Awake() //before any start init stuff
     {
-        keyBindings = new Dictionary<KeyCode[], KeyValuePair<ButtonPressType, CallBack>>();
-        buttonBindings = new Dictionary<string[], KeyValuePair<ButtonPressType, CallBack>>();
+        keyBindings = new Dictionary<List<KeyCode>, KeyValuePair<ButtonPressType, CallBack>>();
+        buttonBindings = new Dictionary<List<string>, KeyValuePair<ButtonPressType, CallBack>>();
         InitKeys();
     }
-    void Start()
-    {
-    }
+  
 
     // Update is called once per frame
     void Update()
@@ -63,25 +61,10 @@ public class InputManager : MonoBehaviour {
         Debug.Log(pressedKeys.ToArray().ToString());
 
 
-        foreach (KeyCode[] simultaneouskeys in keyBindings.Keys)
+        foreach (List<KeyCode> simultaneouskeysList in keyBindings.Keys)
         {
-            List<KeyCode> simultaneouskeysList = new List<KeyCode>(simultaneouskeys);
-            var pair = keyBindings[simultaneouskeys];
-            
-            bool allKeysPressed=true;
-
-            foreach (KeyCode key in pressedKeys)
-            {
-                if (!(simultaneouskeysList.Contains(key) && (
-                    (pair.Key == ButtonPressType.ALL && Input.GetKey(key))
-                 || (pair.Key == ButtonPressType.DOWN && Input.GetKeyDown(key))
-                 || (pair.Key == ButtonPressType.UP && Input.GetKeyUp(key)))))
-                {
-                    allKeysPressed = false;
-                    break;
-                }
-            }
-            if (pressedKeys.Count>0 && allKeysPressed)
+            var pair = keyBindings[simultaneouskeysList];
+            if (pressedKeys.Count > 0 && simultaneouskeysList.TrueForAll(pressedKeys.Contains))
             {
                 pair.Value();
             }
@@ -91,16 +74,16 @@ public class InputManager : MonoBehaviour {
 
     }
 
-    public void AddKeyBinding(KeyCode[] keys, ButtonPressType pressType, CallBack callback)
+    public void AddKeyBinding(List<KeyCode> keys, ButtonPressType pressType, CallBack callback)
     {
         keyBindings.Add(keys, new KeyValuePair < ButtonPressType, CallBack >(pressType, callback));
     }
-    public void AddButtonBinding(string[] keys, ButtonPressType pressType, CallBack callback)
+    public void AddButtonBinding(List<string> keys, ButtonPressType pressType, CallBack callback)
     {
         buttonBindings.Add(keys, new KeyValuePair<ButtonPressType, CallBack>(pressType, callback));
     }
 
-    public void ChangeKeyBinding(KeyCode[] keys, ButtonPressType pressType, CallBack callback)
+    public void ChangeKeyBinding(List<KeyCode> keys, ButtonPressType pressType, CallBack callback)
     {
         if (keyBindings.ContainsKey(keys))
         {
@@ -108,7 +91,7 @@ public class InputManager : MonoBehaviour {
         }
             
     }
-    public void ChangeButtonBinding(string[] keys, ButtonPressType pressType, CallBack callback)
+    public void ChangeButtonBinding(List<string> keys, ButtonPressType pressType, CallBack callback)
     {
         if (buttonBindings.ContainsKey(keys))
         {
@@ -116,7 +99,7 @@ public class InputManager : MonoBehaviour {
         }
     }
 
-    public void RemoveKeyBinding(KeyCode[] keys)
+    public void RemoveKeyBinding(List<KeyCode> keys)
     {
         if (keyBindings.ContainsKey(keys))
         {
@@ -124,7 +107,7 @@ public class InputManager : MonoBehaviour {
         }
 
     }
-    public void RemoveButtonBinding(string[] keys)
+    public void RemoveButtonBinding(List<string> keys)
     {
         if (buttonBindings.ContainsKey(keys))
         {
@@ -134,11 +117,11 @@ public class InputManager : MonoBehaviour {
 
     public void RemoveAllKeyBindings()
     {
-        keyBindings = new Dictionary<KeyCode[], KeyValuePair<ButtonPressType, CallBack>>();
+        keyBindings = new Dictionary<List<KeyCode>, KeyValuePair<ButtonPressType, CallBack>>();
     }
     public void RemoveAllButtonBindings()
     {
-        buttonBindings = new Dictionary<string[], KeyValuePair<ButtonPressType, CallBack>>();
+        buttonBindings = new Dictionary<List<string>, KeyValuePair<ButtonPressType, CallBack>>();
     }
 
 }
