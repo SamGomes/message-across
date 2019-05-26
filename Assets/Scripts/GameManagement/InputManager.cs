@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -7,7 +8,7 @@ public class InputManager : MonoBehaviour {
 
     public enum ButtonPressType
     {
-        ALL,
+        PRESSED,
         DOWN,
         UP,
     }
@@ -20,11 +21,14 @@ public class InputManager : MonoBehaviour {
     Dictionary<List<KeyCode>, KeyValuePair< ButtonPressType, CallBack> > keyBindings;
     Dictionary<List<string>, KeyValuePair< ButtonPressType, CallBack> > buttonBindings;
 
+    List<KeyCode> currPressedKeys = new List<KeyCode>();
+    
     public void InitKeys()
     {
         this.RemoveAllKeyBindings();
-        this.AddKeyBinding(new List<KeyCode> { KeyCode.Space, KeyCode.A }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); });
-        this.AddButtonBinding(new List<string> { "Start" }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); });
+        this.AddKeyBinding(new List<KeyCode> { KeyCode.Space, KeyCode.A }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(); });
+        this.AddKeyBinding(new List<KeyCode> { KeyCode.Space, KeyCode.B }, InputManager.ButtonPressType.UP, delegate () { gameSceneManager.StartAndPauseGame(); });
+        this.AddButtonBinding(new List<string> { "Start" }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(); });
         
         //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.Q }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
         //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.W }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
@@ -49,29 +53,64 @@ public class InputManager : MonoBehaviour {
     // Update is called once per frame
     void Update()
     {
-        List<KeyCode> pressedKeys = new List<KeyCode>();
+        List<KeyCode> bufferMod = new List<KeyCode>();
+        List<KeyCode> oldPressedKeys = currPressedKeys;
+        currPressedKeys = new List<KeyCode>();
         foreach (KeyCode key in System.Enum.GetValues(typeof(KeyCode)))
         {
             if (Input.GetKey(key))
             {
-                pressedKeys.Add(key);
+                currPressedKeys.Add(key);
             }
         }
 
-        Debug.Log(pressedKeys.ToArray().ToString());
+        bool keysDown = !currPressedKeys.TrueForAll(oldPressedKeys.Contains);
+        bool keysUp = !oldPressedKeys.TrueForAll(currPressedKeys.Contains);
+        if (currPressedKeys.Count > 0 && (keysDown || keysUp))
+        {
+            List<KeyCode> allKeysPressed = oldPressedKeys;
+            allKeysPressed.AddRange(currPressedKeys);
+            bufferMod = allKeysPressed.Distinct().ToList();
+            //bufferMod = bufferMod.Distinct().ToList();
+        }
 
+        string bufferModString = "[";
+        foreach (KeyCode k in bufferMod)
+        {
+            bufferModString += k.ToString();
+            bufferModString += ",";
+        }
+        bufferModString += "]";
+        Debug.Log(bufferModString);
 
         foreach (List<KeyCode> simultaneouskeysList in keyBindings.Keys)
         {
             var pair = keyBindings[simultaneouskeysList];
-            if (pressedKeys.Count > 0 && simultaneouskeysList.TrueForAll(pressedKeys.Contains))
+            switch (pair.Key)
             {
-                pair.Value();
+                case ButtonPressType.DOWN:
+                    if (!(simultaneouskeysList.TrueForAll(bufferMod.Contains) && keysDown))
+                    {
+                        continue;
+                    }
+                    break;
+                case ButtonPressType.UP:
+                    if (!(simultaneouskeysList.TrueForAll(bufferMod.Contains) && keysUp))
+                    {
+                        continue;
+                    }
+                    break;
+                case ButtonPressType.PRESSED:
+                    if (!simultaneouskeysList.TrueForAll(currPressedKeys.Contains))
+                    {
+                        continue;
+                    }
+                    break;
             }
+            pair.Value();
         }
 
-      
-
+        
     }
 
     public void AddKeyBinding(List<KeyCode> keys, ButtonPressType pressType, CallBack callback)

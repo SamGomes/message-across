@@ -128,7 +128,7 @@ public class GameManager : MonoBehaviour
 
 
         exercises = new List<Exercise>();
-        exercises.Add(new Exercise("Fck yourself:_", "A"));
+        exercises.Add(new Exercise("Fck yourself:_", "HFESUIHFUESIGHUFISEHUFESIHFESI"));
         //exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
         //exercises.Add(new Exercise("Word to match: BANANA \n Your Word:_", "BANANA"));
         //exercises.Add(new Exercise("Word to match: PIE \n Your Word:_", "PIE"));
@@ -154,7 +154,7 @@ public class GameManager : MonoBehaviour
         ChangeTargetWord();
         ChangeGameParametrizations(true);
 
-        gameSceneManager.StartAndPauseGame(Utilities.PlayerId.NONE); //for the initial screen
+        gameSceneManager.StartAndPauseGame(); //for the initial screen
 
 
         for (int i = 0; i < players.Count; i++)
@@ -248,7 +248,7 @@ public class GameManager : MonoBehaviour
 
     void PoppupQuestionnaires()
     {
-        gameSceneManager.pauseForQuestionnaires(Utilities.PlayerId.NONE);
+        gameSceneManager.PauseForQuestionnaires();
         //spawn questionnaires before changing word
         foreach (Player player in players)
         {
@@ -271,7 +271,7 @@ public class GameManager : MonoBehaviour
         foreach (Button button in this.gameButtons)
         {
             List<Player> selectedKeysPlayers = new List<Player>();
-            this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.MULTIPLAYER : chosenAlternative;
+            this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : chosenAlternative;
             foreach (Player player in this.players)
             {
                 HashSet<KeyCode> buttonKeyCombo = new HashSet<KeyCode>();
@@ -308,7 +308,7 @@ public class GameManager : MonoBehaviour
                 }
                 buttonKeyCombos.Add(buttonKeyCombo);
                 inputManager.AddKeyBinding(
-                    new List<KeyCode>(buttonKeyCombo), InputManager.ButtonPressType.ALL, delegate () {
+                    new List<KeyCode>(buttonKeyCombo), InputManager.ButtonPressType.PRESSED, delegate () {
                         gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
                 });
             }

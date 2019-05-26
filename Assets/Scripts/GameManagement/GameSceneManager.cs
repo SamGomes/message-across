@@ -14,15 +14,15 @@ public class GameSceneManager : MonoBehaviour {
     private GameObject questionnairesMenu;
     private GameObject initialConfigMenu;
 
-    public void StartAndPauseGame(Utilities.PlayerId caller)
+    public void StartAndPauseGame()
     {
         if (!isGameLoaded)
         {
-            this.StartGame(caller);
+            this.StartGame();
         }
         else
         {
-            this.PauseGame(caller);
+            this.PauseGame();
         }
     }
 
@@ -38,7 +38,7 @@ public class GameSceneManager : MonoBehaviour {
         this.currPauseMenu = initialConfigMenu;
     }
 
-    private void StartGame(Utilities.PlayerId caller)
+    private void StartGame()
     {
         //set stuff
         isGamePaused = false;
@@ -56,7 +56,7 @@ public class GameSceneManager : MonoBehaviour {
         SceneManager.LoadScene("gameover");
     }
 
-    private void PauseGame(Utilities.PlayerId caller)
+    private void PauseGame()
     {
         if (!isGamePaused)
         {
@@ -77,14 +77,14 @@ public class GameSceneManager : MonoBehaviour {
         isGamePaused = !isGamePaused;
     }
 
-    public void quitGame(Utilities.PlayerId caller)
+    public void QuitGame()
     {
         Application.Quit();
     }
 
-    public void pauseForQuestionnaires(Utilities.PlayerId caller)
+    public void PauseForQuestionnaires()
     {
         this.currPauseMenu = questionnairesMenu;
-        this.PauseGame(caller);
+        this.PauseGame();
     }
 }
