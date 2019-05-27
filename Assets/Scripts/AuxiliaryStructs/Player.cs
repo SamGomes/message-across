@@ -13,7 +13,8 @@ public class Player
 
 
     //performance metrics
-    public Dictionary<List<Player>, int> buttonHits;
+    public int mybuttonHits;
+    public int simultaneousButtonHits;
 
     public Player(List<KeyCode> myKeys, List<string> myButtons)
     {
@@ -23,16 +24,23 @@ public class Player
         this.name = "";
         this.score = 0;
 
-        this.buttonHits = new Dictionary<List<Player>, int>();
+        this.mybuttonHits = 0;
+        this.simultaneousButtonHits = 0;
     }
     
     public void AddHitToStatistics(List<Player> players)
     {
-        if (!buttonHits.ContainsKey(players))
+        if (players.Contains(this))
         {
-            buttonHits.Add(players, 1);
+            if(players.Count == 1)
+            {
+                mybuttonHits++;
+            }
+            else
+            {
+                simultaneousButtonHits++;
+            }
         }
-        buttonHits[players]++;
     }
 
     public string GetName()

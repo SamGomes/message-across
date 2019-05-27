@@ -253,8 +253,10 @@ public class GameManager : MonoBehaviour
         //spawn questionnaires before changing word
         foreach (Player player in players)
         {
-            //Debug.Log("window.open('https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.2097900814=" + player.GetId() + "&entry.631185473=" + currExercise.targetWord + "&entry.159491668=" + (int)this.currNumPlayersCombo + "&entry.1472728103=" + (int)prevAntOutputs[players.IndexOf(player)] + "');");
-            Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100="+player.GetName()+"&entry.631185473="+currWordState+"&entry.159491668="+ currNumPlayersCombo + "&entry.1252688229="+20+"&entry.1140424083="+30); //spawn questionaires
+            int totalButtonHits = player.mybuttonHits + player.simultaneousButtonHits;
+            float playerHitsPercentage = ((float) player.mybuttonHits /(float) totalButtonHits) * 100.0f;
+            float simultaneousHitsPercentage = ((float)player.simultaneousButtonHits / (float)totalButtonHits) * 100.0f;
+            Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100="+player.GetName()+"&entry.631185473="+currWordState+"&entry.159491668="+ currNumPlayersCombo + "&entry.1252688229="+ playerHitsPercentage +"&entry.1140424083="+ simultaneousHitsPercentage); //spawn questionaires
         }
     }
 
@@ -269,52 +271,48 @@ public class GameManager : MonoBehaviour
         Utilities.PlayersToPressButtonAlternative chosenAlternative = Utilities.playersToPressButtonAlternatives[randomAltIndex];
 
         List<List<KeyCode>> buttonKeyCombos = new List<List<KeyCode>>();
+        HashSet<KeyCode> possibleKeys = new HashSet<KeyCode>();
         foreach (Button button in this.gameButtons)
         {
             List<Player> selectedKeysPlayers = new List<Player>();
             this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : chosenAlternative;
             foreach (Player player in this.players)
             {
-                List<KeyCode> buttonKeyCombo = new List<KeyCode>();
-                while (buttonKeyCombo.Count < numKeysToPress)
+                List<KeyCode> generatedKeyCombo = new List<KeyCode>();
+
+                int randomPlayerIndex = UnityEngine.Random.Range(0, players.Count);
+                Player selectedPlayer = player;
+                if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
                 {
-                    int randomPlayerIndex = UnityEngine.Random.Range(0, players.Count);
-
-                    Player selectedPlayer = player;
-                    if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
+                    // do nothing
+                }
+                else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
+                {
+                    selectedPlayer = players[(generatedKeyCombo.Count + randomPlayerIndex) % players.Count];
+                }
+                possibleKeys.UnionWith(selectedPlayer.GetMyKeys());
+                while (generatedKeyCombo.Count < numKeysToPress)
+                {
+                    if(possibleKeys.Count == 0)
                     {
-                        // do nothing
-                    }
-                    else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
-                    {
-                        selectedPlayer = players[(buttonKeyCombo.Count + randomPlayerIndex) % players.Count];
+                        possibleKeys.UnionWith(selectedPlayer.GetMyKeys());
                     }
 
-                    List<KeyCode> possibleKeys = selectedPlayer.GetMyKeys();
-                    possibleKeys = possibleKeys.Except(buttonKeyCombo).ToList();
+                    foreach(KeyCode key in generatedKeyCombo)
+                    {
+                        possibleKeys.Remove(key);
+                    }
 
                     int randomCodeIndex = UnityEngine.Random.Range(0, possibleKeys.Count);
-                    KeyCode currCode = possibleKeys[randomCodeIndex];
+                    KeyCode currCode = possibleKeys.ElementAt(randomCodeIndex);
                     //possibleKeys.RemoveAt(randomIndex);
 
-                    //ensure that no two equal key combinations are generated
-                    
-                    foreach (List<KeyCode> combo in buttonKeyCombos)
-                    {
-                        foreach (KeyCode key in buttonKeyCombo)
-                        {
-                            if (!combo.Contains(key))
-                            {
-                                buttonKeyCombo.Add(currCode);
-                                selectedKeysPlayers.Add(selectedPlayer);
-                                continue;
-                            }
-                        }
-                    }
+                    generatedKeyCombo.Add(currCode);
+                    selectedKeysPlayers.Add(selectedPlayer);
                 }
-                buttonKeyCombos.Add(buttonKeyCombo);
+                buttonKeyCombos.Add(generatedKeyCombo);
                 inputManager.AddKeyBinding(
-                    new List<KeyCode>(buttonKeyCombo), InputManager.ButtonPressType.PRESSED, delegate () {
+                    new List<KeyCode>(generatedKeyCombo), InputManager.ButtonPressType.PRESSED, delegate () {
                         gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
                 });
             }
