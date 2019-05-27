@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -267,14 +268,14 @@ public class GameManager : MonoBehaviour
         int randomAltIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
         Utilities.PlayersToPressButtonAlternative chosenAlternative = Utilities.playersToPressButtonAlternatives[randomAltIndex];
 
-        List<HashSet<KeyCode>> buttonKeyCombos = new List<HashSet<KeyCode>>();
+        List<List<KeyCode>> buttonKeyCombos = new List<List<KeyCode>>();
         foreach (Button button in this.gameButtons)
         {
             List<Player> selectedKeysPlayers = new List<Player>();
             this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : chosenAlternative;
             foreach (Player player in this.players)
             {
-                HashSet<KeyCode> buttonKeyCombo = new HashSet<KeyCode>();
+                List<KeyCode> buttonKeyCombo = new List<KeyCode>();
                 while (buttonKeyCombo.Count < numKeysToPress)
                 {
                     int randomPlayerIndex = UnityEngine.Random.Range(0, players.Count);
@@ -290,21 +291,26 @@ public class GameManager : MonoBehaviour
                     }
 
                     List<KeyCode> possibleKeys = selectedPlayer.GetMyKeys();
+                    possibleKeys = possibleKeys.Except(buttonKeyCombo).ToList();
 
                     int randomCodeIndex = UnityEngine.Random.Range(0, possibleKeys.Count);
                     KeyCode currCode = possibleKeys[randomCodeIndex];
                     //possibleKeys.RemoveAt(randomIndex);
 
                     //ensure that no two equal key combinations are generated
-                    foreach (HashSet<KeyCode> hash in buttonKeyCombos)
+                    
+                    foreach (List<KeyCode> combo in buttonKeyCombos)
                     {
-                        if (hash.SetEquals(buttonKeyCombo))
+                        foreach (KeyCode key in buttonKeyCombo)
                         {
-                            continue;
+                            if (!combo.Contains(key))
+                            {
+                                buttonKeyCombo.Add(currCode);
+                                selectedKeysPlayers.Add(selectedPlayer);
+                                continue;
+                            }
                         }
                     }
-                    buttonKeyCombo.Add(currCode);
-                    selectedKeysPlayers.Add(selectedPlayer);
                 }
                 buttonKeyCombos.Add(buttonKeyCombo);
                 inputManager.AddKeyBinding(

@@ -65,7 +65,7 @@ public class InputManager : MonoBehaviour {
         }
 
         bool keysDown = !currPressedKeys.TrueForAll(oldPressedKeys.Contains);
-        bool keysUp = !oldPressedKeys.TrueForAll(currPressedKeys.Contains);
+        bool keysUp = !oldPressedKeys.TrueForAll(currPressedKeys.Contains) || currPressedKeys.Count == 0;
         if (currPressedKeys.Count > 0 && (keysDown || keysUp))
         {
             List<KeyCode> allKeysPressed = oldPressedKeys;
@@ -73,15 +73,6 @@ public class InputManager : MonoBehaviour {
             bufferMod = allKeysPressed.Distinct().ToList();
             //bufferMod = bufferMod.Distinct().ToList();
         }
-
-        string bufferModString = "[";
-        foreach (KeyCode k in bufferMod)
-        {
-            bufferModString += k.ToString();
-            bufferModString += ",";
-        }
-        bufferModString += "]";
-        Debug.Log(bufferModString);
 
         foreach (List<KeyCode> simultaneouskeysList in keyBindings.Keys)
         {
