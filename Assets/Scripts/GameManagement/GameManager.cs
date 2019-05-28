@@ -123,8 +123,8 @@ public class GameManager : MonoBehaviour
         gameSceneManager.MainSceneLoadedNotification();
 
         players = new List<Player>();
-        players.Add(new Player(new List<KeyCode>(){ KeyCode.Q, KeyCode.W, KeyCode.E }, new List<string> { "YButtonJoy1" , "BButtonJoy1" }));
-        players.Add(new Player(new List<KeyCode>() { KeyCode.I, KeyCode.O, KeyCode.P }, new List<string> { "YButtonJoy2" , "BButtonJoy2" }));
+        players.Add(new Player(new HashSet<KeyCode>(){ KeyCode.Q, KeyCode.W, KeyCode.E }, new HashSet<string> { "YButtonJoy1" , "BButtonJoy1" }));
+        players.Add(new Player(new HashSet<KeyCode>() { KeyCode.I, KeyCode.O, KeyCode.P }, new HashSet<string> { "YButtonJoy2" , "BButtonJoy2" }));
         //players.Add(new Player(Utilities.PlayerId.PLAYER_2, new KeyCode[] { KeyCode.V, KeyCode.B, KeyCode.N }, new string[] { "YButtonJoy3" , "BButtonJoy3" }));
 
 
@@ -182,6 +182,8 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
+        
+
 
         //if no lifes end game immediately
         if (lifes < 1)
@@ -260,6 +262,21 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    HashSet<KeyCode> GenerateKeyCombo(HashSet<KeyCode> possibleKeys, int numKeysInEachCombo)
+    {
+        HashSet<KeyCode> comboPossibleKeys = new HashSet<KeyCode>(possibleKeys);
+        HashSet<KeyCode> generatedKeyCombo = new HashSet<KeyCode>();
+        while (generatedKeyCombo.Count < numKeysInEachCombo)
+        {
+            int randomCodeIndex = UnityEngine.Random.Range(0, possibleKeys.Count);
+            KeyCode currCode = possibleKeys.ElementAt(randomCodeIndex);
+
+            comboPossibleKeys.Remove(currCode);
+            generatedKeyCombo.Add(currCode);
+        }
+        return generatedKeyCombo;
+    }
+
     void ChangeGameParametrizations(bool firstTimeCall)
     {
         inputManager.InitKeys();
@@ -270,52 +287,69 @@ public class GameManager : MonoBehaviour
         int randomAltIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
         Utilities.PlayersToPressButtonAlternative chosenAlternative = Utilities.playersToPressButtonAlternatives[randomAltIndex];
 
-        List<List<KeyCode>> buttonKeyCombos = new List<List<KeyCode>>();
-        HashSet<KeyCode> possibleKeys = new HashSet<KeyCode>();
+        
         foreach (Button button in this.gameButtons)
         {
-            List<Player> selectedKeysPlayers = new List<Player>();
             this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : chosenAlternative;
-            foreach (Player player in this.players)
+            
+            if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
             {
-                List<KeyCode> generatedKeyCombo = new List<KeyCode>();
-
-                int randomPlayerIndex = UnityEngine.Random.Range(0, players.Count);
-                Player selectedPlayer = player;
-                if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
+                foreach (Player player in this.players)
                 {
-                    // do nothing
+                    HashSet<KeyCode> generatedKeyCombo = GenerateKeyCombo(player.GetMyKeys(), numKeysToPress);
+                    List<Player> selectedKeysPlayers = new List<Player>(){ player };
+                    inputManager.AddKeyBinding(
+                        generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate ()
+                        {
+                            gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
+                        });
                 }
-                else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
-                {
-                    selectedPlayer = players[(generatedKeyCombo.Count + randomPlayerIndex) % players.Count];
-                }
-                possibleKeys.UnionWith(selectedPlayer.GetMyKeys());
-                while (generatedKeyCombo.Count < numKeysToPress)
-                {
-                    if(possibleKeys.Count == 0)
-                    {
-                        possibleKeys.UnionWith(selectedPlayer.GetMyKeys());
-                    }
-
-                    foreach(KeyCode key in generatedKeyCombo)
-                    {
-                        possibleKeys.Remove(key);
-                    }
-
-                    int randomCodeIndex = UnityEngine.Random.Range(0, possibleKeys.Count);
-                    KeyCode currCode = possibleKeys.ElementAt(randomCodeIndex);
-                    //possibleKeys.RemoveAt(randomIndex);
-
-                    generatedKeyCombo.Add(currCode);
-                    selectedKeysPlayers.Add(selectedPlayer);
-                }
-                buttonKeyCombos.Add(generatedKeyCombo);
-                inputManager.AddKeyBinding(
-                    new List<KeyCode>(generatedKeyCombo), InputManager.ButtonPressType.PRESSED, delegate () {
-                        gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
-                });
             }
+            else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
+            {
+                List<Player> selectedKeysPlayers = new List<Player>();
+                HashSet<KeyCode> possibleKeys = new HashSet<KeyCode>();
+                for (int i = 0; i < numKeysToPress; i++)
+                {
+                    Player selectedPlayer = players[i % players.Count];
+                    selectedKeysPlayers.Add(selectedPlayer);
+
+                    int randomIndex = UnityEngine.Random.Range(0, selectedPlayer.GetMyKeys().Count);
+                    possibleKeys.Add(selectedPlayer.GetMyKeys().ElementAt(randomIndex));
+                }
+
+                HashSet<KeyCode> generatedKeyCombo = GenerateKeyCombo(possibleKeys, numKeysToPress);
+                inputManager.AddKeyBinding(
+                    generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate ()
+                    {
+                        gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
+                    });
+            }
+
+
+
+            //HashSet<KeyCode> generatedKeyCombo = new HashSet<KeyCode>();
+
+            //int randomPlayerIndex = UnityEngine.Random.Range(0, players.Count);
+            //Player selectedPlayer = player;
+
+            //possibleKeys.UnionWith(selectedPlayer.GetMyKeys());
+            //while (generatedKeyCombo.Count < numKeysToPress)
+            //{
+
+            //    int randomCodeIndex = UnityEngine.Random.Range(0, possibleKeys.Count);
+            //    KeyCode currCode = possibleKeys.ElementAt(randomCodeIndex);
+            //    //possibleKeys.RemoveAt(randomIndex);
+
+            //    generatedKeyCombo.Add(currCode);
+            //    selectedKeysPlayers.Add(selectedPlayer);
+            //}
+            //buttonKeyCombos.Add(generatedKeyCombo);
+            //inputManager.AddKeyBinding(
+            //    generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate () {
+            //        gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
+            //});
+
         }
 
         for(int i=0; i<letterSpawners.Length; i++)

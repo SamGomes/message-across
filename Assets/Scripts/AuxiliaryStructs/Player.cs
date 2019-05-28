@@ -6,8 +6,8 @@ public class Player
 {
     private string name;
 
-    private List<KeyCode> myKeys;
-    private List<string> myButtons;
+    private HashSet<KeyCode> myKeys;
+    private HashSet<string> myButtons;
 
     public int score;
 
@@ -16,7 +16,7 @@ public class Player
     public int mybuttonHits;
     public int simultaneousButtonHits;
 
-    public Player(List<KeyCode> myKeys, List<string> myButtons)
+    public Player(HashSet<KeyCode> myKeys, HashSet<string> myButtons)
     {
         this.myKeys = myKeys;
         this.myButtons = myButtons;
@@ -47,10 +47,10 @@ public class Player
     {
         return this.name;
     }
-    public List<KeyCode> GetMyKeys() {
+    public HashSet<KeyCode> GetMyKeys() {
         return myKeys;
     }
-    public List<string> GetMyButtons()
+    public HashSet<string> GetMyButtons()
     {
         return myButtons;
     }
