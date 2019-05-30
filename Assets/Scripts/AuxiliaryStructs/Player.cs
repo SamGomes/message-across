@@ -6,13 +6,16 @@ using UnityEngine;
 [Serializable]
 public class Player
 {
+    [SerializeField]
     private string name;
 
+    [SerializeField]
     private List<KeyCode> myKeys;
+
+    [SerializeField]
     private List<string> myButtons;
 
     public int score;
-
 
     //performance metrics
     public int mybuttonHits;

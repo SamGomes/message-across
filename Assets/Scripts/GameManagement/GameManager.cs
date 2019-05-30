@@ -125,32 +125,32 @@ public class GameManager : MonoBehaviour
         isGameplayPaused = false;
         gameSceneManager.MainSceneLoadedNotification();
 
-        settings = new GameSettings();
+        //settings = new GameSettings();
 
-        settings.maxSimultaneousKeyPresses = 2;
+        //settings.maxSimultaneousKeyPresses = 2;
 
-        settings.players = new List<Player>();
-        settings.players.Add(new Player(new List<KeyCode>() { KeyCode.Q, KeyCode.W, KeyCode.E }, new List<string> { "YButtonJoy1", "BButtonJoy1" }));
-        settings.players.Add(new Player(new List<KeyCode>() { KeyCode.I, KeyCode.O, KeyCode.P }, new List<string> { "YButtonJoy2", "BButtonJoy2" }));
-        //players.Add(new Player(Utilities.PlayerId.PLAYER_2, new KeyCode[] { KeyCode.V, KeyCode.B, KeyCode.N }, new string[] { "YButtonJoy3" , "BButtonJoy3" }));
+        //settings.players = new List<Player>();
+        //settings.players.Add(new Player(new List<KeyCode>() { KeyCode.Q, KeyCode.W, KeyCode.E }, new List<string> { "YButtonJoy1", "BButtonJoy1" }));
+        //settings.players.Add(new Player(new List<KeyCode>() { KeyCode.I, KeyCode.O, KeyCode.P }, new List<string> { "YButtonJoy2", "BButtonJoy2" }));
+        ////players.Add(new Player(Utilities.PlayerId.PLAYER_2, new KeyCode[] { KeyCode.V, KeyCode.B, KeyCode.N }, new string[] { "YButtonJoy3" , "BButtonJoy3" }));
 
 
-        settings.exercises = new List<Exercise>();
-        settings.exercises.Add(new Exercise("Fck yourself:_", "HFESUIHFUESIGHUFISEHUFESIHFESI"));
-        //exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
-        //exercises.Add(new Exercise("Word to match: BANANA \n Your Word:_", "BANANA"));
-        //exercises.Add(new Exercise("Word to match: PIE \n Your Word:_", "PIE"));
-        //exercises.Add(new Exercise("Word to match: PIZZA \n Your Word:_", "PIZZA"));
-        //exercises.Add(new Exercise("Word to match: CROISSANT \n Your Word:_", "CROISSANT"));
-        //exercises.Add(new Exercise("Word to match: DONUT \n Your Word:_", "DONUT"));
-        //exercises.Add(new Exercise("Word to match: CHERRY \n Your Word:_", "CHERRY"));
-        //exercises.Add(new Exercise("Word to match: XMASCOOKIES \n Your Word:_", "XMASCOOKIES"));
-        //exercises.Add(new Exercise("Word to match: KIWI \n Your Word:_", "KIWI"));
-        //exercises.Add(new Exercise("Word to match: QUICHE \n Your Word:_", "QUICHE"));
-        //exercises.Add(new Exercise("Word to match: MANGO \n Your Word:_", "MANGO"));
-        //exercises.Add(new Exercise("Word to match: FISH \n Your Word:_", "FISH"));
-        //exercises.Add(new Exercise("Word to match: VANILLA \n Your Word:_", "VANILLA"));
-        //exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
+        //settings.exercises = new List<Exercise>();
+        //settings.exercises.Add(new Exercise("Fck yourself:_", "HFESUIHFUESIGHUFISEHUFESIHFESI"));
+        ////exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
+        ////exercises.Add(new Exercise("Word to match: BANANA \n Your Word:_", "BANANA"));
+        ////exercises.Add(new Exercise("Word to match: PIE \n Your Word:_", "PIE"));
+        ////exercises.Add(new Exercise("Word to match: PIZZA \n Your Word:_", "PIZZA"));
+        ////exercises.Add(new Exercise("Word to match: CROISSANT \n Your Word:_", "CROISSANT"));
+        ////exercises.Add(new Exercise("Word to match: DONUT \n Your Word:_", "DONUT"));
+        ////exercises.Add(new Exercise("Word to match: CHERRY \n Your Word:_", "CHERRY"));
+        ////exercises.Add(new Exercise("Word to match: XMASCOOKIES \n Your Word:_", "XMASCOOKIES"));
+        ////exercises.Add(new Exercise("Word to match: KIWI \n Your Word:_", "KIWI"));
+        ////exercises.Add(new Exercise("Word to match: QUICHE \n Your Word:_", "QUICHE"));
+        ////exercises.Add(new Exercise("Word to match: MANGO \n Your Word:_", "MANGO"));
+        ////exercises.Add(new Exercise("Word to match: FISH \n Your Word:_", "FISH"));
+        ////exercises.Add(new Exercise("Word to match: VANILLA \n Your Word:_", "VANILLA"));
+        ////exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
 
         string path = Application.streamingAssetsPath + "/config.cfg";
         string configText = "";
@@ -165,9 +165,8 @@ public class GameManager : MonoBehaviour
             configText = File.ReadAllText(path);
         }
 
-
         //string json = JsonUtility.ToJson(settings);
-        //settings = JsonUtility.FromJson<GameSettings>(configText);
+        settings = JsonUtility.FromJson<GameSettings>(configText);
 
         lifes = 50;
 
