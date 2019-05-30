@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -39,7 +40,14 @@ public static class Utilities
     
 
     public static int numPlayersToPressButtonAlternatives = playersToPressButtonAlternatives.Length;
-    public static int simultaneousKeysToPress = 2;
+}
+
+[Serializable]
+public struct GameSettings
+{
+    public int maxSimultaneousKeyPresses;
+    public List<Exercise> exercises;
+    public List<Player> players;
 }
 
 
@@ -49,6 +57,7 @@ public class GameManager : MonoBehaviour
     public GameSceneManager gameSceneManager;
 
     public bool isGameplayPaused;
+    public bool isGameplayStarted;
 
     public GameObject namesInputLocation;
     public GameObject playerNameInputFieldPrefabRef;
@@ -74,9 +83,7 @@ public class GameManager : MonoBehaviour
 
     public int lifes;
     private int score;
-    private List<Exercise> exercises;
-
-    private List<Player> players;
+    private GameSettings settings;
     
     public Utilities.PlayersToPressButtonAlternative currNumPlayersCombo;
 
@@ -112,24 +119,24 @@ public class GameManager : MonoBehaviour
         return i + suffix;
     }
 
-    // Use this for initialization
-    void Start()
+
+    IEnumerator YieldedStart()
     {
-        //Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=AAA&entry.631185473=" + currWordState + "&entry.159491668=" + currNumPlayersCombo + "&entry.1252688229=" + 20 + "&entry.1140424083=" + 30); //spawn questionaires
-
-
-
         isGameplayPaused = false;
         gameSceneManager.MainSceneLoadedNotification();
 
-        players = new List<Player>();
-        players.Add(new Player(new HashSet<KeyCode>(){ KeyCode.Q, KeyCode.W, KeyCode.E }, new HashSet<string> { "YButtonJoy1" , "BButtonJoy1" }));
-        players.Add(new Player(new HashSet<KeyCode>() { KeyCode.I, KeyCode.O, KeyCode.P }, new HashSet<string> { "YButtonJoy2" , "BButtonJoy2" }));
+        settings = new GameSettings();
+
+        settings.maxSimultaneousKeyPresses = 2;
+
+        settings.players = new List<Player>();
+        settings.players.Add(new Player(new List<KeyCode>() { KeyCode.Q, KeyCode.W, KeyCode.E }, new List<string> { "YButtonJoy1", "BButtonJoy1" }));
+        settings.players.Add(new Player(new List<KeyCode>() { KeyCode.I, KeyCode.O, KeyCode.P }, new List<string> { "YButtonJoy2", "BButtonJoy2" }));
         //players.Add(new Player(Utilities.PlayerId.PLAYER_2, new KeyCode[] { KeyCode.V, KeyCode.B, KeyCode.N }, new string[] { "YButtonJoy3" , "BButtonJoy3" }));
 
 
-        exercises = new List<Exercise>();
-        exercises.Add(new Exercise("Fck yourself:_", "HFESUIHFUESIGHUFISEHUFESIHFESI"));
+        settings.exercises = new List<Exercise>();
+        settings.exercises.Add(new Exercise("Fck yourself:_", "HFESUIHFUESIGHUFISEHUFESIHFESI"));
         //exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
         //exercises.Add(new Exercise("Word to match: BANANA \n Your Word:_", "BANANA"));
         //exercises.Add(new Exercise("Word to match: PIE \n Your Word:_", "PIE"));
@@ -145,6 +152,23 @@ public class GameManager : MonoBehaviour
         //exercises.Add(new Exercise("Word to match: VANILLA \n Your Word:_", "VANILLA"));
         //exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
 
+        string path = Application.streamingAssetsPath + "/config.cfg";
+        string configText = "";
+        if (path.Contains("://") || path.Contains(":///")) //url instead of path
+        {
+            UnityWebRequest www = UnityWebRequest.Get(path);
+            yield return www.SendWebRequest();
+            configText = www.downloadHandler.text;
+        }
+        else
+        {
+            configText = File.ReadAllText(path);
+        }
+
+
+        //string json = JsonUtility.ToJson(settings);
+        //settings = JsonUtility.FromJson<GameSettings>(configText);
+
         lifes = 50;
 
         //Application.targetFrameRate = 60;
@@ -158,32 +182,38 @@ public class GameManager : MonoBehaviour
         gameSceneManager.StartAndPauseGame(); //for the initial screen
 
 
-        for (int i = 0; i < players.Count; i++)
+        for (int i = 0; i < settings.players.Count; i++)
         {
-            Player currPlayer = players[i];
-            GameObject newNameInput = Instantiate(playerNameInputFieldPrefabRef,namesInputLocation.transform);
+            Player currPlayer = settings.players[i];
+            GameObject newNameInput = Instantiate(playerNameInputFieldPrefabRef, namesInputLocation.transform);
             InputField input = newNameInput.GetComponent<InputField>();
-            input.placeholder.GetComponent<Text>().text = OrderedFormOfNumber(i+1)+" player name";
+            input.placeholder.GetComponent<Text>().text = OrderedFormOfNumber(i + 1) + " player name";
 
 
             input.onValueChanged.AddListener(delegate
             {
                 List<InputField> inputFields = new List<InputField>(namesInputLocation.GetComponentsInChildren<InputField>());
-                players[inputFields.IndexOf(input)].SetName(input.text);
+                settings.players[inputFields.IndexOf(input)].SetName(input.text);
             });
         }
+        isGameplayStarted = true;
+    }
+
+    // Use this for initialization
+    void Start()
+    {
+        isGameplayStarted = false;
+        StartCoroutine(YieldedStart());
     }
 
 
     // Update is called once per frame
     void Update()
     {
-        if (isGameplayPaused)
+        if (isGameplayPaused || !isGameplayStarted)
         {
             return;
         }
-        
-
 
         //if no lifes end game immediately
         if (lifes < 1)
@@ -206,9 +236,9 @@ public class GameManager : MonoBehaviour
 
         UnityEngine.UI.Text playerPanelText = playersPanel.transform.GetComponentInChildren<UnityEngine.UI.Text>();
         playerPanelText.text = "";
-        for (int i=0; i < players.Count; i++)
+        for (int i=0; i < settings.players.Count; i++)
         {
-            playerPanelText.text += "\n Player "+players[i].GetName()+" Score: " + players[i].score;
+            playerPanelText.text += "\n Player "+ settings.players[i].GetName()+" Score: " + settings.players[i].score;
         }
 
         //update curr display message
@@ -253,7 +283,7 @@ public class GameManager : MonoBehaviour
     {
         gameSceneManager.PauseForQuestionnaires();
         //spawn questionnaires before changing word
-        foreach (Player player in players)
+        foreach (Player player in settings.players)
         {
             int totalButtonHits = player.mybuttonHits + player.simultaneousButtonHits;
             float playerHitsPercentage = ((float) player.mybuttonHits /(float) totalButtonHits) * 100.0f;
@@ -281,7 +311,7 @@ public class GameManager : MonoBehaviour
     {
         inputManager.InitKeys();
         
-        int numKeysToPress = Utilities.simultaneousKeysToPress;
+        int numKeysToPress = settings.maxSimultaneousKeyPresses;
         
         //choose num players combo
         int randomAltIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
@@ -290,14 +320,17 @@ public class GameManager : MonoBehaviour
         
         foreach (Button button in this.gameButtons)
         {
-            this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER : chosenAlternative;
+            this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.MULTIPLAYER : chosenAlternative;
             
             if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
             {
-                foreach (Player player in this.players)
+                foreach (Player player in settings.players)
                 {
-                    HashSet<KeyCode> generatedKeyCombo = GenerateKeyCombo(player.GetMyKeys(), numKeysToPress);
+                    HashSet<KeyCode> generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress);
                     List<Player> selectedKeysPlayers = new List<Player>(){ player };
+                    while (generatedKeyCombo != null && inputManager.ContainsKeyBinding(generatedKeyCombo)){
+                        generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress);
+                    }
                     inputManager.AddKeyBinding(
                         generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate ()
                         {
@@ -311,7 +344,7 @@ public class GameManager : MonoBehaviour
                 HashSet<KeyCode> possibleKeys = new HashSet<KeyCode>();
                 for (int i = 0; i < numKeysToPress; i++)
                 {
-                    Player selectedPlayer = players[i % players.Count];
+                    Player selectedPlayer = settings.players[i % settings.players.Count];
                     selectedKeysPlayers.Add(selectedPlayer);
 
                     int randomIndex = UnityEngine.Random.Range(0, selectedPlayer.GetMyKeys().Count);
@@ -352,6 +385,15 @@ public class GameManager : MonoBehaviour
 
         }
 
+
+        List<HashSet<KeyCode>> list =  inputManager.GetAllKeyBindings().Keys.ToList();
+        List<List<KeyCode>> fk = new List<List<KeyCode>>();
+        foreach(HashSet<KeyCode> key in list)
+        {
+            fk.Add(key.ToList());
+        }
+
+
         for(int i=0; i<letterSpawners.Length; i++)
         {
             if(!firstTimeCall && letterSpawners[i].minIntervalRange > 0.3 && letterSpawners[i].maxIntervalRange > 0.4)
@@ -390,8 +432,8 @@ public class GameManager : MonoBehaviour
 
     void ChangeTargetWord()
     {
-        int random = UnityEngine.Random.Range(0, exercises.Count);
-        Exercise newExercise = exercises[random];
+        int random = UnityEngine.Random.Range(0, settings.exercises.Count);
+        Exercise newExercise = settings.exercises[random];
 
         currWordState = "";
         displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
@@ -463,7 +505,7 @@ public class GameManager : MonoBehaviour
 
     public List<Player> GetPlayers()
     {
-        return this.players;
+        return settings.players;
     }
 
 

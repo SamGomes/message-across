@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -75,8 +76,14 @@ public class InputManager : MonoBehaviour {
             //bufferMod = bufferMod.Distinct().ToList();
         }
 
+
         foreach (HashSet<KeyCode> simultaneouskeysHash in keyBindings.Keys)
         {
+            if(bufferMod.Count > simultaneouskeysHash.Count || currPressedKeys.Count > simultaneouskeysHash.Count)
+            {
+                continue;
+            }
+
             var pair = keyBindings[simultaneouskeysHash];
 
             List<KeyCode> simultaneouskeysList = simultaneouskeysHash.ToList();
@@ -158,6 +165,30 @@ public class InputManager : MonoBehaviour {
         buttonBindings = new Dictionary<HashSet<string>, KeyValuePair<ButtonPressType, CallBack>>();
     }
 
+    public Dictionary<HashSet<KeyCode>, KeyValuePair<ButtonPressType, CallBack>> GetAllKeyBindings()
+    {
+        return this.keyBindings;
+    }
+
+    internal bool ContainsKeyBinding(HashSet<KeyCode> generatedKeyCombo)
+    {
+        foreach(HashSet<KeyCode> combo in keyBindings.Keys)
+        {
+            bool comboContains = true;
+            foreach(KeyCode key in generatedKeyCombo)
+            {
+                if (!combo.Contains(key))
+                {
+                    comboContains = false;
+                }
+            }
+            if (comboContains)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 

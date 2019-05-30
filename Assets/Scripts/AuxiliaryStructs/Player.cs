@@ -1,13 +1,15 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
 public class Player
 {
     private string name;
 
-    private HashSet<KeyCode> myKeys;
-    private HashSet<string> myButtons;
+    private List<KeyCode> myKeys;
+    private List<string> myButtons;
 
     public int score;
 
@@ -16,7 +18,7 @@ public class Player
     public int mybuttonHits;
     public int simultaneousButtonHits;
 
-    public Player(HashSet<KeyCode> myKeys, HashSet<string> myButtons)
+    public Player(List<KeyCode> myKeys, List<string> myButtons)
     {
         this.myKeys = myKeys;
         this.myButtons = myButtons;
@@ -47,10 +49,10 @@ public class Player
     {
         return this.name;
     }
-    public HashSet<KeyCode> GetMyKeys() {
+    public List<KeyCode> GetMyKeys() {
         return myKeys;
     }
-    public HashSet<string> GetMyButtons()
+    public List<string> GetMyButtons()
     {
         return myButtons;
     }
