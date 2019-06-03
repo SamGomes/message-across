@@ -54,7 +54,9 @@ public class LetterSpawner : MonoBehaviour
         int random = Random.Range(0, lettersPool.Count - 1);
         char currLetter = lettersPool[random];
         lettersPool.RemoveAt(random);
-       
+
+        currLetter = 'A';
+
         string path = "Textures/Alphabet/" + currLetter;
 
         newLetter.GetComponent<Letter>().letterText = currLetter;

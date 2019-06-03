@@ -34,7 +34,15 @@ public static class Utilities
         MULTIPLAYER
     }
 
+    public enum RewardType
+    {
+        COOPERATION,
+        COMPETITION,
+        SELF_IMPROVEMENT
+    }
+
     public static PlayersToPressButtonAlternative[] playersToPressButtonAlternatives = (PlayersToPressButtonAlternative[]) Enum.GetValues(typeof(Utilities.PlayersToPressButtonAlternative));
+    public static RewardType[] rewardTypes = (RewardType[]) Enum.GetValues(typeof(Utilities.RewardType));
 
     public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Utilities.ButtonId));
     
@@ -50,9 +58,20 @@ public struct GameSettings
     public List<Player> players;
 }
 
+[Serializable]
+public struct PerformanceMetrics
+{
+    public Dictionary<Player,int> singlebuttonHits;
+    public int multiplayerButtonHits;
+}
 
 public class GameManager : MonoBehaviour
 {
+
+    private GameSettings settings;
+    private PerformanceMetrics performanceMetrics;
+
+
 
     public GameSceneManager gameSceneManager;
 
@@ -83,9 +102,9 @@ public class GameManager : MonoBehaviour
 
     public int lifes;
     private int score;
-    private GameSettings settings;
-    
+
     public Utilities.PlayersToPressButtonAlternative currNumPlayersCombo;
+    public Utilities.RewardType currRewardType;
 
     public Exercise currExercise { get; set; }
 
@@ -196,6 +215,9 @@ public class GameManager : MonoBehaviour
             });
         }
         isGameplayStarted = true;
+
+        performanceMetrics = new PerformanceMetrics();
+
     }
 
     // Use this for initialization
@@ -213,6 +235,19 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
+
+        //record metrics
+        //List<KeyCode> bufferMod = inputManager.GetBufferMod();
+        //foreach(KeyCode key in bufferMod)
+        //{
+        //     foreach (Player player in settings.players)
+        //     {
+        //        if (bufferMod.Contains(key))
+        //        {
+        //            performanceMetrics.singlebuttonHits[player]++;
+        //        }
+        //    }
+        //}
 
         //if no lifes end game immediately
         if (lifes < 1)
@@ -282,13 +317,13 @@ public class GameManager : MonoBehaviour
     {
         gameSceneManager.PauseForQuestionnaires();
         //spawn questionnaires before changing word
-        foreach (Player player in settings.players)
-        {
-            int totalButtonHits = player.mybuttonHits + player.simultaneousButtonHits;
-            float playerHitsPercentage = ((float) player.mybuttonHits /(float) totalButtonHits) * 100.0f;
-            float simultaneousHitsPercentage = ((float)player.simultaneousButtonHits / (float)totalButtonHits) * 100.0f;
-            Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100="+player.GetName()+"&entry.631185473="+currWordState+"&entry.159491668="+ currNumPlayersCombo + "&entry.1252688229="+ playerHitsPercentage +"&entry.1140424083="+ simultaneousHitsPercentage); //spawn questionaires
-        }
+        //foreach (Player player in settings.players)
+        //{
+        //    int totalButtonHits = performanceMetrics.singlebuttonHits[player] + performanceMetrics.multiplayerButtonHits;
+        //    float playerHitsPercentage = ((float)performanceMetrics.singlebuttonHits[player] / (float) totalButtonHits) * 100.0f;
+        //    float simultaneousHitsPercentage = ((float) performanceMetrics.multiplayerButtonHits / (float)totalButtonHits) * 100.0f;
+        //    Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100="+player.GetName()+"&entry.631185473="+currWordState+"&entry.159491668="+ currNumPlayersCombo + "&entry.1252688229="+ playerHitsPercentage +"&entry.1140424083="+ simultaneousHitsPercentage); //spawn questionaires
+        //}
     }
 
     HashSet<KeyCode> GenerateKeyCombo(HashSet<KeyCode> possibleKeys, int numKeysInEachCombo)
@@ -314,27 +349,29 @@ public class GameManager : MonoBehaviour
         
         //choose num players combo
         int randomAltIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
-        Utilities.PlayersToPressButtonAlternative chosenAlternative = Utilities.playersToPressButtonAlternatives[randomAltIndex];
+        Utilities.PlayersToPressButtonAlternative chosenPAAlternative = Utilities.playersToPressButtonAlternatives[randomAltIndex];
+        randomAltIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
+        Utilities.RewardType chosenRTAlternative = Utilities.rewardTypes[randomAltIndex];
 
         
+        this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.MULTIPLAYER : chosenPAAlternative;
+        this.currRewardType = Utilities.RewardType.COOPERATION;
+
         foreach (Button button in this.gameButtons)
         {
-            this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.MULTIPLAYER : chosenAlternative;
-            
             if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
             {
                 foreach (Player player in settings.players)
                 {
-                    HashSet<KeyCode> generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress);
-                    List<Player> selectedKeysPlayers = new List<Player>(){ player };
+                    List<KeyCode> generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress).ToList();
                     while (generatedKeyCombo != null && inputManager.ContainsKeyBinding(generatedKeyCombo)){
-                        generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress);
+                        generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress).ToList();
                     }
                     inputManager.AddKeyBinding(
                         generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate ()
                         {
-                            gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
-                        });
+                            gameButtons[(int)button.buttonCode].RegisterUserButtonPress(player);
+                        },false);
                 }
             }
             else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
@@ -350,12 +387,15 @@ public class GameManager : MonoBehaviour
                     possibleKeys.Add(selectedPlayer.GetMyKeys().ElementAt(randomIndex));
                 }
 
-                HashSet<KeyCode> generatedKeyCombo = GenerateKeyCombo(possibleKeys, numKeysToPress);
+                List<KeyCode> generatedKeyCombo = GenerateKeyCombo(possibleKeys, numKeysToPress).ToList();
                 inputManager.AddKeyBinding(
                     generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate ()
                     {
-                        gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
-                    });
+                        foreach (Player selectedPlayer in selectedKeysPlayers)
+                        {
+                            gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedPlayer);
+                        }
+                    },true);
             }
 
 
@@ -382,14 +422,6 @@ public class GameManager : MonoBehaviour
             //        gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
             //});
 
-        }
-
-
-        List<HashSet<KeyCode>> list =  inputManager.GetAllKeyBindings().Keys.ToList();
-        List<List<KeyCode>> fk = new List<List<KeyCode>>();
-        foreach(HashSet<KeyCode> key in list)
-        {
-            fk.Add(key.ToList());
         }
 
 
@@ -451,15 +483,45 @@ public class GameManager : MonoBehaviour
         this.currWordState = this.currWordState.ToUpper();
         string currTargetWord = this.currExercise.targetWord;
 
-
         if (currWordState.Length <= currTargetWord.Length && currTargetWord[currWordState.Length - 1] == currWordState[currWordState.Length - 1])
         {
-            score += 100;
-            foreach (Player player in hitters)
+            //diferent rewards in different reward conditions
+            switch (currRewardType)
             {
-                player.AddHitToStatistics(hitters);
-                player.score += 50;
+                case Utilities.RewardType.COOPERATION:
+                    for (int i=0; i < hitters.Count; i++)
+                    {
+                        Player currHitter = hitters[i];
+                        currHitter.score += 50;
+                        
+                    }
+                    break;
+                case Utilities.RewardType.COMPETITION:
+                    for (int i = 0; i < hitters.Count; i++)
+                    {
+                        Player currHitter = hitters[i];
+                        if (i > 0)
+                        {
+                            currHitter.score -= 50;
+                        }
+                        else
+                        {
+                            currHitter.score += 100;
+                        }
+                    }
+                    break;
+                case Utilities.RewardType.SELF_IMPROVEMENT:
+                    for (int i = 0; i < hitters.Count; i++)
+                    {
+                        Player currHitter = hitters[i];
+                        if (i <= 0)
+                        {
+                            currHitter.score -= 50;
+                        }
+                    }
+                    break;
             }
+            
         }
         else
         {

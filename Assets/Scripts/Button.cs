@@ -14,8 +14,9 @@ public class Button : MonoBehaviour {
 
     private List<Player> playersPressingThisButton;
 
-    public void RegisterUserButtonPress(List<Player> playersPressingThisButton) {
-        this.playersPressingThisButton = playersPressingThisButton;
+    public void RegisterUserButtonPress(Player playerPressingThisButton) {
+        Debug.Log(playersPressingThisButton.Count);
+        this.playersPressingThisButton.Add(playerPressingThisButton);
         //List<Player> players = gameManager.GetPlayers();
         this.keyPressed = true;
     }
@@ -30,14 +31,20 @@ public class Button : MonoBehaviour {
     {
         if (this.keyPressed && !this.locked)
         {
-            this.clicked = true;
-            this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            if (!this.clicked)
+            {
+                this.clicked = true;
+                this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            }
         }
         else
         {
-            this.playersPressingThisButton = new List<Player>();
-            this.clicked = false;
-            this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+            if (this.clicked)
+            {
+                this.playersPressingThisButton = new List<Player>();
+                this.clicked = false;
+                this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+            }
         }
 
         if (!this.keyPressed)

@@ -17,9 +17,6 @@ public class Player
 
     public int score;
 
-    //performance metrics
-    public int mybuttonHits;
-    public int simultaneousButtonHits;
 
     public Player(List<KeyCode> myKeys, List<string> myButtons)
     {
@@ -28,26 +25,8 @@ public class Player
         
         this.name = "";
         this.score = 0;
-
-        this.mybuttonHits = 0;
-        this.simultaneousButtonHits = 0;
     }
-    
-    public void AddHitToStatistics(List<Player> players)
-    {
-        if (players.Contains(this))
-        {
-            if(players.Count == 1)
-            {
-                mybuttonHits++;
-            }
-            else
-            {
-                simultaneousButtonHits++;
-            }
-        }
-    }
-
+   
     public string GetName()
     {
         return this.name;
