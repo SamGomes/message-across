@@ -355,7 +355,7 @@ public class GameManager : MonoBehaviour
 
         
         this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.MULTIPLAYER : chosenPAAlternative;
-        this.currRewardType = Utilities.RewardType.COOPERATION;
+        this.currRewardType = Utilities.RewardType.COMPETITION;
 
         foreach (Button button in this.gameButtons)
         {
@@ -370,8 +370,8 @@ public class GameManager : MonoBehaviour
                     inputManager.AddKeyBinding(
                         generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate ()
                         {
-                            gameButtons[(int)button.buttonCode].RegisterUserButtonPress(player);
-                        },false);
+                            gameButtons[(int)button.buttonCode].RegisterButtonPress();
+                        }, false);
                 }
             }
             else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
@@ -393,9 +393,9 @@ public class GameManager : MonoBehaviour
                     {
                         foreach (Player selectedPlayer in selectedKeysPlayers)
                         {
-                            gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedPlayer);
+                            gameButtons[(int)button.buttonCode].RegisterButtonPress();
                         }
-                    },true);
+                    }, false);
             }
 
 
@@ -477,7 +477,7 @@ public class GameManager : MonoBehaviour
         lifes--;
     }
 
-    public void RecordHit(List<Player> hitters, char letterText)
+    public void RecordHit(char letterText)
     {
         this.currWordState += letterText;
         this.currWordState = this.currWordState.ToUpper();
@@ -486,42 +486,40 @@ public class GameManager : MonoBehaviour
         if (currWordState.Length <= currTargetWord.Length && currTargetWord[currWordState.Length - 1] == currWordState[currWordState.Length - 1])
         {
             //diferent rewards in different reward conditions
+            Player currHitter = null;
+            foreach (Player player in settings.players)
+            {
+                if (player.GetMyKeys().Contains(inputManager.GetLastPressedKey()))
+                {
+                    currHitter = player;
+                }
+            }
             switch (currRewardType)
             {
                 case Utilities.RewardType.COOPERATION:
-                    for (int i=0; i < hitters.Count; i++)
+                    foreach (Player player in settings.players)
                     {
-                        Player currHitter = hitters[i];
-                        currHitter.score += 50;
-                        
+                        player.score += 50;
                     }
                     break;
                 case Utilities.RewardType.COMPETITION:
-                    for (int i = 0; i < hitters.Count; i++)
+                    foreach (Player player in settings.players)
                     {
-                        Player currHitter = hitters[i];
-                        if (i > 0)
+                        if (currHitter == player)
                         {
-                            currHitter.score -= 50;
+                            currHitter.score += 100;
                         }
                         else
                         {
-                            currHitter.score += 100;
+                            player.score -= 50;
                         }
                     }
                     break;
                 case Utilities.RewardType.SELF_IMPROVEMENT:
-                    for (int i = 0; i < hitters.Count; i++)
-                    {
-                        Player currHitter = hitters[i];
-                        if (i <= 0)
-                        {
-                            currHitter.score -= 50;
-                        }
-                    }
+                    currHitter.score += 50;
                     break;
             }
-            
+
         }
         else
         {

@@ -28,10 +28,12 @@ public class InputManager : MonoBehaviour {
 
     public delegate void CallBack();
 
-    Dictionary<List<KeyCode>, KeyBindingData> keyBindings;
+    private Dictionary<List<KeyCode>, KeyBindingData> keyBindings;
 
-    List<KeyCode> currPressedKeys = new List<KeyCode>();
-    List<KeyCode> bufferMod;
+    private List<KeyCode> currPressedKeys = new List<KeyCode>();
+    private List<KeyCode> bufferMod;
+
+    private KeyCode lastPressedKey;
 
     public List<KeyCode> GetCurrPressedKeys()
     {
@@ -49,7 +51,7 @@ public class InputManager : MonoBehaviour {
         this.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(); }, false);
         this.AddKeyBinding(new List<KeyCode> { KeyCode.A, KeyCode.B }, InputManager.ButtonPressType.DOWN, delegate () { Debug.Log("A"); }, true);
         this.AddKeyBinding(new List<KeyCode> { KeyCode.B, KeyCode.A }, InputManager.ButtonPressType.DOWN, delegate () { Debug.Log("B"); }, true);
-        this.AddKeyBinding(new List<KeyCode> { KeyCode.C, KeyCode.D }, InputManager.ButtonPressType.DOWN, delegate () { Debug.Log("c"); }, false);
+        this.AddKeyBinding(new List<KeyCode> { KeyCode.C, KeyCode.D }, InputManager.ButtonPressType.PRESSED, delegate () { Debug.Log("c"); }, false);
         //this.AddKeyBinding(new HashSet<KeyCode> { KeyCode.Space, KeyCode.A }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(); });
         //this.AddKeyBinding(new HashSet<KeyCode> { KeyCode.Space, KeyCode.B }, InputManager.ButtonPressType.UP, delegate () { gameSceneManager.StartAndPauseGame(); });
         //this.AddButtonBinding(new HashSet<string> { "Start" }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(); });
@@ -107,13 +109,14 @@ public class InputManager : MonoBehaviour {
             List<KeyCode> allKeysPressed = oldPressedKeys;
             allKeysPressed.AddRange(currPressedKeys);
             bufferMod = allKeysPressed.Distinct().ToList();
+            lastPressedKey = bufferMod[bufferMod.Count - 1];
             //bufferMod = bufferMod.Distinct().ToList();
         }
 
 
         foreach (List<KeyCode> simultaneouskeysList in keyBindings.Keys)
         {
-            if(bufferMod.Count < 1 || bufferMod.Count > simultaneouskeysList.Count || currPressedKeys.Count > simultaneouskeysList.Count)
+            if(bufferMod.Count > simultaneouskeysList.Count || currPressedKeys.Count > simultaneouskeysList.Count)
             {
                 continue;
             }
@@ -129,7 +132,7 @@ public class InputManager : MonoBehaviour {
                     }
                     else
                     {
-                        if (pair.isOrdered && !ContainsSequence(simultaneouskeysList, bufferMod))
+                        if (bufferMod.Count > 0 && pair.isOrdered && !ContainsSequence(simultaneouskeysList, bufferMod))
                         {
                             continue;
                         }
@@ -142,20 +145,20 @@ public class InputManager : MonoBehaviour {
                     }
                     else
                     {
-                        if (pair.isOrdered && !ContainsSequence(simultaneouskeysList, bufferMod))
+                        if (bufferMod.Count > 0 && pair.isOrdered && !ContainsSequence(simultaneouskeysList, bufferMod))
                         {
                             continue;
                         }
                     }
                     break;
                 case ButtonPressType.PRESSED:
-                    if (!(simultaneouskeysList.TrueForAll(bufferMod.Contains)))
+                    if (!(simultaneouskeysList.TrueForAll(currPressedKeys.Contains)))
                     {
                         continue;
                     }
                     else
                     {
-                        if (pair.isOrdered && !ContainsSequence(simultaneouskeysList, bufferMod))
+                        if (pair.isOrdered && !ContainsSequence(simultaneouskeysList, currPressedKeys))
                         {
                             continue;
                         }
@@ -197,6 +200,12 @@ public class InputManager : MonoBehaviour {
         keyBindings.Clear();
     }
     
+
+    public KeyCode GetLastPressedKey()
+    {
+        return this.lastPressedKey;
+    }
+
     internal bool ContainsKeyBinding(List<KeyCode> generatedKeyCombo)
     {
         foreach(List<KeyCode> combo in keyBindings.Keys)

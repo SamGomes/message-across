@@ -12,12 +12,9 @@ public class Button : MonoBehaviour {
     private bool clicked;
     private bool locked;
 
-    private List<Player> playersPressingThisButton;
+    
 
-    public void RegisterUserButtonPress(Player playerPressingThisButton) {
-        Debug.Log(playersPressingThisButton.Count);
-        this.playersPressingThisButton.Add(playerPressingThisButton);
-        //List<Player> players = gameManager.GetPlayers();
+    public void RegisterButtonPress() {
         this.keyPressed = true;
     }
 
@@ -41,7 +38,6 @@ public class Button : MonoBehaviour {
         {
             if (this.clicked)
             {
-                this.playersPressingThisButton = new List<Player>();
                 this.clicked = false;
                 this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
             }
@@ -67,7 +63,7 @@ public class Button : MonoBehaviour {
             otherObject.gameObject.transform.localScale = new Vector3(0.3f, 0.3f, 1.0f);
             otherObject.gameObject.GetComponent<SpriteRenderer>().color = Color.cyan;
 
-            gameManager.RecordHit(this.playersPressingThisButton, otherObject.gameObject.GetComponent<Letter>().letterText);
+            gameManager.RecordHit(otherObject.gameObject.GetComponent<Letter>().letterText);
 
             gameObject.GetComponent<AudioSource>().Play();
         }
