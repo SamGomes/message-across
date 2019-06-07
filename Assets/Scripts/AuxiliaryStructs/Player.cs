@@ -17,6 +17,7 @@ public class Player
 
     public int score;
 
+    private int activeButtonIndex;
 
     public Player(List<KeyCode> myKeys, List<string> myButtons)
     {
@@ -44,4 +45,13 @@ public class Player
         this.name = name;
     }
 
+    internal int GetActivebuttonIndex()
+    {
+        return activeButtonIndex;
+    }
+
+    internal void SetActiveButtonIndex(int activeButtonIndex)
+    {
+        this.activeButtonIndex = activeButtonIndex;
+    }
 }

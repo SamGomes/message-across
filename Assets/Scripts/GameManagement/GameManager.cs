@@ -34,15 +34,16 @@ public static class Utilities
         MULTIPLAYER
     }
 
-    public enum RewardType
+    public enum InteractionType
     {
+        NONE,
         COOPERATION,
         COMPETITION,
         SELF_IMPROVEMENT
     }
 
     public static PlayersToPressButtonAlternative[] playersToPressButtonAlternatives = (PlayersToPressButtonAlternative[]) Enum.GetValues(typeof(Utilities.PlayersToPressButtonAlternative));
-    public static RewardType[] rewardTypes = (RewardType[]) Enum.GetValues(typeof(Utilities.RewardType));
+    public static InteractionType[] interactionTypes = (InteractionType[]) Enum.GetValues(typeof(Utilities.InteractionType));
 
     public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Utilities.ButtonId));
     
@@ -103,7 +104,7 @@ public class GameManager : MonoBehaviour
     public int lifes;
 
     public Utilities.PlayersToPressButtonAlternative currNumPlayersCombo;
-    public Utilities.RewardType currRewardType;
+    public Utilities.InteractionType currRewardType;
 
     public Exercise currExercise { get; set; }
 
@@ -216,6 +217,22 @@ public class GameManager : MonoBehaviour
             });
 
             performanceMetrics.singlebuttonHits.Add(currPlayer, 0);
+
+            List<KeyCode> keys = currPlayer.GetMyKeys();
+
+            for (int j = 0; j < keys.Count-1; j++)
+            {
+                inputManager.AddKeyBinding(
+                    new List<KeyCode>(){ keys[j] }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
+                    {
+                        gameButtons[currPlayer.GetActivebuttonIndex()].RegisterButtonPress(Utilities.interactionTypes[j]);
+                    }, false);
+            }
+            inputManager.AddKeyBinding(
+                    new List<KeyCode>() { keys[keys.Count-1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+                    {
+                        currPlayer.SetActiveButtonIndex(currPlayer.GetActivebuttonIndex()+1 % (gameButtons.Count));
+                    }, false);
         }
         performanceMetrics.multiplayerButtonHits = 0;
         isGameplayStarted = true;
@@ -225,7 +242,7 @@ public class GameManager : MonoBehaviour
               new List<KeyCode>() { (KeyCode)(-1), (KeyCode)(-1) }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> pressedKeys)
               {
                   int playersPressingButtons = 0;
-                  pressedKeys.ForEach(i => Debug.Log(i));
+                  //pressedKeys.ForEach(i => Debug.Log(i));
 
                   foreach (Player player in settings.players)
                   {
@@ -268,14 +285,13 @@ public class GameManager : MonoBehaviour
     {
         isGameplayStarted = false;
         StartCoroutine(YieldedStart());
-
     }
 
 
     // Update is called once per frame
     void Update()
     {
-        Debug.Log("multi: " + performanceMetrics.multiplayerButtonHits);
+        //Debug.Log("multi: " + performanceMetrics.multiplayerButtonHits);
         if (isGameplayPaused || !isGameplayStarted)
         {
             return;
@@ -383,52 +399,52 @@ public class GameManager : MonoBehaviour
         int randomAltIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
         Utilities.PlayersToPressButtonAlternative chosenPAAlternative = Utilities.playersToPressButtonAlternatives[randomAltIndex];
         randomAltIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
-        Utilities.RewardType chosenRTAlternative = Utilities.rewardTypes[randomAltIndex];
+        Utilities.InteractionType chosenRTAlternative = Utilities.interactionTypes[randomAltIndex];
 
         
         this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.MULTIPLAYER : chosenPAAlternative;
         this.currRewardType = chosenRTAlternative;
 
-        foreach (Button button in this.gameButtons)
-        {
-            if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
-            {
-                foreach (Player player in settings.players)
-                {
-                    List<KeyCode> generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress).ToList();
-                    while (generatedKeyCombo != null && inputManager.ContainsKeyBinding(generatedKeyCombo)){
-                        generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress).ToList();
-                    }
-                    inputManager.AddKeyBinding(
-                        generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
-                        {
-                            gameButtons[(int)button.buttonCode].RegisterButtonPress();
-                        }, false);
-                }
-            }
-            else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
-            {
-                List<Player> selectedKeysPlayers = new List<Player>();
-                HashSet<KeyCode> possibleKeys = new HashSet<KeyCode>();
-                for (int i = 0; i < numKeysToPress; i++)
-                {
-                    Player selectedPlayer = settings.players[i % settings.players.Count];
-                    selectedKeysPlayers.Add(selectedPlayer);
+        //foreach (Button button in this.gameButtons)
+        //{
+        //    if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
+        //    {
+        //        foreach (Player player in settings.players)
+        //        {
+        //            List<KeyCode> generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress).ToList();
+        //            while (generatedKeyCombo != null && inputManager.ContainsKeyBinding(generatedKeyCombo)){
+        //                generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress).ToList();
+        //            }
+        //            inputManager.AddKeyBinding(
+        //                generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
+        //                {
+        //                    gameButtons[(int)button.buttonCode].RegisterButtonPress();
+        //                }, false);
+        //        }
+        //    }
+        //    else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
+        //    {
+        //        List<Player> selectedKeysPlayers = new List<Player>();
+        //        HashSet<KeyCode> possibleKeys = new HashSet<KeyCode>();
+        //        for (int i = 0; i < numKeysToPress; i++)
+        //        {
+        //            Player selectedPlayer = settings.players[i % settings.players.Count];
+        //            selectedKeysPlayers.Add(selectedPlayer);
 
-                    int randomIndex = UnityEngine.Random.Range(0, selectedPlayer.GetMyKeys().Count);
-                    possibleKeys.Add(selectedPlayer.GetMyKeys().ElementAt(randomIndex));
-                }
+        //            int randomIndex = UnityEngine.Random.Range(0, selectedPlayer.GetMyKeys().Count);
+        //            possibleKeys.Add(selectedPlayer.GetMyKeys().ElementAt(randomIndex));
+        //        }
 
-                List<KeyCode> generatedKeyCombo = GenerateKeyCombo(possibleKeys, numKeysToPress).ToList();
-                inputManager.AddKeyBinding(
-                    generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
-                    {
-                        foreach (Player selectedPlayer in selectedKeysPlayers)
-                        {
-                            gameButtons[(int)button.buttonCode].RegisterButtonPress();
-                        }
-                    }, false);
-            }
+        //        List<KeyCode> generatedKeyCombo = GenerateKeyCombo(possibleKeys, numKeysToPress).ToList();
+        //        inputManager.AddKeyBinding(
+        //            generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
+        //            {
+        //                foreach (Player selectedPlayer in selectedKeysPlayers)
+        //                {
+        //                    gameButtons[(int)button.buttonCode].RegisterButtonPress();
+        //                }
+        //            }, false);
+        //    }
 
 
 
@@ -454,7 +470,7 @@ public class GameManager : MonoBehaviour
             //        gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
             //});
 
-        }
+        //}
 
 
         for(int i=0; i<letterSpawners.Length; i++)
@@ -528,13 +544,13 @@ public class GameManager : MonoBehaviour
             }
             switch (currRewardType)
             {
-                case Utilities.RewardType.COOPERATION:
+                case Utilities.InteractionType.COOPERATION:
                     foreach (Player player in settings.players)
                     {
                         player.score += 50;
                     }
                     break;
-                case Utilities.RewardType.COMPETITION:
+                case Utilities.InteractionType.COMPETITION:
                     foreach (Player player in settings.players)
                     {
                         if (currHitter == player)
@@ -547,7 +563,7 @@ public class GameManager : MonoBehaviour
                         }
                     }
                     break;
-                case Utilities.RewardType.SELF_IMPROVEMENT:
+                case Utilities.InteractionType.SELF_IMPROVEMENT:
                     currHitter.score += 50;
                     break;
             }
