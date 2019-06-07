@@ -225,13 +225,13 @@ public class GameManager : MonoBehaviour
                 inputManager.AddKeyBinding(
                     new List<KeyCode>(){ keys[j] }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
                     {
-                        gameButtons[currPlayer.GetActivebuttonIndex()].RegisterButtonPress(Utilities.interactionTypes[j]);
+                        gameButtons[currPlayer.GetActivebuttonIndex()].RegisterButtonPress();//Utilities.interactionTypes[j]);
                     }, false);
             }
             inputManager.AddKeyBinding(
                     new List<KeyCode>() { keys[keys.Count-1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                     {
-                        currPlayer.SetActiveButtonIndex(currPlayer.GetActivebuttonIndex()+1 % (gameButtons.Count));
+                        currPlayer.SetActiveButtonIndex((currPlayer.GetActivebuttonIndex()+1) % (gameButtons.Count));
                     }, false);
         }
         performanceMetrics.multiplayerButtonHits = 0;

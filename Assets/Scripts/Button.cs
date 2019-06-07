@@ -9,14 +9,12 @@ public class Button : MonoBehaviour {
     public Utilities.ButtonId buttonCode;
 
     private bool keyPressed;
-    private Utilities.InteractionType pressType;
     private bool clicked;
     private bool locked;
 
     
 
-    public void RegisterButtonPress(Utilities.InteractionType pressType) {
-        this.pressType = pressType;
+    public void RegisterButtonPress() {
         this.keyPressed = true;
     }
 
