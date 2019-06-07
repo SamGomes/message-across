@@ -101,7 +101,6 @@ public class GameManager : MonoBehaviour
     public float timeLeft;
 
     public int lifes;
-    private int score;
 
     public Utilities.PlayersToPressButtonAlternative currNumPlayersCombo;
     public Utilities.RewardType currRewardType;
@@ -171,6 +170,7 @@ public class GameManager : MonoBehaviour
         ////exercises.Add(new Exercise("Word to match: VANILLA \n Your Word:_", "VANILLA"));
         ////exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
 
+
         string path = Application.streamingAssetsPath + "/config.cfg";
         string configText = "";
         if (path.Contains("://") || path.Contains(":///")) //url instead of path
@@ -199,7 +199,8 @@ public class GameManager : MonoBehaviour
 
         gameSceneManager.StartAndPauseGame(); //for the initial screen
 
-
+        performanceMetrics = new PerformanceMetrics();
+        performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
         for (int i = 0; i < settings.players.Count; i++)
         {
             Player currPlayer = settings.players[i];
@@ -213,10 +214,52 @@ public class GameManager : MonoBehaviour
                 List<InputField> inputFields = new List<InputField>(namesInputLocation.GetComponentsInChildren<InputField>());
                 settings.players[inputFields.IndexOf(input)].SetName(input.text);
             });
+
+            performanceMetrics.singlebuttonHits.Add(currPlayer, 0);
         }
+        performanceMetrics.multiplayerButtonHits = 0;
         isGameplayStarted = true;
 
-        performanceMetrics = new PerformanceMetrics();
+
+        inputManager.AddKeyBinding(
+              new List<KeyCode>() { (KeyCode)(-1), (KeyCode)(-1) }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> pressedKeys)
+              {
+                  int playersPressingButtons = 0;
+                  pressedKeys.ForEach(i => Debug.Log(i));
+
+                  foreach (Player player in settings.players)
+                  {
+                      List<KeyCode> playerKeys = player.GetMyKeys();
+                      foreach (KeyCode key in pressedKeys)
+                      {
+                          if (playerKeys.Contains(key))
+                          {
+                              playersPressingButtons++;
+                              break;
+                          }
+                      }
+                  }
+
+                  if (playersPressingButtons > 1)
+                  {
+                      performanceMetrics.multiplayerButtonHits++;
+                  }
+
+              }, false);
+
+        inputManager.AddKeyBinding(
+          new List<KeyCode>() { (KeyCode)(-1) }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> pressedKeys)
+          {
+              foreach (Player player in settings.players)
+              {
+                  if (player.GetMyKeys().Contains(pressedKeys[0]))
+                  {
+                      performanceMetrics.singlebuttonHits[player]++;
+                  }
+              }
+          }, false);
+
+        inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { gameSceneManager.StartAndPauseGame(); }, false);
 
     }
 
@@ -225,29 +268,18 @@ public class GameManager : MonoBehaviour
     {
         isGameplayStarted = false;
         StartCoroutine(YieldedStart());
+
     }
 
 
     // Update is called once per frame
     void Update()
     {
+        Debug.Log("multi: " + performanceMetrics.multiplayerButtonHits);
         if (isGameplayPaused || !isGameplayStarted)
         {
             return;
         }
-
-        //record metrics
-        //List<KeyCode> bufferMod = inputManager.GetBufferMod();
-        //foreach(KeyCode key in bufferMod)
-        //{
-        //     foreach (Player player in settings.players)
-        //     {
-        //        if (bufferMod.Contains(key))
-        //        {
-        //            performanceMetrics.singlebuttonHits[player]++;
-        //        }
-        //    }
-        //}
 
         //if no lifes end game immediately
         if (lifes < 1)
@@ -264,7 +296,7 @@ public class GameManager : MonoBehaviour
         }
 
         hpPanel.GetComponent<UnityEngine.UI.Text>().text = "Lifes: "+ lifes;
-        scorePanel.GetComponent<UnityEngine.UI.Text>().text = "Team Score: "+ score;
+        //scorePanel.GetComponent<UnityEngine.UI.Text>().text = "Team Score: "+ score;
         timePanel.GetComponent<UnityEngine.UI.Text>().text = "Time: "+ timeLeft;
 
 
@@ -317,13 +349,13 @@ public class GameManager : MonoBehaviour
     {
         gameSceneManager.PauseForQuestionnaires();
         //spawn questionnaires before changing word
-        //foreach (Player player in settings.players)
-        //{
-        //    int totalButtonHits = performanceMetrics.singlebuttonHits[player] + performanceMetrics.multiplayerButtonHits;
-        //    float playerHitsPercentage = ((float)performanceMetrics.singlebuttonHits[player] / (float) totalButtonHits) * 100.0f;
-        //    float simultaneousHitsPercentage = ((float) performanceMetrics.multiplayerButtonHits / (float)totalButtonHits) * 100.0f;
-        //    Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100="+player.GetName()+"&entry.631185473="+currWordState+"&entry.159491668="+ currNumPlayersCombo + "&entry.1252688229="+ playerHitsPercentage +"&entry.1140424083="+ simultaneousHitsPercentage); //spawn questionaires
-        //}
+        foreach (Player player in settings.players)
+        {
+            int totalButtonHits = performanceMetrics.singlebuttonHits[player] + performanceMetrics.multiplayerButtonHits;
+            float playerHitsPercentage = ((float)performanceMetrics.singlebuttonHits[player] / (float)totalButtonHits) * 100.0f;
+            float simultaneousHitsPercentage = ((float)performanceMetrics.multiplayerButtonHits / (float)totalButtonHits) * 100.0f;
+            Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.631185473=" + currWordState + "&entry.159491668=" + currNumPlayersCombo + "&entry.1252688229=" + playerHitsPercentage + "&entry.1140424083=" + simultaneousHitsPercentage); //spawn questionaires
+        }
     }
 
     HashSet<KeyCode> GenerateKeyCombo(HashSet<KeyCode> possibleKeys, int numKeysInEachCombo)
@@ -355,7 +387,7 @@ public class GameManager : MonoBehaviour
 
         
         this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.MULTIPLAYER : chosenPAAlternative;
-        this.currRewardType = Utilities.RewardType.COMPETITION;
+        this.currRewardType = chosenRTAlternative;
 
         foreach (Button button in this.gameButtons)
         {
@@ -368,7 +400,7 @@ public class GameManager : MonoBehaviour
                         generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress).ToList();
                     }
                     inputManager.AddKeyBinding(
-                        generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate ()
+                        generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
                         {
                             gameButtons[(int)button.buttonCode].RegisterButtonPress();
                         }, false);
@@ -389,7 +421,7 @@ public class GameManager : MonoBehaviour
 
                 List<KeyCode> generatedKeyCombo = GenerateKeyCombo(possibleKeys, numKeysToPress).ToList();
                 inputManager.AddKeyBinding(
-                    generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate ()
+                    generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
                     {
                         foreach (Player selectedPlayer in selectedKeysPlayers)
                         {
@@ -540,10 +572,10 @@ public class GameManager : MonoBehaviour
             {
                 Destroy(letter);
             }
-            foreach (LetterSpawner letterSpawner in letterSpawners)
-            {
-                letterSpawner.SetScore(score);
-            }
+            //foreach (LetterSpawner letterSpawner in letterSpawners)
+            //{
+            //    letterSpawner.SetScore(score);
+            //}
             foreach (AntSpawner antSpawner in antSpawners)
             {
                 antSpawner.SpawnAnt(currTargetWord);

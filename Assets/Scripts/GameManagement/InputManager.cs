@@ -26,7 +26,7 @@ public class InputManager : MonoBehaviour {
     public GameManager gameManager;
     public GameSceneManager gameSceneManager;
 
-    public delegate void CallBack();
+    public delegate void CallBack(List<KeyCode> triggeredKeys);
 
     private Dictionary<List<KeyCode>, KeyBindingData> keyBindings;
 
@@ -47,26 +47,20 @@ public class InputManager : MonoBehaviour {
 
     public void InitKeys()
     {
-        this.RemoveAllKeyBindings();
-        this.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(); }, false);
-        this.AddKeyBinding(new List<KeyCode> { KeyCode.A, KeyCode.B }, InputManager.ButtonPressType.DOWN, delegate () { Debug.Log("A"); }, true);
-        this.AddKeyBinding(new List<KeyCode> { KeyCode.B, KeyCode.A }, InputManager.ButtonPressType.DOWN, delegate () { Debug.Log("B"); }, true);
-        this.AddKeyBinding(new List<KeyCode> { KeyCode.C, KeyCode.D }, InputManager.ButtonPressType.PRESSED, delegate () { Debug.Log("c"); }, false);
-        //this.AddKeyBinding(new HashSet<KeyCode> { KeyCode.Space, KeyCode.A }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(); });
-        //this.AddKeyBinding(new HashSet<KeyCode> { KeyCode.Space, KeyCode.B }, InputManager.ButtonPressType.UP, delegate () { gameSceneManager.StartAndPauseGame(); });
-        //this.AddButtonBinding(new HashSet<string> { "Start" }, InputManager.ButtonPressType.DOWN, delegate () { gameSceneManager.StartAndPauseGame(); });
+        //this.RemoveAllKeyBindings();
+        //this.AddKeyBinding(new List<KeyCode> { KeyCode.A, KeyCode.B }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { Debug.Log("A"); }, true);
+        ////this.AddKeyBinding(new List<KeyCode> { KeyCode.B, KeyCode.A }, InputManager.ButtonPressType.DOWN, delegate () { Debug.Log("B"); }, true);
+        ////this.AddKeyBinding(new List<KeyCode> { KeyCode.C, KeyCode.D }, InputManager.ButtonPressType.PRESSED, delegate () { Debug.Log("c"); }, false);
 
-        
-        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.Q }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
-        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.W }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
-        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.O }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
-        //    inputManager.addKeyBinding(new KeyCode[] { KeyCode.P }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
+        //this.AddKeyBinding(new List<KeyCode> { KeyCode.U, (KeyCode)(-1) }, InputManager.ButtonPressType.UP, delegate (List<KeyCode> triggeredKeys) { Debug.Log("allU"); }, false);
+        //this.AddKeyBinding(new List<KeyCode> { KeyCode.D, (KeyCode)(-1) }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { Debug.Log("allD"); }, false);
+        //this.AddKeyBinding(new List<KeyCode> { KeyCode.P, (KeyCode)(-1) }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys) { Debug.Log("allP"); }, false);
 
-        //    inputManager.addButtonBinding(new string[] { "YButtonJoy1" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
-        //    inputManager.addButtonBinding(new string[] { "BButtonJoy1" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_0); });
-        //    inputManager.addButtonBinding(new string[] { "YButtonJoy2" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_0].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
-        //    inputManager.addButtonBinding(new string[] { "BButtonJoy2" }, InputManager.ButtonPressType.ALL, delegate () { gameButtons[(int)Utilities.ButtonId.BTN_1].registerUserButtonPress(Utilities.PlayerId.PLAYER_1); });
-        //
+        //this.AddKeyBinding(
+        //      new List<KeyCode>() { (KeyCode)(-1), (KeyCode)(-1) }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> pressedKeys)
+        //      {
+        //          Debug.Log("AAA");
+        //      }, false);
     }
 
     void Awake() //before any start init stuff
@@ -74,6 +68,7 @@ public class InputManager : MonoBehaviour {
         keyBindings = new Dictionary<List<KeyCode>, KeyBindingData>();
         InitKeys();
     }
+
 
     public bool ContainsSequence<T>(IEnumerable<T> source, IEnumerable<T> other)
     {
@@ -126,46 +121,65 @@ public class InputManager : MonoBehaviour {
             switch (pair.pressType)
             {
                 case ButtonPressType.DOWN:
-                    if (!(simultaneouskeysList.TrueForAll(bufferMod.Contains) && keysDown))
+                    if (bufferMod.Count < simultaneouskeysList.Count)
                     {
                         continue;
                     }
-                    else
+
+
+                    if (!(simultaneouskeysList.TrueForAll(delegate(KeyCode key) {
+                        return (bufferMod.Contains(key) || key == (KeyCode)(-1));
+                    }) && keysDown))
                     {
-                        if (bufferMod.Count > 0 && pair.isOrdered && !ContainsSequence(simultaneouskeysList, bufferMod))
-                        {
-                            continue;
-                        }
+                        continue;
                     }
+                    else if (bufferMod.Count > 0 && pair.isOrdered && !ContainsSequence(simultaneouskeysList, bufferMod)){
+                            continue;
+                    }
+
+                    pair.callback(bufferMod);
                     break;
                 case ButtonPressType.UP:
-                    if (!(simultaneouskeysList.TrueForAll(bufferMod.Contains) && keysUp))
+                    if (bufferMod.Count < simultaneouskeysList.Count)
                     {
                         continue;
                     }
-                    else
+
+
+                    if (!(simultaneouskeysList.TrueForAll(delegate (KeyCode key) {
+                        return (bufferMod.Contains(key) || key == (KeyCode)(-1));
+                    }) && keysUp))
                     {
-                        if (bufferMod.Count > 0 && pair.isOrdered && !ContainsSequence(simultaneouskeysList, bufferMod))
-                        {
-                            continue;
-                        }
+                        continue;
                     }
+                    else if (bufferMod.Count > 0 && pair.isOrdered && !ContainsSequence(simultaneouskeysList, bufferMod))
+                    {
+                        continue;
+                    }
+
+                    pair.callback(bufferMod);
                     break;
                 case ButtonPressType.PRESSED:
-                    if (!(simultaneouskeysList.TrueForAll(currPressedKeys.Contains)))
+                    if (currPressedKeys.Count < simultaneouskeysList.Count)
                     {
                         continue;
                     }
-                    else
+
+
+                    if (!(simultaneouskeysList.TrueForAll(delegate (KeyCode key) {
+                        return (currPressedKeys.Contains(key) || key == (KeyCode)(-1));
+                    })))
                     {
-                        if (pair.isOrdered && !ContainsSequence(simultaneouskeysList, currPressedKeys))
-                        {
-                            continue;
-                        }
+                        continue;
                     }
+                    else if (pair.isOrdered && !ContainsSequence(simultaneouskeysList, currPressedKeys))
+                    {
+                        continue;
+                    }
+
+                    pair.callback(currPressedKeys);
                     break;
             }
-            pair.callback();
             break;
         }
 
@@ -176,7 +190,7 @@ public class InputManager : MonoBehaviour {
     {
         keyBindings.Add(keys, new KeyBindingData() { pressType = pressType, callback = callback, isOrdered = isUnordered});
     }
-    
+
     public void ChangeKeyBinding(List<KeyCode> keys, ButtonPressType pressType, CallBack callback, bool isUnordered)
     {
         if (keyBindings.ContainsKey(keys))

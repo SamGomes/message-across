@@ -10,7 +10,6 @@ public class LetterSpawner : MonoBehaviour
 
     public float minIntervalRange;
     public float maxIntervalRange;
-    private int score = 0;
 
     private float randomInterval;
 
@@ -83,10 +82,6 @@ public class LetterSpawner : MonoBehaviour
         //bias generation of letters in word
         lettersPool.AddRange(currWordLetters);
         lettersPool.AddRange(currWordLetters);
-    }
-
-    public void SetScore(int score) {
-        this.score = score;
     }
 
 
