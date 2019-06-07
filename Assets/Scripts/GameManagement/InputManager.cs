@@ -27,6 +27,7 @@ public class InputManager : MonoBehaviour {
     public GameSceneManager gameSceneManager;
 
     public delegate void CallBack(List<KeyCode> triggeredKeys);
+    //public List<Delegate> delegates;
 
     private Dictionary<List<KeyCode>, KeyBindingData> keyBindings;
 
@@ -70,15 +71,18 @@ public class InputManager : MonoBehaviour {
     }
 
 
-    public bool ContainsSequence<T>(IEnumerable<T> source, IEnumerable<T> other)
+    public bool ContainsSequence<KeyCode>(List<KeyCode> source, List<KeyCode> other)
     {
         int count = other.Count();
+
+        //KeyCode keyCode = (KeyCode)(-1);
+        //other = other.Remove(KeyCode);
 
         while (source.Any())
         {
             if (source.Take(count).SequenceEqual(other))
                 return true;
-            source = source.Skip(1);
+            source = source.Skip(1).ToList();
         }
         return false;
     }
@@ -180,7 +184,6 @@ public class InputManager : MonoBehaviour {
                     pair.callback(currPressedKeys);
                     break;
             }
-            break;
         }
 
         
