@@ -7,6 +7,10 @@ using UnityEngine;
 public class Player
 {
     [SerializeField]
+    private List<float> buttonRGB;
+    private Color buttonColor;
+
+    [SerializeField]
     private string name;
 
     [SerializeField]
@@ -19,13 +23,19 @@ public class Player
 
     private int activeButtonIndex;
 
-    public Player(List<KeyCode> myKeys, List<string> myButtons)
+    public Player(List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB)
     {
+        this.buttonColor = buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
+
         this.myKeys = myKeys;
         this.myButtons = myButtons;
         
         this.name = "";
         this.score = 0;
+    }
+
+    public void Init() {
+        this.buttonColor = buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
     }
    
     public string GetName()
@@ -45,13 +55,19 @@ public class Player
         this.name = name;
     }
 
-    internal int GetActivebuttonIndex()
+    public int GetActivebuttonIndex()
     {
         return activeButtonIndex;
     }
 
-    internal void SetActiveButtonIndex(int activeButtonIndex)
+    public void SetActiveButtonIndex(int activeButtonIndex)
     {
         this.activeButtonIndex = activeButtonIndex;
     }
+
+    public Color GetButtonColor()
+    {
+        return buttonColor;
+    }
+
 }

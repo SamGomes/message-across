@@ -95,6 +95,7 @@ public class GameManager : MonoBehaviour
     public GameObject playersPanel;
     public AntSpawner[] antSpawners;
     public LetterSpawner[] letterSpawners;
+
     public List<Button> gameButtons;
 
     public string currWordState;
@@ -136,6 +137,28 @@ public class GameManager : MonoBehaviour
                 break;
         }
         return i + suffix;
+    }
+
+    void UpdateButtonColors()
+    {
+        gameButtons.ForEach(delegate (Button button) { button.GetComponent<SpriteRenderer>().color = Color.white; });
+        for(int i=0; i< gameButtons.Count; i++)
+        {
+            int numActivePlayers = 0;
+            foreach(Player player in settings.players)
+            {
+                int activeIndex = player.GetActivebuttonIndex();
+                if (activeIndex == i)
+                {
+                    gameButtons[activeIndex].GetComponent<SpriteRenderer>().color = player.GetButtonColor();
+                    numActivePlayers++;
+                }
+            }
+            if (numActivePlayers > 1)
+            {
+                gameButtons[i].GetComponent<SpriteRenderer>().color = new Color(1.0f,0.5f,0.0f,1.0f);
+            }
+        }
     }
 
 
@@ -185,7 +208,7 @@ public class GameManager : MonoBehaviour
             configText = File.ReadAllText(path);
         }
 
-        //string json = JsonUtility.ToJson(settings);
+        //string json = JsonUtility.ToJson(settings,true);
         settings = JsonUtility.FromJson<GameSettings>(configText);
 
         lifes = 50;
@@ -205,6 +228,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < settings.players.Count; i++)
         {
             Player currPlayer = settings.players[i];
+            currPlayer.Init();
             GameObject newNameInput = Instantiate(playerNameInputFieldPrefabRef, namesInputLocation.transform);
             InputField input = newNameInput.GetComponent<InputField>();
             input.placeholder.GetComponent<Text>().text = OrderedFormOfNumber(i + 1) + " player name";
@@ -220,18 +244,23 @@ public class GameManager : MonoBehaviour
 
             List<KeyCode> keys = currPlayer.GetMyKeys();
 
+            UpdateButtonColors();
+
             for (int j = 0; j < keys.Count-1; j++)
             {
                 inputManager.AddKeyBinding(
                     new List<KeyCode>(){ keys[j] }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
                     {
-                        gameButtons[currPlayer.GetActivebuttonIndex()].RegisterButtonPress();//Utilities.interactionTypes[j]);
+                        int activeIndex = currPlayer.GetActivebuttonIndex();
+                        gameButtons[activeIndex].RegisterButtonPress();//Utilities.interactionTypes[j]);
                     }, false);
             }
             inputManager.AddKeyBinding(
                     new List<KeyCode>() { keys[keys.Count-1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                     {
-                        currPlayer.SetActiveButtonIndex((currPlayer.GetActivebuttonIndex()+1) % (gameButtons.Count));
+                        int activeIndex = (currPlayer.GetActivebuttonIndex() + 1) % (gameButtons.Count);
+                        currPlayer.SetActiveButtonIndex(activeIndex);
+                        UpdateButtonColors();
                     }, false);
         }
         performanceMetrics.multiplayerButtonHits = 0;
