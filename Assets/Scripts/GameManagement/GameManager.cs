@@ -10,7 +10,7 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public static class Utilities
+public static class Globals
 {
     public enum PlayerId
     {
@@ -42,13 +42,15 @@ public static class Utilities
         SELF_IMPROVEMENT
     }
 
-    public static PlayersToPressButtonAlternative[] playersToPressButtonAlternatives = (PlayersToPressButtonAlternative[]) Enum.GetValues(typeof(Utilities.PlayersToPressButtonAlternative));
-    public static InteractionType[] interactionTypes = (InteractionType[]) Enum.GetValues(typeof(Utilities.InteractionType));
+    public static PlayersToPressButtonAlternative[] playersToPressButtonAlternatives = (PlayersToPressButtonAlternative[]) Enum.GetValues(typeof(Globals.PlayersToPressButtonAlternative));
+    public static InteractionType[] interactionTypes = (InteractionType[]) Enum.GetValues(typeof(Globals.InteractionType));
 
-    public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Utilities.ButtonId));
+    public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Globals.ButtonId));
     
 
     public static int numPlayersToPressButtonAlternatives = playersToPressButtonAlternatives.Length;
+
+    public static int currLevelId = 0;
 }
 
 [Serializable]
@@ -57,6 +59,7 @@ public struct GameSettings
     public int maxSimultaneousKeyPresses;
     public List<Exercise> exercises;
     public List<Player> players;
+    public int gameId;
 }
 
 [Serializable]
@@ -104,8 +107,8 @@ public class GameManager : MonoBehaviour
 
     public int lifes;
 
-    public Utilities.PlayersToPressButtonAlternative currNumPlayersCombo;
-    public Utilities.InteractionType currRewardType;
+    public Globals.PlayersToPressButtonAlternative currNumPlayersCombo;
+    public Globals.InteractionType currRewardType;
 
     public Exercise currExercise { get; set; }
 
@@ -307,6 +310,9 @@ public class GameManager : MonoBehaviour
 
         inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { gameSceneManager.StartAndPauseGame(); }, false);
 
+        LogManager logManager = new MongoDBLogManager();
+        logManager.InitLogs(this);
+        logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() { { "a", "0" }, { "b", "1" } });
     }
 
     // Use this for initialization
@@ -402,6 +408,7 @@ public class GameManager : MonoBehaviour
             Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.631185473=" + currWordState + "&entry.159491668=" + currNumPlayersCombo + "&entry.1252688229=" + playerHitsPercentage + "&entry.1140424083=" + simultaneousHitsPercentage); //spawn questionaires
         }
     }
+    
 
     HashSet<KeyCode> GenerateKeyCombo(HashSet<KeyCode> possibleKeys, int numKeysInEachCombo)
     {
@@ -425,13 +432,13 @@ public class GameManager : MonoBehaviour
         int numKeysToPress = settings.maxSimultaneousKeyPresses;
         
         //choose num players combo
-        int randomAltIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
-        Utilities.PlayersToPressButtonAlternative chosenPAAlternative = Utilities.playersToPressButtonAlternatives[randomAltIndex];
-        randomAltIndex = UnityEngine.Random.Range(0, Utilities.numPlayersToPressButtonAlternatives);
-        Utilities.InteractionType chosenRTAlternative = Utilities.interactionTypes[randomAltIndex];
+        int randomAltIndex = UnityEngine.Random.Range(0, Globals.numPlayersToPressButtonAlternatives);
+        Globals.PlayersToPressButtonAlternative chosenPAAlternative = Globals.playersToPressButtonAlternatives[randomAltIndex];
+        randomAltIndex = UnityEngine.Random.Range(0, Globals.numPlayersToPressButtonAlternatives);
+        Globals.InteractionType chosenRTAlternative = Globals.interactionTypes[randomAltIndex];
 
         
-        this.currNumPlayersCombo = firstTimeCall ? Utilities.PlayersToPressButtonAlternative.MULTIPLAYER : chosenPAAlternative;
+        this.currNumPlayersCombo = firstTimeCall ? Globals.PlayersToPressButtonAlternative.MULTIPLAYER : chosenPAAlternative;
         this.currRewardType = chosenRTAlternative;
 
         //foreach (Button button in this.gameButtons)
@@ -573,13 +580,13 @@ public class GameManager : MonoBehaviour
             }
             switch (currRewardType)
             {
-                case Utilities.InteractionType.COOPERATION:
+                case Globals.InteractionType.COOPERATION:
                     foreach (Player player in settings.players)
                     {
                         player.score += 50;
                     }
                     break;
-                case Utilities.InteractionType.COMPETITION:
+                case Globals.InteractionType.COMPETITION:
                     foreach (Player player in settings.players)
                     {
                         if (currHitter == player)
@@ -592,7 +599,7 @@ public class GameManager : MonoBehaviour
                         }
                     }
                     break;
-                case Utilities.InteractionType.SELF_IMPROVEMENT:
+                case Globals.InteractionType.SELF_IMPROVEMENT:
                     currHitter.score += 50;
                     break;
             }

@@ -6,7 +6,7 @@ using UnityEngine;
 public class Button : MonoBehaviour {
 
     public GameManager gameManager;
-    public Utilities.ButtonId buttonCode;
+    public Globals.ButtonId buttonCode;
 
     private bool keyPressed;
     private bool clicked;
