@@ -14,10 +14,10 @@ public abstract class LogManager
         {
             string key = dictKeys[keyI];
 
-            result += " "+ key + ": " + dict[key];
+            result += " "+ key + ": \"" + dict[key] + "\"";
             if(keyI < dictKeys.Count - 1)
             {
-                result += ";";
+                result += ",";
             }
             else
             {

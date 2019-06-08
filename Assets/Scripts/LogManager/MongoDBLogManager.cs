@@ -14,9 +14,7 @@ public class MongoDBLogManager : LogManager
     Hashtable postHeader;
     private List<PendingCall> pendingCalls;
     private UnityWebRequestAsyncOperation currRequest;
-
-    [Serializable]
-    struct DataEntryPlayerLog { }
+    
 
     private struct PendingCall
     {
@@ -51,11 +49,11 @@ public class MongoDBLogManager : LogManager
         pendingCalls = new List<PendingCall>();
     }
 
-    private UnityWebRequest ConvertEntityToPostRequest(System.Object entity, string database, string collection)
+    private UnityWebRequest ConvertEntityToPostRequest(Dictionary<string,string> entity, string database, string collection)
     {
         string url = "https://api.mlab.com/api/1/databases/" + database + "/collections/" + collection + "?apiKey=" + myApiKey;
 
-        string entityJson = JsonUtility.ToJson(entity);
+        string entityJson = StringifyDictionaryForLogs(entity);
         byte[] formData = System.Text.Encoding.UTF8.GetBytes(entityJson);
         UnityWebRequest www = UnityWebRequest.Post(url, entityJson);
         www.uploadHandler = (UploadHandler)new UploadHandlerRaw(formData);

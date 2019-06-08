@@ -93,7 +93,7 @@ public class GameManager : MonoBehaviour
     public GameObject track;
 
     public InputManager inputManager;
-
+    public LogManager logManager;
 
     public GameObject playersPanel;
     public AntSpawner[] antSpawners;
@@ -310,9 +310,8 @@ public class GameManager : MonoBehaviour
 
         inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { gameSceneManager.StartAndPauseGame(); }, false);
 
-        LogManager logManager = new MongoDBLogManager();
+        logManager = new MongoDBLogManager();
         logManager.InitLogs(this);
-        logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() { { "a", "0" }, { "b", "1" } });
     }
 
     // Use this for initialization
@@ -380,11 +379,43 @@ public class GameManager : MonoBehaviour
 
     }
 
+    void RecordMetrics()
+    {
+        //spawn questionnaires before changing word
+        foreach (Player player in settings.players)
+        {
+            //record metrics
+            int totalButtonHits = performanceMetrics.singlebuttonHits[player] + performanceMetrics.multiplayerButtonHits;
+            float playerHitsPercentage = ((float)performanceMetrics.singlebuttonHits[player] / (float)totalButtonHits) * 100.0f;
+            float simultaneousHitsPercentage = ((float)performanceMetrics.multiplayerButtonHits / (float)totalButtonHits) * 100.0f;
+            //StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
+            //    { "playerName", player.GetName() },
+            //    { "currWord", currWordState },
+            //    { "playerCollPercentage", simultaneousHitsPercentage.ToString() },
+            //    { "playerCompPercentage", simultaneousHitsPercentage.ToString() },
+            //    { "playerSelfPercentage", playerHitsPercentage.ToString() }
+            //}));
+            StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
+                { "playerName", player.GetName() },
+                { "currWord", currWordState },
+                { "playerHitsPercentage", playerHitsPercentage.ToString() },
+                { "simultaneousHitsPercentage", simultaneousHitsPercentage.ToString() }
+            }));
+        }
+    }
 
+    void PoppupQuestionnaires()
+    {
+        gameSceneManager.PauseForQuestionnaires();
+        //spawn questionnaires before changing word
+        foreach (Player player in settings.players)
+        {
+            Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName()); //spawn questionaires
+        }
+    }
 
     void ChangeLevel()
     {
-        PoppupQuestionnaires();
         ChangeTargetWord();
         ChangeGameParametrizations(false);
     }
@@ -396,19 +427,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void PoppupQuestionnaires()
+    private void OnApplicationQuit()
     {
-        gameSceneManager.PauseForQuestionnaires();
-        //spawn questionnaires before changing word
-        foreach (Player player in settings.players)
-        {
-            int totalButtonHits = performanceMetrics.singlebuttonHits[player] + performanceMetrics.multiplayerButtonHits;
-            float playerHitsPercentage = ((float)performanceMetrics.singlebuttonHits[player] / (float)totalButtonHits) * 100.0f;
-            float simultaneousHitsPercentage = ((float)performanceMetrics.multiplayerButtonHits / (float)totalButtonHits) * 100.0f;
-            Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName() + "&entry.631185473=" + currWordState + "&entry.159491668=" + currNumPlayersCombo + "&entry.1252688229=" + playerHitsPercentage + "&entry.1140424083=" + simultaneousHitsPercentage); //spawn questionaires
-        }
+        RecordMetrics();
+        PoppupQuestionnaires();
     }
-    
+
 
     HashSet<KeyCode> GenerateKeyCombo(HashSet<KeyCode> possibleKeys, int numKeysInEachCombo)
     {
@@ -527,7 +551,6 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < letterSpawners.Length; i++)
         {
             letterSpawners[i].UpdateCurrStarredWord("");
-
         }
         //for (int i = 0; i < antSpawners.Length; i++)
         //{
