@@ -13,6 +13,7 @@ public class InputManager : MonoBehaviour {
         public ButtonPressType pressType;
         public CallBack callback;
         public bool isOrdered;
+        public bool isExclusive;
     }
 
 
@@ -115,13 +116,12 @@ public class InputManager : MonoBehaviour {
 
         foreach (List<KeyCode> simultaneouskeysList in keyBindings.Keys)
         {
-            if(bufferMod.Count > simultaneouskeysList.Count || currPressedKeys.Count > simultaneouskeysList.Count)
+            
+            var pair = keyBindings[simultaneouskeysList];
+            if (pair.isExclusive && (bufferMod.Count > simultaneouskeysList.Count || currPressedKeys.Count > simultaneouskeysList.Count))
             {
                 continue;
             }
-
-            var pair = keyBindings[simultaneouskeysList];
-            
             switch (pair.pressType)
             {
                 case ButtonPressType.DOWN:
@@ -189,16 +189,16 @@ public class InputManager : MonoBehaviour {
         
     }
 
-    public void AddKeyBinding(List<KeyCode> keys, ButtonPressType pressType, CallBack callback, bool isUnordered)
+    public void AddKeyBinding(List<KeyCode> keys, ButtonPressType pressType, CallBack callback, bool isOrdered, bool isExlusive)
     {
-        keyBindings.Add(keys, new KeyBindingData() { pressType = pressType, callback = callback, isOrdered = isUnordered});
+        keyBindings.Add(keys, new KeyBindingData() { pressType = pressType, callback = callback, isOrdered = isOrdered , isExclusive = isExlusive});
     }
 
-    public void ChangeKeyBinding(List<KeyCode> keys, ButtonPressType pressType, CallBack callback, bool isUnordered)
+    public void ChangeKeyBinding(List<KeyCode> keys, ButtonPressType pressType, CallBack callback, bool isOrdered, bool isExlusive)
     {
         if (keyBindings.ContainsKey(keys))
         {
-            keyBindings[keys] = new KeyBindingData() { pressType = pressType, callback = callback, isOrdered = isUnordered };
+            keyBindings[keys] = new KeyBindingData() { pressType = pressType, callback = callback, isOrdered = isOrdered, isExclusive = isExlusive };
         }
             
     }

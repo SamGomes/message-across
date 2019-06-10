@@ -147,6 +147,7 @@ public class GameManager : MonoBehaviour
         gameButtons.ForEach(delegate (Button button) { button.GetComponent<SpriteRenderer>().color = Color.white; });
         for(int i=0; i< gameButtons.Count; i++)
         {
+            gameButtons[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Textures/button");
             int numActivePlayers = 0;
             foreach(Player player in settings.players)
             {
@@ -159,7 +160,9 @@ public class GameManager : MonoBehaviour
             }
             if (numActivePlayers > 1)
             {
-                gameButtons[i].GetComponent<SpriteRenderer>().color = new Color(1.0f,0.5f,0.0f,1.0f);
+                //gameButtons[i].GetComponent<SpriteRenderer>().color = new Color(1.0f,0.5f,0.0f,1.0f);
+                gameButtons[i].GetComponent<SpriteRenderer>().color = Color.white;
+                gameButtons[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Textures/mixedButton");
             }
         }
     }
@@ -249,22 +252,30 @@ public class GameManager : MonoBehaviour
 
             UpdateButtonColors();
 
-            for (int j = 0; j < keys.Count-1; j++)
+            for (int j = 0; j < gameButtons.Count; j++)
             {
                 inputManager.AddKeyBinding(
                     new List<KeyCode>(){ keys[j] }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
                     {
                         int activeIndex = currPlayer.GetActivebuttonIndex();
                         gameButtons[activeIndex].RegisterButtonPress();//Utilities.interactionTypes[j]);
-                    }, false);
+                    }, false, false);
             }
             inputManager.AddKeyBinding(
-                    new List<KeyCode>() { keys[keys.Count-1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+                    new List<KeyCode>() { keys[gameButtons.Count] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+                    {
+                        int potentialIndex = (currPlayer.GetActivebuttonIndex() - 1);
+                        int activeIndex = (potentialIndex < 0)? potentialIndex = (gameButtons.Count - 1) : potentialIndex;
+                        currPlayer.SetActiveButtonIndex(activeIndex);
+                        UpdateButtonColors();
+                    }, false, false);
+            inputManager.AddKeyBinding(
+                    new List<KeyCode>() { keys[gameButtons.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                     {
                         int activeIndex = (currPlayer.GetActivebuttonIndex() + 1) % (gameButtons.Count);
                         currPlayer.SetActiveButtonIndex(activeIndex);
                         UpdateButtonColors();
-                    }, false);
+                    }, false, false);
         }
         performanceMetrics.multiplayerButtonHits = 0;
         isGameplayStarted = true;
@@ -294,7 +305,7 @@ public class GameManager : MonoBehaviour
                       performanceMetrics.multiplayerButtonHits++;
                   }
 
-              }, false);
+              }, false, false);
 
         inputManager.AddKeyBinding(
           new List<KeyCode>() { (KeyCode)(-1) }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> pressedKeys)
@@ -306,9 +317,9 @@ public class GameManager : MonoBehaviour
                       performanceMetrics.singlebuttonHits[player]++;
                   }
               }
-          }, false);
+          }, false, false);
 
-        inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { gameSceneManager.StartAndPauseGame(); }, false);
+        inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { gameSceneManager.StartAndPauseGame(); }, false, false);
 
         logManager = new MongoDBLogManager();
         logManager.InitLogs(this);
