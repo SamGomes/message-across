@@ -72,7 +72,7 @@ public struct PerformanceMetrics
 public class GameManager : MonoBehaviour
 {
 
-    private GameSettings settings;
+    public GameSettings settings;
     private PerformanceMetrics performanceMetrics;
 
 
@@ -101,7 +101,12 @@ public class GameManager : MonoBehaviour
 
     public List<Button> gameButtons;
 
-    public string currWordState;
+
+
+    public Dictionary<Player, Exercise> currExercises;
+    public Dictionary<Player, string> currWordStates;
+
+
 
     public float timeLeft;
 
@@ -109,8 +114,6 @@ public class GameManager : MonoBehaviour
 
     public Globals.PlayersToPressButtonAlternative currNumPlayersCombo;
     public Globals.InteractionType currRewardType;
-
-    public Exercise currExercise { get; set; }
 
     public void PauseGame()
     {
@@ -170,6 +173,11 @@ public class GameManager : MonoBehaviour
 
     IEnumerator YieldedStart()
     {
+
+        currExercises = new Dictionary<Player, Exercise>();
+        currWordStates = new Dictionary<Player, string>();
+
+
         isGameplayPaused = false;
         gameSceneManager.MainSceneLoadedNotification();
 
@@ -224,7 +232,6 @@ public class GameManager : MonoBehaviour
         timeLeft = 100.0f;
         InvokeRepeating("DecrementTimeLeft", 0.0f, 1.0f);
 
-        ChangeTargetWord();
         ChangeGameParametrizations(true);
 
         gameSceneManager.StartAndPauseGame(); //for the initial screen
@@ -239,6 +246,7 @@ public class GameManager : MonoBehaviour
             InputField input = newNameInput.GetComponent<InputField>();
             input.placeholder.GetComponent<Text>().text = OrderedFormOfNumber(i + 1) + " player name";
 
+            ChangeTargetWord(currPlayer);
 
             input.onValueChanged.AddListener(delegate
             {
@@ -361,7 +369,7 @@ public class GameManager : MonoBehaviour
         timePanel.GetComponent<UnityEngine.UI.Text>().text = "Time: "+ timeLeft;
 
 
-        UnityEngine.UI.Text playerPanelText = playersPanel.transform.GetComponentInChildren<UnityEngine.UI.Text>();
+        Text playerPanelText = playersPanel.transform.GetComponentInChildren<Text>();
         playerPanelText.text = "";
         for (int i=0; i < settings.players.Count; i++)
         {
@@ -369,23 +377,31 @@ public class GameManager : MonoBehaviour
         }
 
         //update curr display message
-        int missingLength = this.currExercise.targetWord.Length - currWordState.Length;
-        string[] substrings = this.currExercise.displayMessage.Split('_');
-
         string displayString = "";
-        if (substrings.Length > 0)
+        foreach(Player player in settings.players)
         {
-            displayString = substrings[0];
-            displayString += currWordState;
-            for (int i = 0; i < missingLength; i++)
+            Exercise currExercise = currExercises[player];
+            string currWordState = currWordStates[player];
+            int missingLength = currExercise.targetWord.Length - currWordState.Length;
+            string[] substrings = currExercise.displayMessage.Split('_');
+
+            displayString += player.GetName()+": \n";
+            if (substrings.Length > 0)
             {
-                displayString += "_";
+                displayString += substrings[0];
+                displayString += currWordState;
+                for (int i = 0; i < missingLength; i++)
+                {
+                    displayString += "_";
+                }
+                if (substrings.Length > 1)
+                {
+                    displayString += substrings[1];
+                }
             }
-            if (substrings.Length > 1)
-            {
-                displayString += substrings[1];
-            }
+            displayString += "\n";
         }
+        
         reqPanel.GetComponent<ReqScript>().UpdateRequirement(displayString);
 
     }
@@ -395,39 +411,38 @@ public class GameManager : MonoBehaviour
         //spawn questionnaires before changing word
         foreach (Player player in settings.players)
         {
-            //record metrics
-            int totalButtonHits = performanceMetrics.singlebuttonHits[player] + performanceMetrics.multiplayerButtonHits;
-            float playerHitsPercentage = ((float)performanceMetrics.singlebuttonHits[player] / (float)totalButtonHits) * 100.0f;
-            float simultaneousHitsPercentage = ((float)performanceMetrics.multiplayerButtonHits / (float)totalButtonHits) * 100.0f;
+            ////record metrics
+            //int totalButtonHits = performanceMetrics.singlebuttonHits[player] + performanceMetrics.multiplayerButtonHits;
+            //float playerHitsPercentage = ((float)performanceMetrics.singlebuttonHits[player] / (float)totalButtonHits) * 100.0f;
+            //float simultaneousHitsPercentage = ((float)performanceMetrics.multiplayerButtonHits / (float)totalButtonHits) * 100.0f;
+            ////StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
+            ////    { "playerName", player.GetName() },
+            ////    { "currWord", currWordState },
+            ////    { "playerCollPercentage", simultaneousHitsPercentage.ToString() },
+            ////    { "playerCompPercentage", simultaneousHitsPercentage.ToString() },
+            ////    { "playerSelfPercentage", playerHitsPercentage.ToString() }
+            ////}));
             //StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
             //    { "playerName", player.GetName() },
-            //    { "currWord", currWordState },
-            //    { "playerCollPercentage", simultaneousHitsPercentage.ToString() },
-            //    { "playerCompPercentage", simultaneousHitsPercentage.ToString() },
-            //    { "playerSelfPercentage", playerHitsPercentage.ToString() }
+            //    { "currWord", currWordStates[player] },
+            //    { "playerHitsPercentage", playerHitsPercentage.ToString() },
+            //    { "simultaneousHitsPercentage", simultaneousHitsPercentage.ToString() }
             //}));
-            StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
-                { "playerName", player.GetName() },
-                { "currWord", currWordState },
-                { "playerHitsPercentage", playerHitsPercentage.ToString() },
-                { "simultaneousHitsPercentage", simultaneousHitsPercentage.ToString() }
-            }));
         }
     }
 
     void PoppupQuestionnaires()
     {
-        gameSceneManager.PauseForQuestionnaires();
-        //spawn questionnaires before changing word
-        foreach (Player player in settings.players)
-        {
-            Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName()); //spawn questionaires
-        }
+        //gameSceneManager.PauseForQuestionnaires();
+        ////spawn questionnaires before changing word
+        //foreach (Player player in settings.players)
+        //{
+        //    Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName()); //spawn questionaires
+        //}
     }
 
     void ChangeLevel()
     {
-        ChangeTargetWord();
         ChangeGameParametrizations(false);
     }
 
@@ -475,74 +490,7 @@ public class GameManager : MonoBehaviour
         
         this.currNumPlayersCombo = firstTimeCall ? Globals.PlayersToPressButtonAlternative.MULTIPLAYER : chosenPAAlternative;
         this.currRewardType = chosenRTAlternative;
-
-        //foreach (Button button in this.gameButtons)
-        //{
-        //    if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.SINGLE_PLAYER)
-        //    {
-        //        foreach (Player player in settings.players)
-        //        {
-        //            List<KeyCode> generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress).ToList();
-        //            while (generatedKeyCombo != null && inputManager.ContainsKeyBinding(generatedKeyCombo)){
-        //                generatedKeyCombo = GenerateKeyCombo(new HashSet<KeyCode>(player.GetMyKeys()), numKeysToPress).ToList();
-        //            }
-        //            inputManager.AddKeyBinding(
-        //                generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
-        //                {
-        //                    gameButtons[(int)button.buttonCode].RegisterButtonPress();
-        //                }, false);
-        //        }
-        //    }
-        //    else if (this.currNumPlayersCombo == Utilities.PlayersToPressButtonAlternative.MULTIPLAYER)
-        //    {
-        //        List<Player> selectedKeysPlayers = new List<Player>();
-        //        HashSet<KeyCode> possibleKeys = new HashSet<KeyCode>();
-        //        for (int i = 0; i < numKeysToPress; i++)
-        //        {
-        //            Player selectedPlayer = settings.players[i % settings.players.Count];
-        //            selectedKeysPlayers.Add(selectedPlayer);
-
-        //            int randomIndex = UnityEngine.Random.Range(0, selectedPlayer.GetMyKeys().Count);
-        //            possibleKeys.Add(selectedPlayer.GetMyKeys().ElementAt(randomIndex));
-        //        }
-
-        //        List<KeyCode> generatedKeyCombo = GenerateKeyCombo(possibleKeys, numKeysToPress).ToList();
-        //        inputManager.AddKeyBinding(
-        //            generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
-        //            {
-        //                foreach (Player selectedPlayer in selectedKeysPlayers)
-        //                {
-        //                    gameButtons[(int)button.buttonCode].RegisterButtonPress();
-        //                }
-        //            }, false);
-        //    }
-
-
-
-            //HashSet<KeyCode> generatedKeyCombo = new HashSet<KeyCode>();
-
-            //int randomPlayerIndex = UnityEngine.Random.Range(0, players.Count);
-            //Player selectedPlayer = player;
-
-            //possibleKeys.UnionWith(selectedPlayer.GetMyKeys());
-            //while (generatedKeyCombo.Count < numKeysToPress)
-            //{
-
-            //    int randomCodeIndex = UnityEngine.Random.Range(0, possibleKeys.Count);
-            //    KeyCode currCode = possibleKeys.ElementAt(randomCodeIndex);
-            //    //possibleKeys.RemoveAt(randomIndex);
-
-            //    generatedKeyCombo.Add(currCode);
-            //    selectedKeysPlayers.Add(selectedPlayer);
-            //}
-            //buttonKeyCombos.Add(generatedKeyCombo);
-            //inputManager.AddKeyBinding(
-            //    generatedKeyCombo, InputManager.ButtonPressType.PRESSED, delegate () {
-            //        gameButtons[(int)button.buttonCode].RegisterUserButtonPress(selectedKeysPlayers);
-            //});
-
-        //}
-
+        
 
         for(int i=0; i<letterSpawners.Length; i++)
         {
@@ -555,9 +503,9 @@ public class GameManager : MonoBehaviour
 
 
         //change ants modes
-        track.GetComponent<SpriteRenderer>().sprite = (Sprite)Resources.Load("Textures/track", typeof(Sprite));
+        track.GetComponent<SpriteRenderer>().sprite = (Sprite) Resources.Load("Textures/track", typeof(Sprite));
 
-        string targetWord = this.currExercise.targetWord;
+        //string targetWord = this.currExercise.targetWord;
 
         for (int i = 0; i < letterSpawners.Length; i++)
         {
@@ -579,15 +527,15 @@ public class GameManager : MonoBehaviour
 
     }
 
-    void ChangeTargetWord()
+    void ChangeTargetWord(Player player)
     {
         int random = UnityEngine.Random.Range(0, settings.exercises.Count);
         Exercise newExercise = settings.exercises[random];
-
-        currWordState = "";
+        
         displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
 
-        this.currExercise = newExercise;
+        this.currExercises[player] = newExercise;
+        this.currWordStates[player] = "";
     }
 
     void Hurt()
@@ -597,89 +545,76 @@ public class GameManager : MonoBehaviour
 
     public void RecordHit(char letterText)
     {
-        this.currWordState += letterText;
-        this.currWordState = this.currWordState.ToUpper();
-        string currTargetWord = this.currExercise.targetWord;
-
-        if (currWordState.Length <= currTargetWord.Length && currTargetWord[currWordState.Length - 1] == currWordState[currWordState.Length - 1])
+        List<Player> currHitters = null;
+        foreach (Player player in settings.players)
         {
-            //diferent rewards in different reward conditions
-            Player currHitter = null;
-            foreach (Player player in settings.players)
+            bool isHitter = player.GetMyKeys().Except(inputManager.GetCurrPressedKeys()).Any();
+            if (!isHitter)
             {
-                if (player.GetMyKeys().Contains(inputManager.GetLastPressedKey()))
-                {
-                    currHitter = player;
-                }
+                return;
             }
-            switch (currRewardType)
+
+            string currWordState = currWordStates[player];
+            currWordState += letterText;
+            currWordState = currWordState.ToUpper();
+            string currTargetWord = currExercises[player].targetWord;
+
+            if (currWordState.Length <= currTargetWord.Length && currTargetWord[currWordState.Length - 1] == currWordState[currWordState.Length - 1])
             {
-                case Globals.InteractionType.COOPERATION:
-                    foreach (Player player in settings.players)
-                    {
+                //diferent rewards in different reward conditions
+                bool isLastHitter = player.GetMyKeys().Contains(inputManager.GetLastPressedKey());
+                switch (currRewardType)
+                {
+                    case Globals.InteractionType.COOPERATION:
                         player.score += 50;
-                    }
-                    break;
-                case Globals.InteractionType.COMPETITION:
-                    foreach (Player player in settings.players)
-                    {
-                        if (currHitter == player)
+                        break;
+
+                    case Globals.InteractionType.COMPETITION:
+                    
+                        if (isLastHitter)
                         {
-                            currHitter.score += 100;
+                            player.score += 100;
                         }
                         else
                         {
                             player.score -= 50;
                         }
-                    }
-                    break;
-                case Globals.InteractionType.SELF_IMPROVEMENT:
-                    currHitter.score += 50;
-                    break;
-            }
+                        break;
 
-        }
-        else
-        {
-            Hurt();
-            currWordState = currWordState.Remove(currWordState.Length - 1);
-            return;
-        }
+                    case Globals.InteractionType.SELF_IMPROVEMENT:
+                        if (isLastHitter)
+                        {
+                            player.score += 50;
+                        }
+                        break;
+                }
+
+            }
+            else
+            {
+                Hurt();
+                currWordState = currWordState.Remove(currWordState.Length - 1);
+                currWordStates[player] = currWordState;
+                return;
+            }
         
 
-        if (currWordState.CompareTo(currTargetWord) == 0)
-        {
-            timeLeft += currTargetWord.Length*4;
-            timeLeft = 100.0f;
-
-            //init track and play ant anims
-            GameObject[] letters = GameObject.FindGameObjectsWithTag("letter");
-            foreach (GameObject letter in letters)
+            if (currWordState.CompareTo(currTargetWord) == 0)
             {
-                Destroy(letter);
-            }
-            //foreach (LetterSpawner letterSpawner in letterSpawners)
-            //{
-            //    letterSpawner.SetScore(score);
-            //}
-            foreach (AntSpawner antSpawner in antSpawners)
-            {
-                antSpawner.SpawnAnt(currTargetWord);
-            }
+                //foreach (LetterSpawner letterSpawner in letterSpawners)
+                //{
+                //    letterSpawner.SetScore(score);
+                //}
+                foreach (AntSpawner antSpawner in antSpawners)
+                {
+                    antSpawner.SpawnAnt(currTargetWord);
+                }
 
-            ChangeLevel();
-
+                //ChangeLevel();
+            }
         }
     }
-
     
-    //private Utilities.OutputRestriction ChooseOutputRestriction()
-    //{
-    //    int randomIndex = UnityEngine.Random.Range(0, Utilities.numOutputRestriction);
-    //    return Utilities.outputRestrictions[randomIndex];
-    //}
-
-
     public List<Player> GetPlayers()
     {
         return settings.players;

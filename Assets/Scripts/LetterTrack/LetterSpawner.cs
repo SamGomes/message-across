@@ -77,7 +77,11 @@ public class LetterSpawner : MonoBehaviour
     private void ResetPool()
     {
         lettersPool = letters.ToList<char>();
-        List<char> currWordLetters = gameManager.currExercise.targetWord.ToCharArray().ToList<char>();
+        List<char> currWordLetters = new List<char>();
+        foreach(Player player in gameManager.settings.players)
+        {
+            currWordLetters = currWordLetters.Union(gameManager.currExercises[player].targetWord.ToCharArray()).ToList<char>();
+        }
 
         //bias generation of letters in word
         lettersPool.AddRange(currWordLetters);

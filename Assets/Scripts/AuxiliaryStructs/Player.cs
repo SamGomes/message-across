@@ -19,6 +19,8 @@ public class Player
     [SerializeField]
     private List<string> myButtons;
 
+    public string currWordState;
+
     public int score;
 
     private int activeButtonIndex;
