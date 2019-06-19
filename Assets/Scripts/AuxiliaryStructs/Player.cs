@@ -19,9 +19,11 @@ public class Player
     [SerializeField]
     private List<string> myButtons;
 
+    public string currWordState;
     public int score;
-
     private int activeButtonIndex;
+
+    private Globals.InteractionType activeInteraction;
 
     public Player(List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB)
     {
@@ -64,6 +66,16 @@ public class Player
     {
         this.activeButtonIndex = activeButtonIndex;
     }
+
+    public void SetActiveInteraction(Globals.InteractionType activeInteraction)
+    {
+        this.activeInteraction = activeInteraction;
+    }
+    public Globals.InteractionType GetActiveInteraction()
+    {
+        return activeInteraction;
+    }
+
 
     public Color GetButtonColor()
     {

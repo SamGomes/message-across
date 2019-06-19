@@ -12,6 +12,7 @@ public class Button : MonoBehaviour {
     private bool clicked;
     private bool locked;
 
+
     
 
     public void RegisterButtonPress() {
@@ -55,7 +56,7 @@ public class Button : MonoBehaviour {
 
     void OnTriggerEnter(Collider otherObject)
     {
-        if (otherObject.GetComponent<Letter>()== null){
+        if (otherObject.GetComponent<Letter>() == null){
             return;
         }
         if (this.clicked)
