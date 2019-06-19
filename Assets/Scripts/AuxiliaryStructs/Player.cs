@@ -23,7 +23,7 @@ public class Player
     public int score;
     private int activeButtonIndex;
 
-    private Globals.InteractionType activeInteraction;
+    private Globals.KeyInteractionType activeInteraction;
 
     public Player(List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB)
     {
@@ -67,11 +67,11 @@ public class Player
         this.activeButtonIndex = activeButtonIndex;
     }
 
-    public void SetActiveInteraction(Globals.InteractionType activeInteraction)
+    public void SetActiveInteraction(Globals.KeyInteractionType activeInteraction)
     {
         this.activeInteraction = activeInteraction;
     }
-    public Globals.InteractionType GetActiveInteraction()
+    public Globals.KeyInteractionType GetActiveInteraction()
     {
         return activeInteraction;
     }

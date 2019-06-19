@@ -27,30 +27,33 @@ public static class Globals
         BTN_2,
         NONE
     }
-
-    public enum PlayersToPressButtonAlternative
-    {
-        SINGLE_PLAYER,
-        MULTIPLAYER
-    }
-
-    public enum InteractionType
+    
+    public enum KeyInteractionType
     {
         NONE,
-        COOPERATION,
-        COMPETITION,
-        SELF_IMPROVEMENT
+        TAKE,
+        GIVE
     }
 
-    public static PlayersToPressButtonAlternative[] playersToPressButtonAlternatives = (PlayersToPressButtonAlternative[]) Enum.GetValues(typeof(Globals.PlayersToPressButtonAlternative));
-    public static InteractionType[] interactionTypes = (InteractionType[]) Enum.GetValues(typeof(Globals.InteractionType));
-
+    public static KeyInteractionType[] keyInteractionTypes = (KeyInteractionType[]) Enum.GetValues(typeof(Globals.KeyInteractionType));
     public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Globals.ButtonId));
     
-
-    public static int numPlayersToPressButtonAlternatives = playersToPressButtonAlternatives.Length;
-
     public static int currLevelId = 0;
+}
+
+[Serializable]
+public class ScoreValue
+{
+    public bool usefulForMe;
+    public bool usefulForOther;
+    public int myValue;
+    public int otherValue;
+}
+[Serializable]
+public class ScoreSystem
+{
+    public List<ScoreValue> giveScores;
+    public List<ScoreValue> takeScores;
 }
 
 [Serializable]
@@ -65,6 +68,8 @@ public struct GameSettings
     public List<ExercisesListWrapper> exercisesGroups;
     public List<Player> players;
     public int gameId;
+
+    public ScoreSystem scoreSystem;
 }
 
 [Serializable]
@@ -111,16 +116,12 @@ public class GameManager : MonoBehaviour
 
     public List<Button> gameButtons;
 
-
-
+    
     public Dictionary<Player, Exercise> currExercises;
     public Dictionary<Player, string> currWordStates;
 
 
     public float timeLeft;
-
-    public Globals.PlayersToPressButtonAlternative currNumPlayersCombo;
-    public Globals.InteractionType currRewardType;
 
     public void PauseGame()
     {
@@ -240,7 +241,7 @@ public class GameManager : MonoBehaviour
             configText = File.ReadAllText(path);
         }
 
-        //string json = JsonUtility.ToJson(settings,true);
+        //string json = JsonUtility.ToJson(settings, true);
         settings = JsonUtility.FromJson<GameSettings>(configText);
 
         //Application.targetFrameRate = 60;
@@ -276,12 +277,13 @@ public class GameManager : MonoBehaviour
 
             UpdateButtonColors();
 
-            for (int j = 0; j < System.Enum.GetValues(typeof(Globals.InteractionType)).Length ; j++)
+            for (int j = 1; j < Globals.keyInteractionTypes.Length ; j++)
             {
+                Globals.KeyInteractionType currInt = (Globals.KeyInteractionType) j;
                 inputManager.AddKeyBinding(
                     new List<KeyCode>(){ keys[j] }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
                     {
-                        currPlayer.SetActiveInteraction((Globals.InteractionType) j);
+                        currPlayer.SetActiveInteraction(currInt);
                         int activeIndex = currPlayer.GetActivebuttonIndex();
                         gameButtons[activeIndex].RegisterButtonPress();//Utilities.interactionTypes[j]);
                     }, false, false);
@@ -501,17 +503,7 @@ public class GameManager : MonoBehaviour
         
         int numKeysToPress = settings.maxSimultaneousKeyPresses;
         
-        //choose num players combo
-        int randomAltIndex = UnityEngine.Random.Range(0, Globals.numPlayersToPressButtonAlternatives);
-        Globals.PlayersToPressButtonAlternative chosenPAAlternative = Globals.playersToPressButtonAlternatives[randomAltIndex];
-        randomAltIndex = UnityEngine.Random.Range(0, Globals.numPlayersToPressButtonAlternatives);
-        Globals.InteractionType chosenRTAlternative = Globals.interactionTypes[randomAltIndex];
-
         
-        this.currNumPlayersCombo = firstTimeCall ? Globals.PlayersToPressButtonAlternative.MULTIPLAYER : chosenPAAlternative;
-        this.currRewardType = chosenRTAlternative;
-        
-
         for(int i=0; i<letterSpawners.Length; i++)
         {
             if(!firstTimeCall && letterSpawners[i].minIntervalRange > 0.3 && letterSpawners[i].maxIntervalRange > 0.4)
@@ -574,50 +566,82 @@ public class GameManager : MonoBehaviour
             
             string currWordState = currWordStates[player];
             currWordState += letterText;
-            currWordState = currWordState.ToUpper();
             string currTargetWord = currExercises[player].targetWord;
 
 
-            
-            if (currWordState.Length <= currTargetWord.Length && currTargetWord[currWordState.Length - 1] == currWordState[currWordState.Length - 1])
+            //check the utility of words
+            bool usefulForMe = (currWordState.Length <= currTargetWord.Length && currTargetWord[currWordState.Length - 1] == currWordState[currWordState.Length - 1]);
+            bool usefulForOther = false;
+            List<Player> whoIsUsefulFor = new List<Player>();
+            foreach (Player innerPlayer in settings.players)
             {
-                //diferent rewards in different reward conditions
-                Globals.InteractionType playerIT = player.GetActiveInteraction();
-                switch (currRewardType)
+                if(innerPlayer == player)
                 {
-                    case Globals.InteractionType.COOPERATION:
-                        player.score += 50;
-                        break;
+                    continue;
+                }
+                string innerWordState = currWordStates[innerPlayer];
+                innerWordState += letterText;
+                string innerTargetState = currExercises[innerPlayer].targetWord;
 
-                    case Globals.InteractionType.COMPETITION:
-                        player.score += 100;
-                        break;
-
-                    case Globals.InteractionType.SELF_IMPROVEMENT:
-                        player.score += 50;
-                        break;
+                usefulForOther = (innerWordState.Length <= innerTargetState.Length && innerTargetState[innerWordState.Length - 1] == innerWordState[innerWordState.Length - 1]);
+                if (usefulForOther)
+                {
+                    whoIsUsefulFor.Add(innerPlayer);
                 }
             }
-            else
+
+            //diferent rewards in different utility conditions
+            Globals.KeyInteractionType playerIT = player.GetActiveInteraction();
+            List<ScoreValue> scores = new List<ScoreValue>();
+            switch (playerIT)
             {
-                currWordState = currWordState.Remove(currWordState.Length - 1);
-                currWordStates[player] = currWordState;
-                return;
+                case Globals.KeyInteractionType.GIVE:
+                    foreach (Player usefulTargetPlayer in whoIsUsefulFor)
+                    {
+                        string innerWordState = currWordStates[usefulTargetPlayer];
+                        string innerTargetState = currExercises[usefulTargetPlayer].targetWord;
+                        innerWordState = innerTargetState.Remove(innerWordState.Length - 1);
+                        currWordStates[usefulTargetPlayer] += letterText;
+                    }
+                    scores = settings.scoreSystem.giveScores;
+                    break;
+                case Globals.KeyInteractionType.TAKE:
+                    if (usefulForMe)
+                    {
+                        currWordState = currTargetWord.Remove(currWordState.Length - 1);
+                        currWordStates[player] += letterText;
+                    }
+                    scores = settings.scoreSystem.takeScores;
+                    break;
             }
-        
+            foreach (ScoreValue score in scores)
+            {
+                if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther)
+                {
+                    player.score += score.myValue;
+                    foreach (Player innerPlayer in settings.players)
+                    {
+                        if (innerPlayer == player)
+                        {
+                            continue;
+                        }
+                        player.score += score.otherValue;
+                    }
+                    break;
+                }
+            }
+
+
+
             if (currWordState.CompareTo(currTargetWord) == 0)
             {
-                //foreach (LetterSpawner letterSpawner in letterSpawners)
-                //{
-                //    letterSpawner.SetScore(score);
-                //}
                 foreach (AntSpawner antSpawner in antSpawners)
                 {
                     antSpawner.SpawnAnt(currTargetWord);
                 }
-
                 ChangeLevel();
             }
+
         }
     }
 

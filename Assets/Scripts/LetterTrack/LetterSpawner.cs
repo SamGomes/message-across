@@ -16,8 +16,11 @@ public class LetterSpawner : MonoBehaviour
     private string currStarredWord;
 
 
-    private char[] letters = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'L', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
-                                 //"1", "2", "3", "4", "5", "6", "7", "8", "9"};
+    //private char[] letters = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'L', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+    //"1", "2", "3", "4", "5", "6", "7", "8", "9"};
+
+    private char[] letters = { 'A' };
+
     private List<char> lettersPool;
 
     private void Awake()
