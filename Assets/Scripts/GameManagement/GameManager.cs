@@ -54,10 +54,15 @@ public static class Globals
 }
 
 [Serializable]
+public class ExercisesListWrapper
+{
+    public List<Exercise> exercises;
+}
+[Serializable]
 public struct GameSettings
 {
     public int maxSimultaneousKeyPresses;
-    public List<Exercise> exercises;
+    public List<ExercisesListWrapper> exercisesGroups;
     public List<Player> players;
     public int gameId;
 }
@@ -69,8 +74,14 @@ public struct PerformanceMetrics
     public int multiplayerButtonHits;
 }
 
+
+
+
 public class GameManager : MonoBehaviour
 {
+
+    private int exerciseGroupIndex;
+
 
     private GameSettings settings;
     private PerformanceMetrics performanceMetrics;
@@ -141,8 +152,19 @@ public class GameManager : MonoBehaviour
         }
         return i + suffix;
     }
+    private void Shuffle<T>(IList<T> list)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            T temp = list[i];
+            int randomIndex = UnityEngine.Random.Range(i, list.Count);
+            list[i] = list[randomIndex];
+            list[randomIndex] = temp;
+        }
+    }
 
-    void UpdateButtonColors()
+
+    private void UpdateButtonColors()
     {
         gameButtons.ForEach(delegate (Button button) { button.GetComponent<SpriteRenderer>().color = Color.white; });
         for(int i=0; i< gameButtons.Count; i++)
@@ -168,7 +190,7 @@ public class GameManager : MonoBehaviour
     }
 
 
-    IEnumerator YieldedStart()
+    private IEnumerator YieldedStart()
     {
         isGameplayPaused = false;
         gameSceneManager.MainSceneLoadedNotification();
@@ -323,6 +345,9 @@ public class GameManager : MonoBehaviour
 
         logManager = new MongoDBLogManager();
         logManager.InitLogs(this);
+
+        Shuffle<ExercisesListWrapper>(settings.exercisesGroups);
+        exerciseGroupIndex = UnityEngine.Random.Range(0, settings.exercisesGroups.Count);
     }
 
     // Use this for initialization
@@ -390,7 +415,7 @@ public class GameManager : MonoBehaviour
 
     }
 
-    void RecordMetrics()
+    private void RecordMetrics()
     {
         //spawn questionnaires before changing word
         foreach (Player player in settings.players)
@@ -407,15 +432,16 @@ public class GameManager : MonoBehaviour
             //    { "playerSelfPercentage", playerHitsPercentage.ToString() }
             //}));
             StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
-                { "playerName", player.GetName() },
-                { "currWord", currWordState },
+                { "playerId", player.GetName() },
+                { "condition", "COMPETITION" },
                 { "playerHitsPercentage", playerHitsPercentage.ToString() },
                 { "simultaneousHitsPercentage", simultaneousHitsPercentage.ToString() }
             }));
         }
+        
     }
 
-    void PoppupQuestionnaires()
+    private void PoppupQuestionnaires()
     {
         gameSceneManager.PauseForQuestionnaires();
         //spawn questionnaires before changing word
@@ -427,6 +453,7 @@ public class GameManager : MonoBehaviour
 
     void ChangeLevel()
     {
+        RecordMetrics();
         ChangeTargetWord();
         ChangeGameParametrizations(false);
     }
@@ -441,7 +468,7 @@ public class GameManager : MonoBehaviour
     private void OnApplicationQuit()
     {
         RecordMetrics();
-        PoppupQuestionnaires();
+        //PoppupQuestionnaires();
     }
 
 
@@ -460,7 +487,7 @@ public class GameManager : MonoBehaviour
         return generatedKeyCombo;
     }
 
-    void ChangeGameParametrizations(bool firstTimeCall)
+    private void ChangeGameParametrizations(bool firstTimeCall)
     {
         inputManager.InitKeys();
         
@@ -579,10 +606,12 @@ public class GameManager : MonoBehaviour
 
     }
 
-    void ChangeTargetWord()
+    private void ChangeTargetWord()
     {
-        int random = UnityEngine.Random.Range(0, settings.exercises.Count);
-        Exercise newExercise = settings.exercises[random];
+        List<Exercise> selectedExerciseGroup = settings.exercisesGroups[exerciseGroupIndex++].exercises;
+
+        int random = UnityEngine.Random.Range(0, selectedExerciseGroup.Count);
+        Exercise newExercise = selectedExerciseGroup[random];
 
         currWordState = "";
         displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
@@ -590,7 +619,7 @@ public class GameManager : MonoBehaviour
         this.currExercise = newExercise;
     }
 
-    void Hurt()
+    private void Hurt()
     {
         lifes--;
     }
@@ -668,17 +697,8 @@ public class GameManager : MonoBehaviour
             }
 
             ChangeLevel();
-
         }
     }
-
-    
-    //private Utilities.OutputRestriction ChooseOutputRestriction()
-    //{
-    //    int randomIndex = UnityEngine.Random.Range(0, Utilities.numOutputRestriction);
-    //    return Utilities.outputRestrictions[randomIndex];
-    //}
-
 
     public List<Player> GetPlayers()
     {
