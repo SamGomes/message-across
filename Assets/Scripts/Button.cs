@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -9,65 +10,51 @@ public class Button : MonoBehaviour {
     public Globals.ButtonId buttonCode;
 
     private bool keyPressed;
-    private bool clicked;
-    private bool locked;
+    private bool isClicked;
 
 
-    
+    private HashSet<Player> currHitters;
 
-    public void RegisterButtonPress() {
+    public void RegisterButtonPress(Player hitter) {
+        currHitters.Add(hitter);
         this.keyPressed = true;
     }
 
-    private void Start()
+    void Start()
     {
-        this.locked = false;
+        currHitters = new HashSet<Player>();    
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (this.keyPressed && !this.locked)
-        {
-            if (!this.clicked)
-            {
-                this.clicked = true;
-                this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            }
+        if (this.keyPressed) {
+            this.isClicked = true;
+            this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
         }
         else
         {
-            if (this.clicked)
-            {
-                this.clicked = false;
-                this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
-            }
+            this.isClicked = false;
+            this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
         }
-
-        if (!this.keyPressed)
-        {
-            this.locked = false;
-        }
-
         this.keyPressed = false;
-
     }
 
 
     void OnTriggerEnter(Collider otherObject)
     {
+
         if (otherObject.GetComponent<Letter>() == null){
             return;
         }
-        if (this.clicked)
+        if (this.isClicked)
         {
             otherObject.gameObject.transform.localScale = new Vector3(0.3f, 0.3f, 1.0f);
-            otherObject.gameObject.GetComponent<SpriteRenderer>().color = Color.cyan;
 
-            gameManager.RecordHit(otherObject.gameObject.GetComponent<Letter>().letterText);
+            gameManager.RecordHit(otherObject.gameObject.GetComponent<Letter>().letterText, otherObject.gameObject, currHitters);
 
             gameObject.GetComponent<AudioSource>().Play();
+            currHitters.Clear();
         }
-        this.locked = true;
     }
 }

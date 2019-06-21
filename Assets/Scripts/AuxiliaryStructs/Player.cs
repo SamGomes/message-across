@@ -25,6 +25,9 @@ public class Player
 
     private Globals.KeyInteractionType activeInteraction;
 
+    private GameObject wordPanel;
+    private GameObject scorePanel;
+
     public Player(List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB)
     {
         this.buttonColor = buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
@@ -40,6 +43,23 @@ public class Player
         this.buttonColor = buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
     }
    
+    public void SetScorePanel(GameObject scorePanel)
+    {
+        this.scorePanel = scorePanel;
+    }
+    public void SetWordPanel(GameObject wordPanel)
+    {
+        this.wordPanel = wordPanel;
+    }
+    public GameObject GetScorePanel()
+    {
+        return this.scorePanel;
+    }
+    public GameObject GetWordPanel()
+    {
+        return this.wordPanel;
+    }
+
     public string GetName()
     {
         return this.name;
