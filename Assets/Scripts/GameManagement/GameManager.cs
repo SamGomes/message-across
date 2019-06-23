@@ -159,25 +159,25 @@ public class GameManager : MonoBehaviour
 
     private void UpdateButtonColors()
     {
-        gameButtons.ForEach(delegate (Button button) { button.GetComponent<SpriteRenderer>().color = Color.white; });
+        gameButtons.ForEach(delegate (Button button) { button.GetComponent<Image>().color = Color.white; });
         for(int i=0; i< gameButtons.Count; i++)
         {
-            gameButtons[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Textures/button");
+            gameButtons[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("Textures/button");
             int numActivePlayers = 0;
             foreach(Player player in settings.players)
             {
                 int activeIndex = player.GetActivebuttonIndex();
                 if (activeIndex == i)
                 {
-                    gameButtons[activeIndex].GetComponent<SpriteRenderer>().color = player.GetButtonColor();
+                    gameButtons[activeIndex].GetComponent<Image>().color = player.GetButtonColor();
                     numActivePlayers++;
                 }
             }
             if (numActivePlayers > 1)
             {
                 //gameButtons[i].GetComponent<SpriteRenderer>().color = new Color(1.0f,0.5f,0.0f,1.0f);
-                gameButtons[i].GetComponent<SpriteRenderer>().color = Color.white;
-                gameButtons[i].GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Textures/mixedButton");
+                gameButtons[i].GetComponent<Image>().color = Color.white;
+                gameButtons[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("Textures/mixedButton");
             }
         }
     }
@@ -260,7 +260,7 @@ public class GameManager : MonoBehaviour
             currPlayer.SetScorePanel(scorePanelsObject.transform.GetChild(i).gameObject);
             currPlayer.SetWordPanel(wordPanelsObject.transform.GetChild(i).gameObject);
 
-            currPlayer.GetWordPanel().transform.Find("Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetButtonColor();
+            currPlayer.GetWordPanel().transform.Find("Layout").GetComponent<Image>().color = currPlayer.GetButtonColor();
 
 
             GameObject newNameInput = Instantiate(playerNameInputFieldPrefabRef, namesInputLocation.transform);
@@ -526,22 +526,21 @@ public class GameManager : MonoBehaviour
     }
 
 
-    private IEnumerator LetterAnimation(GameObject letter)
+    private IEnumerator LetterAnimation(GameObject letter, Vector3 targetPos)
     {
-        //float distFromPanel = 1.0f;
-        //Vector3 letterPos = new Vector3();
-        //Vector3 panelPos = new Vector3();
-        //while (distFromPanel > 0.3f)
-        //{
-        //    letterPos = letter.transform.position;
-        //    panelPos = playersPanel.transform.position;
+        letter.GetComponent<Letter>().isTranslationEnabled = false;
+        float distFromPanel = 1.0f;
+        Vector3 letterPos = new Vector3();
+        while (distFromPanel > 0.05f && letter!=null)
+        {
+            letterPos = letter.transform.position;
 
-        //    Vector3 direction = letterPos - panelPos;
-        //    distFromPanel = direction.sqrMagnitude;
-        //    letter.transform.Translate(-direction);
+            Vector3 direction = letterPos - targetPos;
+            distFromPanel = direction.sqrMagnitude;
+            letter.transform.Translate(-direction.normalized*0.3f);
+            yield return new WaitForSeconds(0.025f);
 
-        //}
-        yield return null;
+        }
     }
 
     private bool TestAndExecuteHit(bool execute, char letterText, GameObject letter, Player player)
@@ -555,7 +554,7 @@ public class GameManager : MonoBehaviour
         if (execute && usefulForMe)
         {
             currWordStates[player] += letterText;
-            StartCoroutine(LetterAnimation(letter));
+            StartCoroutine(LetterAnimation(letter,player.GetWordPanel().transform.position));
         }
 
         return usefulForMe;
@@ -582,19 +581,22 @@ public class GameManager : MonoBehaviour
                         {
                             continue;
                         }
+                        usefulForOther = TestAndExecuteHit(true, letterText, letter, usefulTargetPlayer);
                         if (usefulForOther)
                         {
-                            letter.GetComponent<SpriteRenderer>().color = usefulTargetPlayer.GetButtonColor();
+                            letter.GetComponent<Image>().color = player.GetButtonColor();
                             break;
                         }
 
-                        usefulForOther = TestAndExecuteHit(true, letterText, letter, usefulTargetPlayer);
                     }
                     scores = settings.scoreSystem.giveScores;
                     break;
                 case Globals.KeyInteractionType.TAKE:
                     usefulForMe = TestAndExecuteHit(true, letterText, letter, player);
-                    letter.GetComponent<SpriteRenderer>().color = player.GetButtonColor();
+                    if (usefulForMe)
+                    {
+                        letter.GetComponent<Image>().color = player.GetButtonColor();
+                    }
                     foreach (Player usefulTargetPlayer in settings.players)
                     {
                         if (usefulTargetPlayer == player)
@@ -635,7 +637,7 @@ public class GameManager : MonoBehaviour
         bool areWordsUnfinished = false;
         foreach (Player player in settings.players)
         {
-            string currWordState = currWordStates[player] + letterText;
+            string currWordState = currWordStates[player];
             string currTargetWord = currExercises[player].targetWord;
             if (currWordState.CompareTo(currTargetWord) != 0 && !areWordsUnfinished)
             {

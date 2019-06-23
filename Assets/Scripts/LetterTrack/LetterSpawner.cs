@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.UI;
 
 public class LetterSpawner : MonoBehaviour
 {
+    public GameObject canvas;
+
     public GameObject letterPrefab;
     public GameManager gameManager;
 
@@ -49,9 +52,9 @@ public class LetterSpawner : MonoBehaviour
         {
             ResetPool();
         }
-        GameObject newLetter = Instantiate(letterPrefab);
+        GameObject newLetter = Instantiate(letterPrefab,canvas.transform);
 
-        SpriteRenderer letterRenderer = newLetter.transform.GetComponent<SpriteRenderer>();
+        Image letterRenderer = newLetter.transform.GetComponent<Image>();
 
         int random = Random.Range(0, lettersPool.Count - 1);
         char currLetter = lettersPool[random];
