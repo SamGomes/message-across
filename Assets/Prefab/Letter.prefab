@@ -30,14 +30,14 @@ RectTransform:
   m_GameObject: {fileID: 1439335212217198}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 2.8269}
-  m_LocalScale: {x: 0.20810184, y: 0.20810184, z: 0.20810184}
+  m_LocalScale: {x: 0.22379272, y: 0.22379272, z: 0.22379272}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1.4749, y: 1.4331}
+  m_AnchoredPosition: {x: 1.4706, y: 1.6808}
   m_SizeDelta: {x: 600.18, y: 322.37}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &114284790491832860
@@ -54,6 +54,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 1
   letterText: 0
+  isTranslationEnabled: 0
 --- !u!54 &54357305365335432
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -81,8 +82,8 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 97.59008
-  m_Center: {x: 0.27573323, y: -15.780104, z: 0}
+  m_Radius: 72.69497
+  m_Center: {x: 17.0994, y: -23.268381, z: 10.806009}
 --- !u!222 &7828573467319018119
 CanvasRenderer:
   m_ObjectHideFlags: 0

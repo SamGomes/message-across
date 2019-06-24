@@ -28,6 +28,8 @@ public class Player
     private GameObject wordPanel;
     private GameObject scorePanel;
 
+    private GameObject marker;
+
     public Player(List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB)
     {
         this.buttonColor = buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
@@ -39,7 +41,9 @@ public class Player
         this.score = 0;
     }
 
-    public void Init() {
+    public void Init(GameObject markerPrefab, GameObject canvas)
+    {
+        marker = UnityEngine.Object.Instantiate(markerPrefab, canvas.transform);
         this.buttonColor = buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
     }
    
@@ -84,6 +88,7 @@ public class Player
 
     public void SetActiveButtonIndex(int activeButtonIndex)
     {
+        //Vector3.Lerp(marker.transform.position, , 20 * Time.deltaTime); 
         this.activeButtonIndex = activeButtonIndex;
     }
 

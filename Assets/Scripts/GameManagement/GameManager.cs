@@ -89,6 +89,10 @@ public class GameManager : MonoBehaviour
 
     public GameSceneManager gameSceneManager;
 
+    public GameObject canvas;
+    public GameObject playerMarkerPrefab;
+
+
     public bool isGameplayPaused;
     public bool isGameplayStarted;
 
@@ -254,7 +258,7 @@ public class GameManager : MonoBehaviour
         {
             Player currPlayer = settings.players[i];
 
-            currPlayer.Init();
+            currPlayer.Init(playerMarkerPrefab, canvas);
 
             //init score and display panels
             currPlayer.SetScorePanel(scorePanelsObject.transform.GetChild(i).gameObject);
@@ -277,7 +281,7 @@ public class GameManager : MonoBehaviour
 
             List<KeyCode> keys = currPlayer.GetMyKeys();
 
-            UpdateButtonColors();
+            //UpdateButtonColors();
 
             for (int j = 1; j < Globals.keyInteractionTypes.Length ; j++)
             {
@@ -296,14 +300,14 @@ public class GameManager : MonoBehaviour
                         int potentialIndex = (currPlayer.GetActivebuttonIndex() - 1);
                         int activeIndex = (potentialIndex < 0)? potentialIndex = (gameButtons.Count - 1) : potentialIndex;
                         currPlayer.SetActiveButtonIndex(activeIndex);
-                        UpdateButtonColors();
+                        //UpdateButtonColors();
                     }, false, false);
             inputManager.AddKeyBinding(
                     new List<KeyCode>() { keys[gameButtons.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                     {
                         int activeIndex = (currPlayer.GetActivebuttonIndex() + 1) % (gameButtons.Count);
                         currPlayer.SetActiveButtonIndex(activeIndex);
-                        UpdateButtonColors();
+                        //UpdateButtonColors();
                     }, false, false);
 
 
@@ -315,45 +319,7 @@ public class GameManager : MonoBehaviour
 
         ChangeGameParametrizations(true);
 
-
-        inputManager.AddKeyBinding(
-              new List<KeyCode>() { (KeyCode)(-1), (KeyCode)(-1) }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> pressedKeys)
-              {
-                  int playersPressingButtons = 0;
-                  //pressedKeys.ForEach(i => Debug.Log(i));
-
-                  foreach (Player player in settings.players)
-                  {
-                      List<KeyCode> playerKeys = player.GetMyKeys();
-                      foreach (KeyCode key in pressedKeys)
-                      {
-                          if (playerKeys.Contains(key))
-                          {
-                              playersPressingButtons++;
-                              break;
-                          }
-                      }
-                  }
-
-                  if (playersPressingButtons > 1)
-                  {
-                      performanceMetrics.multiplayerButtonHits++;
-                  }
-
-              }, false, false);
-
-        inputManager.AddKeyBinding(
-          new List<KeyCode>() { (KeyCode)(-1) }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> pressedKeys)
-          {
-              foreach (Player player in settings.players)
-              {
-                  if (player.GetMyKeys().Contains(pressedKeys[0]))
-                  {
-                      performanceMetrics.singlebuttonHits[player]++;
-                  }
-              }
-          }, false, false);
-
+        
         inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { gameSceneManager.StartAndPauseGame(); }, false, false);
 
         logManager = new MongoDBLogManager();
@@ -530,16 +496,18 @@ public class GameManager : MonoBehaviour
     {
         letter.GetComponent<Letter>().isTranslationEnabled = false;
         float distFromPanel = 1.0f;
-        Vector3 letterPos = new Vector3();
+        Vector3 letterPos = letter.transform.position;
         while (distFromPanel > 0.05f && letter!=null)
         {
             letterPos = letter.transform.position;
 
             Vector3 direction = letterPos - targetPos;
             distFromPanel = direction.sqrMagnitude;
-            letter.transform.Translate(-direction.normalized*0.3f);
-            yield return new WaitForSeconds(0.025f);
+            letter.transform.Translate(-direction.normalized * 0.3f);
 
+            //Vector3.Lerp(letterPos, targetPos,  Time.deltaTime); 
+
+            yield return new WaitForSeconds(0.025f);
         }
     }
 
