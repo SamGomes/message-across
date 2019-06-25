@@ -6,8 +6,7 @@ using UnityEngine;
 
 public class Button : MonoBehaviour {
 
-    public GameManager gameManager;
-    public Globals.ButtonId buttonCode;
+    private GameManager gameManager;
 
     private bool keyPressed;
     private bool isClicked;
@@ -22,6 +21,7 @@ public class Button : MonoBehaviour {
 
     void Start()
     {
+        gameManager = GameObject.FindObjectOfType<GameManager>();
         currHitters = new HashSet<Player>();    
     }
 

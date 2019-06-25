@@ -36,6 +36,19 @@ public static class Globals
     public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Globals.ButtonId));
     
     public static int currLevelId = 0;
+
+
+    public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
+    {
+        Vector3 sourcePos = source.transform.position;
+        float totalDist = (targetPos - sourcePos).sqrMagnitude;
+        float currT = 0;
+        while (currT < 1.0f && source != null)
+        {
+            source.transform.position = Vector3.Lerp(sourcePos, targetPos, currT += speed * 0.025f);
+            yield return new WaitForSeconds(0.025f);
+        }
+    }
 }
 
 [Serializable]
@@ -113,10 +126,8 @@ public class GameManager : MonoBehaviour
 
     public List<Button> gameButtons;
 
-    
     public Dictionary<Player, Exercise> currExercises;
     public Dictionary<Player, string> currWordStates;
-
 
     public float timeLeft;
 
@@ -179,7 +190,6 @@ public class GameManager : MonoBehaviour
             }
             if (numActivePlayers > 1)
             {
-                //gameButtons[i].GetComponent<SpriteRenderer>().color = new Color(1.0f,0.5f,0.0f,1.0f);
                 gameButtons[i].GetComponent<Image>().color = Color.white;
                 gameButtons[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("Textures/mixedButton");
             }
@@ -257,8 +267,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < settings.players.Count; i++)
         {
             Player currPlayer = settings.players[i];
-
-            currPlayer.Init(playerMarkerPrefab, canvas);
+            currPlayer.Init(this, playerMarkerPrefab, canvas);
 
             //init score and display panels
             currPlayer.SetScorePanel(scorePanelsObject.transform.GetChild(i).gameObject);
@@ -291,28 +300,29 @@ public class GameManager : MonoBehaviour
                     {
                         currPlayer.SetActiveInteraction(currInt);
                         int activeIndex = currPlayer.GetActivebuttonIndex();
-                        gameButtons[activeIndex].RegisterButtonPress(currPlayer);//Utilities.interactionTypes[j]);
+                        //gameButtons[activeIndex].RegisterButtonPress(currPlayer);//Utilities.interactionTypes[j]);
+                        currPlayer.GetMarker().GetComponentInChildren<Button>().RegisterButtonPress(currPlayer);
                     }, false, false);
+                }
+                inputManager.AddKeyBinding(
+                        new List<KeyCode>() { keys[gameButtons.Count] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+                        {
+                            int potentialIndex = (currPlayer.GetActivebuttonIndex() - 1);
+                            int activeIndex = (potentialIndex < 0)? potentialIndex = (gameButtons.Count - 1) : potentialIndex;
+                            currPlayer.SetActiveButton(activeIndex, gameButtons[activeIndex].transform.position);
+                            //UpdateButtonColors();
+                        }, false, false);
+                inputManager.AddKeyBinding(
+                        new List<KeyCode>() { keys[gameButtons.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+                        {
+                            int activeIndex = (currPlayer.GetActivebuttonIndex() + 1) % (gameButtons.Count);
+                            currPlayer.SetActiveButton(activeIndex, gameButtons[activeIndex].transform.position);
+                            //UpdateButtonColors();
+                        }, false, false);
+
+                currPlayer.SetActiveButton(0, gameButtons[0].transform.position);
+
             }
-            inputManager.AddKeyBinding(
-                    new List<KeyCode>() { keys[gameButtons.Count] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
-                    {
-                        int potentialIndex = (currPlayer.GetActivebuttonIndex() - 1);
-                        int activeIndex = (potentialIndex < 0)? potentialIndex = (gameButtons.Count - 1) : potentialIndex;
-                        currPlayer.SetActiveButtonIndex(activeIndex);
-                        //UpdateButtonColors();
-                    }, false, false);
-            inputManager.AddKeyBinding(
-                    new List<KeyCode>() { keys[gameButtons.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
-                    {
-                        int activeIndex = (currPlayer.GetActivebuttonIndex() + 1) % (gameButtons.Count);
-                        currPlayer.SetActiveButtonIndex(activeIndex);
-                        //UpdateButtonColors();
-                    }, false, false);
-
-
-
-        }
 
         performanceMetrics.multiplayerButtonHits = 0;
         isGameplayStarted = true;
@@ -492,24 +502,6 @@ public class GameManager : MonoBehaviour
     }
 
 
-    private IEnumerator LetterAnimation(GameObject letter, Vector3 targetPos)
-    {
-        letter.GetComponent<Letter>().isTranslationEnabled = false;
-        float distFromPanel = 1.0f;
-        Vector3 letterPos = letter.transform.position;
-        while (distFromPanel > 0.05f && letter!=null)
-        {
-            letterPos = letter.transform.position;
-
-            Vector3 direction = letterPos - targetPos;
-            distFromPanel = direction.sqrMagnitude;
-            letter.transform.Translate(-direction.normalized * 0.3f);
-
-            //Vector3.Lerp(letterPos, targetPos,  Time.deltaTime); 
-
-            yield return new WaitForSeconds(0.025f);
-        }
-    }
 
     private bool TestAndExecuteHit(bool execute, char letterText, GameObject letter, Player player)
     {
@@ -522,7 +514,8 @@ public class GameManager : MonoBehaviour
         if (execute && usefulForMe)
         {
             currWordStates[player] += letterText;
-            StartCoroutine(LetterAnimation(letter,player.GetWordPanel().transform.position));
+            letter.GetComponent<Letter>().isTranslationEnabled = false;
+            StartCoroutine(Globals.LerpAnimation(letter, player.GetWordPanel().transform.position, 1.0f));
         }
 
         return usefulForMe;
