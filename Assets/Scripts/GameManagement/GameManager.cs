@@ -64,6 +64,9 @@ public class ScoreSystem
 {
     public List<ScoreValue> giveScores;
     public List<ScoreValue> takeScores;
+
+    public int completeWordMyScore;
+    public int completeWordOtherScore;
 }
 
 [Serializable]
@@ -126,8 +129,8 @@ public class GameManager : MonoBehaviour
 
     public List<Button> gameButtons;
 
-    public Dictionary<Player, Exercise> currExercises;
-    public Dictionary<Player, string> currWordStates;
+    //public Dictionary<Player, Exercise> currExercises;
+    //public Dictionary<Player, string> currWordStates;
 
     public float timeLeft;
 
@@ -199,8 +202,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator YieldedStart()
     { 
-        currExercises = new Dictionary<Player, Exercise>();
-        currWordStates = new Dictionary<Player, string>();
+        //currExercises = new Dictionary<Player, Exercise>();
+        //currWordStates = new Dictionary<Player, string>();
 
 
         isGameplayPaused = false;
@@ -255,23 +258,18 @@ public class GameManager : MonoBehaviour
         timeLeft = 100.0f;
         InvokeRepeating("DecrementTimeLeft", 0.0f, 1.0f);
 
-        ChangeGameParametrizations(true);
-
+       
         gameSceneManager.StartAndPauseGame(); //for the initial screen
+
 
         performanceMetrics = new PerformanceMetrics();
         performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
 
-
-
         for (int i = 0; i < settings.players.Count; i++)
         {
             Player currPlayer = settings.players[i];
-            currPlayer.Init(this, playerMarkerPrefab, canvas);
-
-            //init score and display panels
-            currPlayer.SetScorePanel(scorePanelsObject.transform.GetChild(i).gameObject);
-            currPlayer.SetWordPanel(wordPanelsObject.transform.GetChild(i).gameObject);
+            
+            currPlayer.Init(this, playerMarkerPrefab, canvas, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0)? 45.0f:-45.0f);
 
             currPlayer.GetWordPanel().transform.Find("Layout").GetComponent<Image>().color = currPlayer.GetButtonColor();
 
@@ -321,12 +319,16 @@ public class GameManager : MonoBehaviour
                         }, false, false);
 
                 currPlayer.SetActiveButton(0, gameButtons[0].transform.position);
-
+                currPlayer.SetScore(0);
             }
+
+        ChangeGameParametrizations(true);
+        
 
         performanceMetrics.multiplayerButtonHits = 0;
         isGameplayStarted = true;
 
+        exerciseGroupIndex = UnityEngine.Random.Range(0, settings.exercisesGroups.Count);
         ChangeGameParametrizations(true);
 
         
@@ -336,8 +338,6 @@ public class GameManager : MonoBehaviour
         logManager.InitLogs(this);
 
         Shuffle<ExercisesListWrapper>(settings.exercisesGroups);
-        exerciseGroupIndex = UnityEngine.Random.Range(0, settings.exercisesGroups.Count);
-
 
 
     }
@@ -373,40 +373,7 @@ public class GameManager : MonoBehaviour
         }
 
         timePanel.GetComponent<UnityEngine.UI.Text>().text = "Time: "+ timeLeft;
-
         
-
-        //update curr display message
-        foreach(Player player in settings.players)
-        {
-            string displayString = "";
-            Exercise currExercise = currExercises[player];
-            string currWordState = currWordStates[player];
-            int missingLength = currExercise.targetWord.Length - currWordState.Length;
-            string[] substrings = currExercise.displayMessage.Split('_');
-            
-            if (substrings.Length > 0)
-            {
-                displayString += substrings[0];
-                displayString += currWordState;
-                for (int i = 0; i < missingLength; i++)
-                {
-                    displayString += "_";
-                }
-                if (substrings.Length > 1)
-                {
-                    displayString += substrings[1];
-                }
-            }
-            displayString += "\n";
-
-
-            Text playerPanelText = player.GetScorePanel().GetComponentInChildren<Text>();
-            playerPanelText.text = "Player " + player.GetName() + " Score: " + player.score;
-
-            Text playerDisplayText = player.GetWordPanel().GetComponentInChildren<Text>();
-            playerDisplayText.text = displayString;
-        }
     }
 
     private void RecordMetrics()
@@ -481,39 +448,44 @@ public class GameManager : MonoBehaviour
             letterSpawners[i].UpdateCurrStarredWord("");
         }
 
-        foreach(Player player in settings.players)
-        {
-            ChangeTargetWord(player);
-        }
+        ChangeTargetWords();
 
     }
     
-    private void ChangeTargetWord(Player player)
+    private void ChangeTargetWords()
     {
-        List<Exercise> selectedExerciseGroup = settings.exercisesGroups[exerciseGroupIndex++ % settings.exercisesGroups.Count].exercises;
+        List<Exercise> selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups[exerciseGroupIndex++ % settings.exercisesGroups.Count].exercises);
+        foreach (Player player in settings.players)
+        {
+            
+            if(selectedExerciseGroup.Count <= 0)
+            {
+                selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups[exerciseGroupIndex++ % settings.exercisesGroups.Count].exercises);
+            }
 
-        int random = UnityEngine.Random.Range(0, selectedExerciseGroup.Count);
-        Exercise newExercise = selectedExerciseGroup[random];
-
-        //displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
-
-        this.currExercises[player] = newExercise;
-        this.currWordStates[player] = "";
+            int random = UnityEngine.Random.Range(0, selectedExerciseGroup.Count);
+            Exercise newExercise = selectedExerciseGroup[random];
+            selectedExerciseGroup.RemoveAt(random);
+            
+            
+            //displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
+            player.SetCurrExercise(newExercise);
+            player.SetCurrWordState("");
+        }
     }
-
 
 
     private bool TestAndExecuteHit(bool execute, char letterText, GameObject letter, Player player)
     {
-        string currWordState = currWordStates[player] + letterText;
-        string currTargetWord = currExercises[player].targetWord;
+        string currWordState = player.GetCurrWordState() + letterText;
+        string currTargetWord = player.GetCurrExercise().targetWord;
 
         //check the utility of word
         bool usefulForMe = (currWordState.Length <= currTargetWord.Length && currTargetWord[currWordState.Length - 1] == currWordState[currWordState.Length - 1]);
 
         if (execute && usefulForMe)
         {
-            currWordStates[player] += letterText;
+            player.SetCurrWordState(player.GetCurrWordState() + letterText);
             letter.GetComponent<Letter>().isTranslationEnabled = false;
             StartCoroutine(Globals.LerpAnimation(letter, player.GetWordPanel().transform.position, 1.0f));
         }
@@ -579,14 +551,14 @@ public class GameManager : MonoBehaviour
             {
                 if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther)
                 {
-                    player.score += score.myValue;
+                    player.SetScore(player.GetScore() + score.myValue);
                     foreach (Player innerPlayer in settings.players)
                     {
                         if (innerPlayer == player)
                         {
                             continue;
                         }
-                        innerPlayer.score += score.otherValue;
+                        innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue);
                     }
                     break;
                 }
@@ -598,11 +570,29 @@ public class GameManager : MonoBehaviour
         bool areWordsUnfinished = false;
         foreach (Player player in settings.players)
         {
-            string currWordState = currWordStates[player];
-            string currTargetWord = currExercises[player].targetWord;
-            if (currWordState.CompareTo(currTargetWord) != 0 && !areWordsUnfinished)
+            string currWordState = player.GetCurrWordState();
+            string currTargetWord = player.GetCurrExercise().targetWord;
+            if (currWordState.CompareTo(currTargetWord) != 0)
             {
-                areWordsUnfinished = true;
+                if(!areWordsUnfinished)
+                    areWordsUnfinished = true;
+
+                if (!player.isCurrExerciseFinished)
+                    player.isCurrExerciseFinished = true;
+            }
+            else
+            {
+                if (!player.isCurrExerciseFinished)
+                    player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore);
+                foreach (Player innerPlayer in settings.players)
+                {
+                    if (player == innerPlayer)
+                    {
+                        continue;
+                    }
+                    if (!innerPlayer.isCurrExerciseFinished)
+                        innerPlayer.SetScore(innerPlayer.GetScore() + settings.scoreSystem.completeWordOtherScore);
+                }
             }
         }
         if (!areWordsUnfinished)

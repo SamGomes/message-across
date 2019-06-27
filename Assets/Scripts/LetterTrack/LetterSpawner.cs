@@ -54,15 +54,14 @@ public class LetterSpawner : MonoBehaviour
         }
         GameObject newLetter = Instantiate(letterPrefab,canvas.transform);
 
-        Image letterRenderer = newLetter.transform.GetComponent<Image>();
+        Text letterText = newLetter.transform.GetComponentInChildren<Text>();
 
         int random = Random.Range(0, lettersPool.Count - 1);
         char currLetter = lettersPool[random];
         lettersPool.RemoveAt(random);
 
         //currLetter = 'A';
-
-        string path = "Textures/Alphabet/" + currLetter;
+        
 
         newLetter.GetComponent<Letter>().letterText = currLetter;
         if (currStarredWord.Contains(currLetter.ToString().ToUpper()))
@@ -71,7 +70,7 @@ public class LetterSpawner : MonoBehaviour
         }
         //newLetter.GetComponent<Letter>().speed = newLetter.GetComponent<Letter>().speed + ((score + 1) * 0.05f);
 
-        letterRenderer.sprite = (Sprite) Resources.Load(path, typeof(Sprite));
+        letterText.text =  currLetter.ToString();
 
         newLetter.transform.position = gameObject.transform.position;
         newLetter.transform.rotation = gameObject.transform.rotation;
@@ -86,7 +85,7 @@ public class LetterSpawner : MonoBehaviour
         List<char> currWordLetters = new List<char>();
         foreach(Player player in gameManager.settings.players)
         {
-            currWordLetters = currWordLetters.Union(gameManager.currExercises[player].targetWord.ToCharArray()).ToList<char>();
+            currWordLetters = currWordLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
         }
 
         //bias generation of letters in word

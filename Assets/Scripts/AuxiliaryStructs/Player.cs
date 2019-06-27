@@ -19,9 +19,8 @@ public class Player
 
     [SerializeField]
     private List<string> myButtons;
-
-    public string currWordState;
-    public int score;
+   
+    private int score;
     private int activeButtonIndex;
 
     private Globals.KeyInteractionType activeInteraction;
@@ -35,27 +34,100 @@ public class Player
 
     private IEnumerator currButtonLerp;
 
+
+    private Exercise currExercise;
+    public bool isCurrExerciseFinished;
+    private string currWordState;
+
     public Player(List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB)
     {
         this.buttonRGB = buttonRGB;
 
         this.myKeys = myKeys;
         this.myButtons = myButtons;
-        
-        this.name = "";
-        this.score = 0;
     }
 
-    public void Init(GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas)
+    public void Init(GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject wordPanel, GameObject scorePanel, float angle)
     {
-        this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 0.5f);
+        //this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
+        this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 0.8f);
         //marker.transform.position = activeButtonPos;
         this.gameManagerRef = gameManagerRef;
 
         marker = UnityEngine.Object.Instantiate(markerPrefab, canvas.transform);
+        //marker.transform.Rotate(new Vector3(1, 0, 0), angle);
         foreach (Image image in marker.GetComponentsInChildren<Image>()) {
             image.color = this.buttonColor;
         }
+
+        this.wordPanel = wordPanel;
+        this.scorePanel = scorePanel;
+
+
+        scorePanel.GetComponentInChildren<Image>().color = this.buttonColor;
+
+        this.name = "";
+        this.score = -1;
+    }
+    
+    public void SetCurrExercise(Exercise newExercise)
+    {
+        //currWordState = "";
+        currExercise = newExercise;
+    }
+    public Exercise GetCurrExercise()
+    {
+        return currExercise;
+    }
+
+    public void SetCurrWordState(string newCurrWordState)
+    {
+        currWordState = newCurrWordState;
+
+        //update UI
+        string displayString = "";
+        int missingLength = currExercise.targetWord.Length - currWordState.Length;
+        string[] substrings = currExercise.displayMessage.Split('_');
+
+        if (substrings.Length > 0)
+        {
+            displayString += substrings[0];
+            displayString += currWordState;
+            for (int i = 0; i < missingLength; i++)
+            {
+                displayString += "_";
+            }
+            if (substrings.Length > 1)
+            {
+                displayString += substrings[1];
+            }
+        }
+        displayString += "\n";
+
+        Text playerDisplayText = wordPanel.GetComponentInChildren<Text>();
+        playerDisplayText.text = displayString;
+    }
+    public string GetCurrWordState()
+    {
+        return currWordState;
+    }
+
+    public void SetScore(int score)
+    {
+        if(this.score != score)
+        {
+            this.score = score;
+
+            //update UI
+            Text playerPanelText = scorePanel.GetComponentInChildren<Text>();
+            playerPanelText.text = "Player " + name + " Score: " + score;
+            scorePanel.GetComponent<Animator>().Play(0);
+        }
+
+    }
+    public int GetScore()
+    {
+        return this.score;
     }
 
     public void SetScorePanel(GameObject scorePanel)
@@ -90,6 +162,10 @@ public class Player
     public void SetName(string name)
     {
         this.name = name;
+
+        //update UI
+        Text playerPanelText = scorePanel.GetComponentInChildren<Text>();
+        playerPanelText.text = "Player " + name + " Score: " + score;
     }
 
     public int GetActivebuttonIndex()

@@ -30,12 +30,12 @@ public class Button : MonoBehaviour {
     {
         if (this.keyPressed) {
             this.isClicked = true;
-            this.gameObject.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            this.gameObject.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         }
         else
         {
             this.isClicked = false;
-            this.gameObject.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+            this.gameObject.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
         }
         this.keyPressed = false;
     }
