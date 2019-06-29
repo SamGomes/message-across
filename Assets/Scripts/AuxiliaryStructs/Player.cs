@@ -29,6 +29,7 @@ public class Player
     private GameObject scorePanel;
 
     private GameObject marker;
+    private List<GameObject> maskedHalf;
 
     private GameManager gameManagerRef;
 
@@ -47,7 +48,7 @@ public class Player
         this.myButtons = myButtons;
     }
 
-    public void Init(GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject wordPanel, GameObject scorePanel, float angle)
+    public void Init(GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject wordPanel, GameObject scorePanel, bool isTopMask)
     {
         //this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
         this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 0.8f);
@@ -59,6 +60,10 @@ public class Player
         foreach (Image image in marker.GetComponentsInChildren<Image>()) {
             image.color = this.buttonColor;
         }
+
+        maskedHalf = new List<GameObject>();
+        maskedHalf.Add((isTopMask == true) ? marker.transform.Find("Button/BackgroundTH").gameObject : marker.transform.Find("Button/BackgroundBH").gameObject);
+        maskedHalf.Add((isTopMask == true) ? marker.transform.Find("trackTH").gameObject : marker.transform.Find("trackBH").gameObject);
 
         this.wordPanel = wordPanel;
         this.scorePanel = scorePanel;
@@ -184,6 +189,11 @@ public class Player
         gameManagerRef.StartCoroutine(currButtonLerp);
 
         this.activeButtonIndex = activeButtonIndex;
+    }
+
+    public List<GameObject> GetMaskedHalf()
+    {
+        return this.maskedHalf;
     }
 
     public void SetActiveInteraction(Globals.KeyInteractionType activeInteraction)

@@ -77,10 +77,10 @@ public class ExercisesListWrapper
 [Serializable]
 public struct GameSettings
 {
-    public int maxSimultaneousKeyPresses;
     public List<ExercisesListWrapper> exercisesGroups;
     public List<Player> players;
     public int gameId;
+    public int initialTimeLeft;
 
     public ScoreSystem scoreSystem;
 }
@@ -112,6 +112,8 @@ public class GameManager : MonoBehaviour
     public bool isGameplayPaused;
     public bool isGameplayStarted;
 
+    public bool isButtonOverlap;
+
     public GameObject namesInputLocation;
     public GameObject playerNameInputFieldPrefabRef;
     
@@ -132,7 +134,7 @@ public class GameManager : MonoBehaviour
     //public Dictionary<Player, Exercise> currExercises;
     //public Dictionary<Player, string> currWordStates;
 
-    public float timeLeft;
+    private float timeLeft;
 
     public void PauseGame()
     {
@@ -177,24 +179,31 @@ public class GameManager : MonoBehaviour
 
     private void UpdateButtonColors()
     {
-        gameButtons.ForEach(delegate (Button button) { button.GetComponent<Image>().color = Color.white; });
-        for(int i=0; i< gameButtons.Count; i++)
+        //gameButtons.ForEach(delegate (Button button) { button.GetComponent<Image>().color = Color.white; });
+        //for(int i=0; i< gameButtons.Count; i++)
+        //{
+        //    gameButtons[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("Textures/button");
+        //    int numActivePlayers = 0;
+        //    foreach(Player player in settings.players)
+        //    {
+        //        int activeIndex = player.GetActivebuttonIndex();
+        //        if (activeIndex == i)
+        //        {
+        //            gameButtons[activeIndex].GetComponent<Image>().color = player.GetButtonColor();
+        //            numActivePlayers++;
+        //        }
+        //    }
+        //    if (numActivePlayers > 1)
+        //    {
+        //        gameButtons[i].GetComponent<Image>().color = Color.white;
+        //        gameButtons[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("Textures/mixedButton");
+        //    }
+        //}
+        foreach(Player player in settings.players)
         {
-            gameButtons[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("Textures/button");
-            int numActivePlayers = 0;
-            foreach(Player player in settings.players)
+            foreach(GameObject obj in player.GetMaskedHalf())
             {
-                int activeIndex = player.GetActivebuttonIndex();
-                if (activeIndex == i)
-                {
-                    gameButtons[activeIndex].GetComponent<Image>().color = player.GetButtonColor();
-                    numActivePlayers++;
-                }
-            }
-            if (numActivePlayers > 1)
-            {
-                gameButtons[i].GetComponent<Image>().color = Color.white;
-                gameButtons[i].GetComponent<Image>().sprite = Resources.Load<Sprite>("Textures/mixedButton");
+                obj.SetActive(!isButtonOverlap);
             }
         }
     }
@@ -255,8 +264,10 @@ public class GameManager : MonoBehaviour
 
         //Application.targetFrameRate = 60;
 
-        timeLeft = 100.0f;
-        InvokeRepeating("DecrementTimeLeft", 0.0f, 1.0f);
+        timeLeft = settings.initialTimeLeft;
+        timePanel.GetComponent<Animator>().StopPlayback();
+
+        InvokeRepeating("TimeDependentEvents", 0.0f, 1.0f);
 
        
         gameSceneManager.StartAndPauseGame(); //for the initial screen
@@ -269,9 +280,9 @@ public class GameManager : MonoBehaviour
         {
             Player currPlayer = settings.players[i];
             
-            currPlayer.Init(this, playerMarkerPrefab, canvas, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0)? 45.0f:-45.0f);
+            currPlayer.Init(this, playerMarkerPrefab, canvas, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
 
-            currPlayer.GetWordPanel().transform.Find("Layout").GetComponent<Image>().color = currPlayer.GetButtonColor();
+            currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<Image>().color = currPlayer.GetButtonColor();
 
 
             GameObject newNameInput = Instantiate(playerNameInputFieldPrefabRef, namesInputLocation.transform);
@@ -290,6 +301,7 @@ public class GameManager : MonoBehaviour
 
             //UpdateButtonColors();
 
+            isButtonOverlap = true;
             for (int j = 1; j < Globals.keyInteractionTypes.Length ; j++)
             {
                 Globals.KeyInteractionType currInt = (Globals.KeyInteractionType) j;
@@ -306,21 +318,41 @@ public class GameManager : MonoBehaviour
                         new List<KeyCode>() { keys[gameButtons.Count] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                         {
                             int potentialIndex = (currPlayer.GetActivebuttonIndex() - 1);
-                            int activeIndex = (potentialIndex < 0)? potentialIndex = (gameButtons.Count - 1) : potentialIndex;
-                            currPlayer.SetActiveButton(activeIndex, gameButtons[activeIndex].transform.position);
-                            //UpdateButtonColors();
+                            potentialIndex = (potentialIndex < 0)? 0 : potentialIndex;
+                            isButtonOverlap = false;
+                            foreach (Player player in settings.players)
+                            {
+                                if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
+                                {
+                                    isButtonOverlap = true;
+                                    break;
+                                }
+                            }
+                            currPlayer.SetActiveButton(potentialIndex, gameButtons[potentialIndex].transform.position);
+                            UpdateButtonColors();
                         }, false, false);
                 inputManager.AddKeyBinding(
                         new List<KeyCode>() { keys[gameButtons.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                         {
-                            int activeIndex = (currPlayer.GetActivebuttonIndex() + 1) % (gameButtons.Count);
-                            currPlayer.SetActiveButton(activeIndex, gameButtons[activeIndex].transform.position);
-                            //UpdateButtonColors();
+                            int potentialIndex = (currPlayer.GetActivebuttonIndex() + 1);
+                            potentialIndex = (potentialIndex > (gameButtons.Count - 1)) ? (gameButtons.Count - 1) : potentialIndex;
+                            isButtonOverlap = false;
+                            foreach (Player player in settings.players)
+                            {
+                                if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
+                                {
+                                    isButtonOverlap = true;
+                                    break;
+                                }
+                            }
+                            currPlayer.SetActiveButton(potentialIndex, gameButtons[potentialIndex].transform.position);
+                            UpdateButtonColors();
                         }, false, false);
 
                 currPlayer.SetActiveButton(0, gameButtons[0].transform.position);
                 currPlayer.SetScore(0);
-            }
+        }
+        UpdateButtonColors();
 
         ChangeGameParametrizations(true);
         
@@ -364,15 +396,6 @@ public class GameManager : MonoBehaviour
         //{
         //    gameSceneManager.EndGame();
         //}
-
-        //if time's up change word
-        if (timeLeft == 0.0f)
-        {
-            ChangeLevel();
-            timeLeft = 100.0f;
-        }
-
-        timePanel.GetComponent<UnityEngine.UI.Text>().text = "Time: "+ timeLeft;
         
     }
 
@@ -418,11 +441,36 @@ public class GameManager : MonoBehaviour
         ChangeGameParametrizations(false);
     }
 
-    void DecrementTimeLeft()
+    void TimeDependentEvents()
     {
-        if(timeLeft > 0.0f){
-            timeLeft--; 
+        Color panelColor = Color.white;
+        Color panelTextColor = Color.black;
+        if (timeLeft > 1){
+            timeLeft--;
+
+            if(timeLeft < 10)
+            {
+                timePanel.GetComponent<AudioSource>().Play();
+                timePanel.GetComponent<Animator>().Play(0);
+                panelColor = Color.red;
+                panelTextColor = Color.white;
+            }
+            else
+            {
+                timePanel.GetComponent<AudioSource>().Stop();
+                timePanel.GetComponent<Animator>().StopPlayback();
+            }
         }
+        else
+        {
+            ChangeLevel();
+            timeLeft = settings.initialTimeLeft;
+        }
+        Text timePanelText = timePanel.GetComponentInChildren<Text>();
+        Image timePanelImage = timePanel.GetComponentInChildren<Image>();
+        timePanelImage.color = panelColor;
+        timePanelText.color = panelTextColor;
+        timePanelText.text = "Time: " + timeLeft;
     }
 
     private void OnApplicationQuit()
@@ -457,7 +505,6 @@ public class GameManager : MonoBehaviour
         List<Exercise> selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups[exerciseGroupIndex++ % settings.exercisesGroups.Count].exercises);
         foreach (Player player in settings.players)
         {
-            
             if(selectedExerciseGroup.Count <= 0)
             {
                 selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups[exerciseGroupIndex++ % settings.exercisesGroups.Count].exercises);
@@ -471,7 +518,11 @@ public class GameManager : MonoBehaviour
             //displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
             player.SetCurrExercise(newExercise);
             player.SetCurrWordState("");
+
+            //animate transition
+            player.GetWordPanel().GetComponentInChildren<Animator>().Play(0);
         }
+        gameObject.GetComponent<AudioSource>().Play();
     }
 
 
