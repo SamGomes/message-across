@@ -4841,7 +4841,6 @@ GameObject:
   - component: {fileID: 2275559220178457366}
   - component: {fileID: 7129091008945427732}
   - component: {fileID: 2905419395758574882}
-  - component: {fileID: 2642319523335095931}
   m_Layer: 0
   m_Name: Queen
   m_TagString: Untagged
@@ -4906,25 +4905,6 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
---- !u!95 &2642319523335095931
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2737773062507671227}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: cea8b059fa5a240879ab42f693e1e2a0, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1001 &2736025214894507618
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4976,11 +4956,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 3.3967326
       objectReference: {fileID: 0}
-    - target: {fileID: 114326863672783150, guid: d36b6842e39844964aec23f69b1870ff,
-        type: 3}
-      propertyPath: QueenAnt
-      value: 
-      objectReference: {fileID: 2737773062507671227}
     - target: {fileID: 61123650150532726, guid: d36b6842e39844964aec23f69b1870ff,
         type: 3}
       propertyPath: m_Offset.x
@@ -4991,6 +4966,11 @@ PrefabInstance:
       propertyPath: m_Size.x
       value: 1.3879623
       objectReference: {fileID: 0}
+    - target: {fileID: 114326863672783150, guid: d36b6842e39844964aec23f69b1870ff,
+        type: 3}
+      propertyPath: QueenAnt
+      value: 
+      objectReference: {fileID: 2737773062507671227}
     m_RemovedComponents:
     - {fileID: 114326863672783150, guid: d36b6842e39844964aec23f69b1870ff, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: d36b6842e39844964aec23f69b1870ff, type: 3}

@@ -313,44 +313,46 @@ public class GameManager : MonoBehaviour
                         //gameButtons[activeIndex].RegisterButtonPress(currPlayer);//Utilities.interactionTypes[j]);
                         currPlayer.GetMarker().GetComponentInChildren<Button>().RegisterButtonPress(currPlayer);
                     }, false, false);
-                }
-                inputManager.AddKeyBinding(
-                        new List<KeyCode>() { keys[gameButtons.Count] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+            }
+            inputManager.AddKeyBinding(
+                    new List<KeyCode>() { keys[gameButtons.Count] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+                    {
+                        int potentialIndex = (currPlayer.GetActivebuttonIndex() - 1);
+                        potentialIndex = (potentialIndex < 0)? 0 : potentialIndex;
+                        isButtonOverlap = false;
+                        foreach (Player player in settings.players)
                         {
-                            int potentialIndex = (currPlayer.GetActivebuttonIndex() - 1);
-                            potentialIndex = (potentialIndex < 0)? 0 : potentialIndex;
-                            isButtonOverlap = false;
-                            foreach (Player player in settings.players)
+                            if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
                             {
-                                if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
-                                {
-                                    isButtonOverlap = true;
-                                    break;
-                                }
+                                isButtonOverlap = true;
+                                break;
                             }
-                            currPlayer.SetActiveButton(potentialIndex, gameButtons[potentialIndex].transform.position);
-                            UpdateButtonColors();
-                        }, false, false);
-                inputManager.AddKeyBinding(
-                        new List<KeyCode>() { keys[gameButtons.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+                        }
+                        Debug.Log("Key: " + keys[gameButtons.Count] + "; Potential Index: " + potentialIndex);
+                        currPlayer.SetActiveButton(potentialIndex, gameButtons[potentialIndex].transform.position);
+                        UpdateButtonColors();
+                    }, false, false);
+            inputManager.AddKeyBinding(
+                    new List<KeyCode>() { keys[gameButtons.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+                    {
+                        int potentialIndex = (currPlayer.GetActivebuttonIndex() + 1);
+                        potentialIndex = (potentialIndex > (gameButtons.Count - 1)) ? (gameButtons.Count - 1) : potentialIndex;
+                        isButtonOverlap = false;
+                        foreach (Player player in settings.players)
                         {
-                            int potentialIndex = (currPlayer.GetActivebuttonIndex() + 1);
-                            potentialIndex = (potentialIndex > (gameButtons.Count - 1)) ? (gameButtons.Count - 1) : potentialIndex;
-                            isButtonOverlap = false;
-                            foreach (Player player in settings.players)
+                            if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
                             {
-                                if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
-                                {
-                                    isButtonOverlap = true;
-                                    break;
-                                }
+                                isButtonOverlap = true;
+                                break;
                             }
-                            currPlayer.SetActiveButton(potentialIndex, gameButtons[potentialIndex].transform.position);
-                            UpdateButtonColors();
-                        }, false, false);
+                        }
+                        Debug.Log("Key: " + keys[gameButtons.Count] + "; Potential Index: " + potentialIndex);
+                        currPlayer.SetActiveButton(potentialIndex, gameButtons[potentialIndex].transform.position);
+                        UpdateButtonColors();
+                    }, false, false);
 
-                currPlayer.SetActiveButton(0, gameButtons[0].transform.position);
-                currPlayer.SetScore(0);
+            currPlayer.SetActiveButton(0, gameButtons[0].transform.position);
+            currPlayer.SetScore(0);
         }
         UpdateButtonColors();
 
@@ -444,7 +446,7 @@ public class GameManager : MonoBehaviour
     void TimeDependentEvents()
     {
         Color panelColor = Color.white;
-        Color panelTextColor = Color.black;
+        Color panelTextColor = Color.white;
         if (timeLeft > 1){
             timeLeft--;
 
@@ -470,7 +472,7 @@ public class GameManager : MonoBehaviour
         Image timePanelImage = timePanel.GetComponentInChildren<Image>();
         timePanelImage.color = panelColor;
         timePanelText.color = panelTextColor;
-        timePanelText.text = "Time: " + timeLeft;
+        timePanelText.text =  (int)((timeLeft/ settings.initialTimeLeft)*100) + " %";
     }
 
     private void OnApplicationQuit()
