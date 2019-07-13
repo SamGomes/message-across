@@ -312,7 +312,7 @@ public class GameManager : MonoBehaviour
                         int activeIndex = currPlayer.GetActivebuttonIndex();
                         //gameButtons[activeIndex].RegisterButtonPress(currPlayer);//Utilities.interactionTypes[j]);
                         currPlayer.GetMarker().GetComponentInChildren<Button>().RegisterButtonPress(currPlayer);
-                    }, false, false);
+                    }, false);
             }
             inputManager.AddKeyBinding(
                     new List<KeyCode>() { keys[gameButtons.Count] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
@@ -331,7 +331,7 @@ public class GameManager : MonoBehaviour
                         Debug.Log("Key: " + keys[gameButtons.Count] + "; Potential Index: " + potentialIndex);
                         currPlayer.SetActiveButton(potentialIndex, gameButtons[potentialIndex].transform.position);
                         UpdateButtonColors();
-                    }, false, false);
+                    }, false);
             inputManager.AddKeyBinding(
                     new List<KeyCode>() { keys[gameButtons.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                     {
@@ -349,7 +349,7 @@ public class GameManager : MonoBehaviour
                         Debug.Log("Key: " + keys[gameButtons.Count] + "; Potential Index: " + potentialIndex);
                         currPlayer.SetActiveButton(potentialIndex, gameButtons[potentialIndex].transform.position);
                         UpdateButtonColors();
-                    }, false, false);
+                    }, false);
 
             currPlayer.SetActiveButton(0, gameButtons[0].transform.position);
             currPlayer.SetScore(0);
@@ -366,7 +366,7 @@ public class GameManager : MonoBehaviour
         ChangeGameParametrizations(true);
 
         
-        inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { gameSceneManager.StartAndPauseGame(); }, false, false);
+        inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { gameSceneManager.StartAndPauseGame(); }, false);
 
         logManager = new MongoDBLogManager();
         logManager.InitLogs(this);
