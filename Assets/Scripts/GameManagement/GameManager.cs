@@ -97,7 +97,7 @@ public struct PerformanceMetrics
 
 public class GameManager : MonoBehaviour
 {
-
+    private AudioManager audioManager;
     private int exerciseGroupIndex;
 
     public GameSettings settings;
@@ -123,10 +123,11 @@ public class GameManager : MonoBehaviour
     public GameObject timePanel;
     public GameObject track;
 
+    public GameObject emoji;
+
     public InputManager inputManager;
     public LogManager logManager;
     
-    public AntSpawner[] antSpawners;
     public LetterSpawner[] letterSpawners;
 
     public List<Button> gameButtons;
@@ -210,7 +211,12 @@ public class GameManager : MonoBehaviour
 
 
     private IEnumerator YieldedStart()
-    { 
+    {
+        audioManager = new AudioManager();
+
+        logManager = new MongoDBLogManager();
+        logManager.InitLogs(this);
+
         //currExercises = new Dictionary<Player, Exercise>();
         //currWordStates = new Dictionary<Player, string>();
 
@@ -368,8 +374,6 @@ public class GameManager : MonoBehaviour
         
         inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { gameSceneManager.StartAndPauseGame(); }, false);
 
-        logManager = new MongoDBLogManager();
-        logManager.InitLogs(this);
 
         Shuffle<ExercisesListWrapper>(settings.exercisesGroups);
 
@@ -439,6 +443,18 @@ public class GameManager : MonoBehaviour
 
     void ChangeLevel()
     {
+        if (timeLeft > 1)
+        {
+
+            audioManager.PlayClip("Audio/WordChange.wav");
+            emoji.GetComponent<Animator>().Play("Smiling");
+        }
+        else
+        {
+            audioManager.PlayClip("Audio/throwSound.wav");
+            emoji.GetComponent<Animator>().Play("Sad");
+        }
+        timeLeft = settings.initialTimeLeft;
         RecordMetrics();
         ChangeGameParametrizations(false);
     }
@@ -450,23 +466,22 @@ public class GameManager : MonoBehaviour
         if (timeLeft > 1){
             timeLeft--;
 
-            if(timeLeft < 10)
+            if(timeLeft < 0.1f*settings.initialTimeLeft)
             {
-                timePanel.GetComponent<AudioSource>().Play();
+                audioManager.PlayClip("Audio/timeRunningOut.wav");
                 timePanel.GetComponent<Animator>().Play(0);
                 panelColor = Color.red;
                 panelTextColor = Color.white;
             }
             else
             {
-                timePanel.GetComponent<AudioSource>().Stop();
+                audioManager.StopCurrentClip();
                 timePanel.GetComponent<Animator>().StopPlayback();
             }
         }
         else
         {
             ChangeLevel();
-            timeLeft = settings.initialTimeLeft;
         }
         Text timePanelText = timePanel.GetComponentInChildren<Text>();
         Image timePanelImage = timePanel.GetComponentInChildren<Image>();
@@ -524,7 +539,6 @@ public class GameManager : MonoBehaviour
             //animate transition
             player.GetWordPanel().GetComponentInChildren<Animator>().Play(0);
         }
-        gameObject.GetComponent<AudioSource>().Play();
     }
 
 
@@ -548,7 +562,6 @@ public class GameManager : MonoBehaviour
 
     public void RecordHit(char letterText, GameObject letter, HashSet<Player> currHitters)
     {
-        
         foreach (Player player in currHitters)
         {
             bool usefulForMe = false;
@@ -598,6 +611,11 @@ public class GameManager : MonoBehaviour
                     }
                     scores = settings.scoreSystem.takeScores;
                     break;
+            }
+
+            if (usefulForMe || usefulForOther)
+            {
+                emoji.GetComponent<Animator>().Play("Nice");
             }
 
             foreach (ScoreValue score in scores)
@@ -650,12 +668,11 @@ public class GameManager : MonoBehaviour
         }
         if (!areWordsUnfinished)
         {
-            //foreach (AntSpawner antSpawner in antSpawners)
-            //{
-            //    antSpawner.SpawnAnt(currTargetWord);
-            //}
             ChangeLevel();
         }
+
+
+
 
     }
 
