@@ -11,6 +11,7 @@ public class Button : MonoBehaviour {
     private bool keyPressed;
     private bool isClicked;
 
+    private AudioManager buttonAudioManager;
 
     private HashSet<Player> currHitters;
 
@@ -21,6 +22,7 @@ public class Button : MonoBehaviour {
 
     void Start()
     {
+        buttonAudioManager = new AudioManager();
         gameManager = GameObject.FindObjectOfType<GameManager>();
         currHitters = new HashSet<Player>();    
     }
@@ -53,7 +55,7 @@ public class Button : MonoBehaviour {
 
             gameManager.RecordHit(otherObject.gameObject.GetComponent<Letter>().letterText, otherObject.gameObject, currHitters);
 
-            gameObject.GetComponent<AudioSource>().Play();
+            buttonAudioManager.PlayClip("Audio/note");
             currHitters.Clear();
         }
     }

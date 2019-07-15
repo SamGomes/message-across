@@ -97,7 +97,7 @@ public struct PerformanceMetrics
 
 public class GameManager : MonoBehaviour
 {
-    private AudioManager audioManager;
+    private AudioManager globalAudioManager;
     private int exerciseGroupIndex;
 
     public GameSettings settings;
@@ -139,13 +139,22 @@ public class GameManager : MonoBehaviour
 
     public void PauseGame()
     {
-        Time.timeScale = 0;
+        //Time.timeScale = 0;
+        foreach(LetterSpawner ls in letterSpawners)
+        {
+            ls.enabled = false;
+        }
+        
         isGameplayPaused = true;
     }
 
     public void ResumeGame()
     {
-        Time.timeScale = 1;
+        //Time.timeScale = 1;
+        foreach (LetterSpawner ls in letterSpawners)
+        {
+            ls.enabled = true;
+        }
         isGameplayPaused = false;
     }
 
@@ -212,7 +221,7 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator YieldedStart()
     {
-        audioManager = new AudioManager();
+        globalAudioManager = new AudioManager();
 
         logManager = new MongoDBLogManager();
         logManager.InitLogs(this);
@@ -275,7 +284,7 @@ public class GameManager : MonoBehaviour
 
         InvokeRepeating("TimeDependentEvents", 0.0f, 1.0f);
 
-       
+
         gameSceneManager.StartAndPauseGame(); //for the initial screen
 
 
@@ -334,7 +343,7 @@ public class GameManager : MonoBehaviour
                                 break;
                             }
                         }
-                        Debug.Log("Key: " + keys[gameButtons.Count] + "; Potential Index: " + potentialIndex);
+                        //Debug.Log("Key: " + keys[gameButtons.Count] + "; Potential Index: " + potentialIndex);
                         currPlayer.SetActiveButton(potentialIndex, gameButtons[potentialIndex].transform.position);
                         UpdateButtonColors();
                     }, false);
@@ -352,7 +361,7 @@ public class GameManager : MonoBehaviour
                                 break;
                             }
                         }
-                        Debug.Log("Key: " + keys[gameButtons.Count] + "; Potential Index: " + potentialIndex);
+                        //Debug.Log("Key: " + keys[gameButtons.Count] + "; Potential Index: " + potentialIndex);
                         currPlayer.SetActiveButton(potentialIndex, gameButtons[potentialIndex].transform.position);
                         UpdateButtonColors();
                     }, false);
@@ -372,7 +381,10 @@ public class GameManager : MonoBehaviour
         ChangeGameParametrizations(true);
 
         
-        inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) { gameSceneManager.StartAndPauseGame(); }, false);
+        inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) {
+            globalAudioManager.PlayClip("Audio/wordChangeBad");
+            gameSceneManager.StartAndPauseGame();
+        }, false);
 
 
         Shuffle<ExercisesListWrapper>(settings.exercisesGroups);
@@ -446,12 +458,12 @@ public class GameManager : MonoBehaviour
         if (timeLeft > 1)
         {
 
-            audioManager.PlayClip("Audio/WordChange.wav");
+            globalAudioManager.PlayClip("Audio/wordChangeGood");
             emoji.GetComponent<Animator>().Play("Smiling");
         }
         else
         {
-            audioManager.PlayClip("Audio/throwSound.wav");
+            globalAudioManager.PlayClip("Audio/wordChangeBad");
             emoji.GetComponent<Animator>().Play("Sad");
         }
         timeLeft = settings.initialTimeLeft;
@@ -461,6 +473,11 @@ public class GameManager : MonoBehaviour
 
     void TimeDependentEvents()
     {
+        if (isGameplayPaused)
+        {
+            return;
+        }
+
         Color panelColor = Color.white;
         Color panelTextColor = Color.white;
         if (timeLeft > 1){
@@ -468,14 +485,14 @@ public class GameManager : MonoBehaviour
 
             if(timeLeft < 0.1f*settings.initialTimeLeft)
             {
-                audioManager.PlayClip("Audio/timeRunningOut.wav");
+                globalAudioManager.PlayClip("Audio/timeRunningOut");
                 timePanel.GetComponent<Animator>().Play(0);
                 panelColor = Color.red;
                 panelTextColor = Color.white;
             }
             else
             {
-                audioManager.StopCurrentClip();
+                globalAudioManager.StopCurrentClip();
                 timePanel.GetComponent<Animator>().StopPlayback();
             }
         }

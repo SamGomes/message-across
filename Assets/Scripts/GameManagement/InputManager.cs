@@ -24,9 +24,6 @@ public class InputManager : MonoBehaviour {
         UP,
     }
 
-    public GameManager gameManager;
-    public GameSceneManager gameSceneManager;
-
     public delegate void CallBack(List<KeyCode> triggeredKeys);
     private Dictionary<List<KeyCode>, KeyBindingData> keyBindings;
 
@@ -37,10 +34,10 @@ public class InputManager : MonoBehaviour {
     {
         keyBindings = new Dictionary<List<KeyCode>, KeyBindingData>();
 
-        AddKeyBinding(new List<KeyCode>() { KeyCode.Z, KeyCode.X, KeyCode.C }, InputManager.ButtonPressType.DOWN, 
-        delegate(List<KeyCode> triggeredKey) {
-            Debug.Log("rfegyregfyreugfryeufr");
-        }, false);
+        //AddKeyBinding(new List<KeyCode>() { KeyCode.Z, KeyCode.X, KeyCode.C }, InputManager.ButtonPressType.DOWN, 
+        //delegate(List<KeyCode> triggeredKey) {
+        //    Debug.Log("rfegyregfyreugfryeufr");
+        //}, false);
     }
 
 
@@ -148,12 +145,12 @@ public class InputManager : MonoBehaviour {
                 currPressedKeys[key] = true;
             }
 
-            string print = "";
-            foreach (KeyCode key in bufferMod)
-            {
-                print += key.ToString() + ",";
-            }
-            Debug.Log("Pressed Key: [" + print + "]");
+            //string print = "";
+            //foreach (KeyCode key in bufferMod)
+            //{
+            //    print += key.ToString() + ",";
+            //}
+            //Debug.Log("Pressed Key: [" + print + "]");
             //currPressedKeys = currPressedKeys.Except(simultaneouskeysList).ToList();
         }
 
