@@ -10,10 +10,10 @@ public class StartSceneFunctionalities : MonoBehaviour
     void Start()
     {
         inputManager.AddKeyBinding(
-                    new List<KeyCode>() { KeyCode.Space }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
-                    {
-                        SceneManager.LoadScene("mainScene");
-                    }, false);
+        new List<KeyCode>() { KeyCode.Space }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
+        {
+            SceneManager.LoadScene("mainScene");
+        }, false);
     }
 
     // Update is called once per frame

@@ -51,11 +51,11 @@ public class Button : MonoBehaviour {
         }
         if (this.isClicked)
         {
-            otherObject.gameObject.transform.localScale = new Vector3(0.3f, 0.3f, 1.0f);
+            buttonAudioManager.PlayClip("Audio/note");
+            otherObject.gameObject.transform.localScale = new Vector3(1.2f, 1.2f, 1.0f);
 
             gameManager.RecordHit(otherObject.gameObject.GetComponent<Letter>().letterText, otherObject.gameObject, currHitters);
 
-            buttonAudioManager.PlayClip("Audio/note");
             currHitters.Clear();
         }
     }

@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1349.0764, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: -1225.7, y: 14.4}
+  m_SizeDelta: {x: 94.6, y: 144.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6070870669829879947
 CanvasRenderer:
@@ -58,7 +58,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.30588236}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.13333334}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -221,8 +221,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1349.0764, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: -1225.7, y: 14.4}
+  m_SizeDelta: {x: 94.6, y: 144.2}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3011794947095463359
 CanvasRenderer:
@@ -245,7 +245,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 0.30588236}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.13333334}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -472,8 +472,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 149.54684, y: 155.50482, z: 168.5816}
-  m_Center: {x: 8.28096, y: 0.08701802, z: 18.740818}
+  m_Size: {x: 208.72797, y: 189.76433, z: 168.5816}
+  m_Center: {x: -21.3096, y: 17.216774, z: 18.740814}
 --- !u!82 &930604261190994116
 AudioSource:
   m_ObjectHideFlags: 0

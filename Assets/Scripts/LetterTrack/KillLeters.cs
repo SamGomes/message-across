@@ -7,7 +7,6 @@ public class KillLeters : MonoBehaviour {
 
     void OnTriggerEnter(Collider otherObject)
     {
-        Destroy(otherObject.GetComponent<Image>().gameObject);
         Destroy(otherObject.gameObject);
     }
 }

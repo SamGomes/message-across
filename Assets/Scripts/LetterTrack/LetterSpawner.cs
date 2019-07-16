@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class LetterSpawner : MonoBehaviour
 {
-    public GameObject canvas;
-
     public GameObject letterPrefab;
     public GameManager gameManager;
 
@@ -52,14 +50,13 @@ public class LetterSpawner : MonoBehaviour
         {
             ResetPool();
         }
-        GameObject newLetter = Instantiate(letterPrefab,canvas.transform);
+        GameObject newLetter = Instantiate(letterPrefab,transform);
 
         Text letterText = newLetter.transform.GetComponentInChildren<Text>();
 
         int random = Random.Range(0, lettersPool.Count - 1);
         char currLetter = lettersPool[random];
         lettersPool.RemoveAt(random);
-
         //currLetter = 'A';
         
 
@@ -68,7 +65,6 @@ public class LetterSpawner : MonoBehaviour
         {
             newLetter.GetComponent<SpriteRenderer>().color = Color.cyan;
         }
-        //newLetter.GetComponent<Letter>().speed = newLetter.GetComponent<Letter>().speed + ((score + 1) * 0.05f);
 
         letterText.text =  currLetter.ToString();
 
