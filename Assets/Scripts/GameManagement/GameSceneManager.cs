@@ -65,10 +65,10 @@ public class GameSceneManager : MonoBehaviour {
             currPauseMenu.SetActive(false);
 
             //regain pause menu everytime user unpauses the questionnaire menu
-            if (currPauseMenu != plainPauseMenu)
-            {
+//            if (currPauseMenu != plainPauseMenu)
+//            {
                 currPauseMenu = plainPauseMenu;
-            }
+//            }
         }
         isGamePaused = !isGamePaused;
     }

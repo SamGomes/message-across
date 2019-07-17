@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ContentModelStore">
+    <e p="$USER_HOME$/.Rider2019.1/system/extResources" t="IncludeRecursive" />
+    <e p="$USER_HOME$/.Rider2019.1/system/resharper-host/local/Transient/ReSharperHost/v191/SolutionCaches/_interaction-mechanics-cross-ant.-518420395.00" t="ExcludeRecursive" />
+    <e p="$PROJECT_DIR$" t="IncludeRecursive">
+      <e p="Assembly-CSharp-Editor.csproj" t="IncludeRecursive" />
+      <e p="Assembly-CSharp.csproj" t="IncludeRecursive" />
+      <e p="Assets" t="Include">
+        <e p="Resources" t="Include">
+          <e p="Animations" t="Include">
+            <e p="empty.txt" t="Include" />
+          </e>
+          <e p="Textures" t="Include">
+            <e p="empty.txt" t="Include" />
+          </e>
+        </e>
+        <e p="Scripts" t="Include">
+          <e p="Ant" t="Include">
+            <e p="Ant.cs" t="Include" />
+            <e p="AntSpawner.cs" t="Include" />
+            <e p="FoodProjectile.cs" t="Include" />
+          </e>
+          <e p="AuxiliaryStructs" t="Include">
+            <e p="Exercise.cs" t="Include" />
+            <e p="Player.cs" t="Include" />
+          </e>
+          <e p="Button.cs" t="Include" />
+          <e p="GameManagement" t="Include">
+            <e p="AudioManager.cs" t="Include" />
+            <e p="GameManager.cs" t="Include" />
+            <e p="GameSceneManager.cs" t="Include" />
+            <e p="InputManager.cs" t="Include" />
+          </e>
+          <e p="LetterTrack" t="Include">
+            <e p="KillLeters.cs" t="Include" />
+            <e p="Letter.cs" t="Include" />
+            <e p="LetterSpawner.cs" t="Include" />
+          </e>
+          <e p="LogManager" t="Include">
+            <e p="DebugLogManager.cs" t="Include" />
+            <e p="LogManager.cs" t="Include" />
+            <e p="MongoDBLogManager.cs" t="Include" />
+          </e>
+          <e p="StartSceneFunctionalities.cs" t="Include" />
+        </e>
+        <e p="VSCode" t="Include">
+          <e p="Plugins" t="Include">
+            <e p="Editor" t="Include">
+              <e p="VSCode.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="Temp/bin" t="ExcludeRecursive" />
+      <e p="interaction-mechanics-cross-ant.sln" t="IncludeFlat" />
+      <e p="obj" t="ExcludeRecursive" />
+      <e p="packages" t="ExcludeRecursive" />
+    </e>
+  </component>
+</project>
