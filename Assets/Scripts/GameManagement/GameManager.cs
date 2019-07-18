@@ -103,13 +103,16 @@ public class GameManager : MonoBehaviour
     public GameSettings settings;
     private PerformanceMetrics performanceMetrics;
 
+    public GameObject canvas;
 
     public GameObject camera;
     public GameSceneManager gameSceneManager;
 
     public GameObject playerMarkersContainer;
     public GameObject playerMarkerPrefab;
+    public GameObject playerUIPrefab;
 
+    
 
     public bool isGameplayPaused;
     public bool isGameplayStarted;
@@ -132,8 +135,7 @@ public class GameManager : MonoBehaviour
     public LetterSpawner[] letterSpawners;
 
     public List<GameObject> pointerPlaceholders;
-    public List<GameObject> UIButtonsP1;
-    public List<GameObject> UIButtonsP2;
+    public List<GameObject> playerUIs;
     
     private float timeLeft;
 
@@ -271,16 +273,6 @@ public class GameManager : MonoBehaviour
         performanceMetrics = new PerformanceMetrics();
         performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
 
-        //set buttons for touch screen
-        foreach (GameObject button in UIButtonsP1)
-        {
-            button.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(delegate()
-            {
-                int indexOfButton = pointerPlaceholders.IndexOf(button);
-                settings.players[0].SetActiveButton(indexOfButton, pointerPlaceholders[indexOfButton].transform.position);
-                UpdateButtonOverlaps();
-            });
-        }
         
         for (int i = 0; i < settings.players.Count; i++)
         {
@@ -290,6 +282,37 @@ public class GameManager : MonoBehaviour
 
             currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<Image>().color = currPlayer.GetButtonColor();
 
+
+            //set buttons for touch screen
+            GameObject playerUI = playerUIs[i];
+            playerUI.GetComponent<Image>().color = currPlayer.GetButtonColor();
+            UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
+            for(int buttonI=0; buttonI < playerButtons.Length; buttonI++)
+            {
+                UnityEngine.UI.Button currButton = playerButtons[buttonI];
+                if (i < pointerPlaceholders.Count)
+                {
+                    currButton.onClick.AddListener(delegate()
+                    {
+                        settings.players[0].SetActiveButton(i, pointerPlaceholders[i].transform.position);
+                        UpdateButtonOverlaps();
+                    });
+                }
+                else
+                {
+                    int j = buttonI - pointerPlaceholders.Count;
+                    Globals.KeyInteractionType currInt = (Globals.KeyInteractionType) j;
+                    currButton.onClick.AddListener(delegate ()
+                    {
+                        currPlayer.SetActiveInteraction(currInt);
+                        int activeIndex = currPlayer.GetActivebuttonIndex();
+                        currPlayer.GetMarker().GetComponentInChildren<Button>().RegisterButtonPress(currPlayer);
+                    });
+                }
+                
+            }
+
+            
 
             GameObject newNameInput = Instantiate(playerNameInputFieldPrefabRef, namesInputLocation.transform);
             InputField input = newNameInput.GetComponent<InputField>();

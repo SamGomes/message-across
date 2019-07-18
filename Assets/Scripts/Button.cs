@@ -24,7 +24,7 @@ public class Button : MonoBehaviour {
     {
         buttonAudioManager = new AudioManager();
         gameManager = GameObject.FindObjectOfType<GameManager>();
-        currHitters = new HashSet<Player>();    
+        currHitters = new HashSet<Player>();  
     }
 
     // Update is called once per frame
@@ -52,9 +52,12 @@ public class Button : MonoBehaviour {
         if (this.isClicked)
         {
             buttonAudioManager.PlayClip("Audio/note");
-            otherObject.gameObject.transform.localScale = new Vector3(1.2f, 1.2f, 1.0f);
+            
+            GameObject letter = otherObject.gameObject;
+            
+            letter.transform.localScale *= 1.2f;
 
-            gameManager.RecordHit(otherObject.gameObject.GetComponent<Letter>().letterText, otherObject.gameObject, currHitters);
+            gameManager.RecordHit(otherObject.gameObject.GetComponent<Letter>().letterText, letter, currHitters);
 
             currHitters.Clear();
         }

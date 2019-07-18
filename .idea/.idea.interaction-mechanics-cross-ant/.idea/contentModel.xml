@@ -35,6 +35,7 @@
           <e p="LetterTrack" t="Include">
             <e p="KillLeters.cs" t="Include" />
             <e p="Letter.cs" t="Include" />
+            <e p="LetterPit.cs" t="Include" />
             <e p="LetterSpawner.cs" t="Include" />
           </e>
           <e p="LogManager" t="Include">

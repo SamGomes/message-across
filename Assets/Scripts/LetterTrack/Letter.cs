@@ -26,4 +26,5 @@ public class Letter : MonoBehaviour {
     void DestroyLetter() {
         Destroy(this.gameObject);
     }
+    
 }
