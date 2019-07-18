@@ -28,8 +28,8 @@ public class GameSceneManager : MonoBehaviour {
     public void MainSceneLoadedNotification()
     {
         isGameLoaded = true;
-        this.plainPauseMenu = GameObject.Find("Canvas/PauseCanvas");
-        this.initialConfigMenu = GameObject.Find("Canvas/InitialConfigPauseCanvas");
+        this.plainPauseMenu = GameObject.Find("CanvasForUI/PauseCanvas");
+        this.initialConfigMenu = GameObject.Find("CanvasForUI/InitialConfigPauseCanvas");
         plainPauseMenu.SetActive(false);
         //initialConfigMenu.SetActive(false);
         this.currPauseMenu = initialConfigMenu;

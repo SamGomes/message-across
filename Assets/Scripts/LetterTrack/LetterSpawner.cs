@@ -50,9 +50,9 @@ public class LetterSpawner : MonoBehaviour
         {
             ResetPool();
         }
-        GameObject newLetter = Instantiate(letterPrefab,transform);
+        GameObject newLetter = Instantiate(letterPrefab, transform.GetChild(0));
 
-        Text letterText = newLetter.transform.GetComponentInChildren<Text>();
+        TextMesh letterText = newLetter.transform.GetComponentInChildren<TextMesh>();
 
         int random = Random.Range(0, lettersPool.Count - 1);
         char currLetter = lettersPool[random];

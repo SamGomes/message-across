@@ -109,7 +109,7 @@ public class Player
         }
         displayString += "\n";
 
-        Text playerDisplayText = wordPanel.GetComponentInChildren<Text>();
+        TextMesh playerDisplayText = wordPanel.GetComponentInChildren<TextMesh>();
         playerDisplayText.text = displayString;
     }
     public string GetCurrWordState()

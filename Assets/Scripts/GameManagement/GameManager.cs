@@ -280,7 +280,7 @@ public class GameManager : MonoBehaviour
             
             currPlayer.Init(this, playerMarkerPrefab, playerMarkersContainer, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
 
-            currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<Image>().color = currPlayer.GetButtonColor();
+            currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetButtonColor();
 
 
             //set buttons for touch screen
@@ -509,8 +509,8 @@ public class GameManager : MonoBehaviour
         {
             ChangeLevel();
         }
-        Text timePanelText = timePanel.GetComponentInChildren<Text>();
-        Image timePanelImage = timePanel.GetComponentInChildren<Image>();
+        TextMesh timePanelText = timePanel.GetComponentInChildren<TextMesh>();
+        SpriteRenderer timePanelImage = timePanel.GetComponentInChildren<SpriteRenderer>();
         timePanelImage.color = panelColor;
         timePanelText.color = panelTextColor;
         timePanelText.text =  (int)((timeLeft/ settings.initialTimeLeft)*100) + " %";
@@ -615,7 +615,7 @@ public class GameManager : MonoBehaviour
                         usefulForOther = TestAndExecuteHit(true, letterText, letter, usefulTargetPlayer);
                         if (usefulForOther)
                         {
-                            letter.GetComponentInChildren<Image>().color = player.GetButtonColor();
+                            letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
                             break;
                         }
 
@@ -626,7 +626,7 @@ public class GameManager : MonoBehaviour
                     usefulForMe = TestAndExecuteHit(true, letterText, letter, player);
                     if (usefulForMe)
                     {
-                        letter.GetComponentInChildren<Image>().color = player.GetButtonColor();
+                        letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
                     }
                     foreach (Player usefulTargetPlayer in settings.players)
                     {
