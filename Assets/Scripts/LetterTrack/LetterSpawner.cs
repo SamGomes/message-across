@@ -69,7 +69,7 @@ public class LetterSpawner : MonoBehaviour
         letterText.text =  currLetter.ToString();
 
         newLetter.transform.position = gameObject.transform.position;
-        newLetter.transform.rotation = gameObject.transform.rotation;
+        newLetter.transform.LookAt(gameManager.camera.transform.position);
 
         randomInterval = Random.Range(minIntervalRange, maxIntervalRange);
         StartCoroutine(SpawnLetterWithDelay(randomInterval));

@@ -6,14 +6,12 @@ public class Letter : MonoBehaviour {
 
     public float speed;
     public char letterText;
-    private float totalTranslation;
 
     public bool isTranslationEnabled;
 
 	void Awake() {
-        totalTranslation = 0;
         isTranslationEnabled = true;
-        speed = 1.5f;
+        speed = 10.5f;
     }
 	
 	// Update is called once per frame
@@ -22,7 +20,6 @@ public class Letter : MonoBehaviour {
         {
             float translation = Time.deltaTime * speed;
             transform.Translate(translation, 0, 0);
-            totalTranslation += translation;
         }
     }
 

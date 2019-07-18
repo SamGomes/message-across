@@ -103,9 +103,10 @@ public class GameManager : MonoBehaviour
     public GameSettings settings;
     private PerformanceMetrics performanceMetrics;
 
+
+    public GameObject camera;
     public GameSceneManager gameSceneManager;
 
-    public GameObject canvas;
     public GameObject playerMarkersContainer;
     public GameObject playerMarkerPrefab;
 
@@ -130,7 +131,9 @@ public class GameManager : MonoBehaviour
     
     public LetterSpawner[] letterSpawners;
 
-    public List<GameObject> placementButtons;
+    public List<GameObject> pointerPlaceholders;
+    public List<GameObject> UIButtonsP1;
+    public List<GameObject> UIButtonsP2;
     
     private float timeLeft;
 
@@ -269,12 +272,12 @@ public class GameManager : MonoBehaviour
         performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
 
         //set buttons for touch screen
-        foreach (GameObject button in placementButtons)
+        foreach (GameObject button in UIButtonsP1)
         {
             button.GetComponent<UnityEngine.UI.Button>().onClick.AddListener(delegate()
             {
-                int indexOfButton = placementButtons.IndexOf(button);
-                settings.players[0].SetActiveButton(indexOfButton, placementButtons[indexOfButton].transform.position);
+                int indexOfButton = pointerPlaceholders.IndexOf(button);
+                settings.players[0].SetActiveButton(indexOfButton, pointerPlaceholders[indexOfButton].transform.position);
                 UpdateButtonOverlaps();
             });
         }
@@ -315,7 +318,7 @@ public class GameManager : MonoBehaviour
                     }, false);
             }
             inputManager.AddKeyBinding(
-                    new List<KeyCode>() { keys[placementButtons.Count] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+                    new List<KeyCode>() { keys[pointerPlaceholders.Count] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                     {
                         int potentialIndex = (currPlayer.GetActivebuttonIndex() - 1);
                         potentialIndex = (potentialIndex < 0)? 0 : potentialIndex;
@@ -328,14 +331,14 @@ public class GameManager : MonoBehaviour
                                 break;
                             }
                         }
-                        currPlayer.SetActiveButton(potentialIndex, placementButtons[potentialIndex].transform.position);
+                        currPlayer.SetActiveButton(potentialIndex, pointerPlaceholders[potentialIndex].transform.position);
                         UpdateButtonOverlaps();
                     }, false);
             inputManager.AddKeyBinding(
-                    new List<KeyCode>() { keys[placementButtons.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
+                    new List<KeyCode>() { keys[pointerPlaceholders.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                     {
                         int potentialIndex = (currPlayer.GetActivebuttonIndex() + 1);
-                        potentialIndex = (potentialIndex > (placementButtons.Count - 1)) ? (placementButtons.Count - 1) : potentialIndex;
+                        potentialIndex = (potentialIndex > (pointerPlaceholders.Count - 1)) ? (pointerPlaceholders.Count - 1) : potentialIndex;
                         isButtonOverlap = false;
                         foreach (Player player in settings.players)
                         {
@@ -345,11 +348,11 @@ public class GameManager : MonoBehaviour
                                 break;
                             }
                         }
-                        currPlayer.SetActiveButton(potentialIndex, placementButtons[potentialIndex].transform.position);
+                        currPlayer.SetActiveButton(potentialIndex, pointerPlaceholders[potentialIndex].transform.position);
                         UpdateButtonOverlaps();
                     }, false);
 
-            currPlayer.SetActiveButton(0, placementButtons[0].transform.position);
+            currPlayer.SetActiveButton(0, pointerPlaceholders[0].transform.position);
             currPlayer.SetScore(0);
         }
         UpdateButtonOverlaps();
