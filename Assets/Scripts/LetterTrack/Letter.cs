@@ -11,7 +11,7 @@ public class Letter : MonoBehaviour {
 
 	void Awake() {
         isTranslationEnabled = true;
-        speed = 10.5f;
+        //speed = 10.5f;
     }
 	
 	// Update is called once per frame
