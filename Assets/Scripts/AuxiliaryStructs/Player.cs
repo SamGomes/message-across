@@ -57,7 +57,7 @@ public class Player
 
         marker = UnityEngine.Object.Instantiate(markerPrefab, canvas.transform);
         //marker.transform.Rotate(new Vector3(1, 0, 0), angle);
-        foreach (Image image in marker.GetComponentsInChildren<Image>()) {
+        foreach (SpriteRenderer image in marker.GetComponentsInChildren<SpriteRenderer>()) {
             image.color = this.buttonColor;
         }
 
