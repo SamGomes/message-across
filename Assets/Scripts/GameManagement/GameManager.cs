@@ -615,7 +615,7 @@ public class GameManager : MonoBehaviour
                         usefulForOther = TestAndExecuteHit(true, letterText, letter, usefulTargetPlayer);
                         if (usefulForOther)
                         {
-                            letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
+                            //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
                             break;
                         }
 
@@ -626,7 +626,7 @@ public class GameManager : MonoBehaviour
                     usefulForMe = TestAndExecuteHit(true, letterText, letter, player);
                     if (usefulForMe)
                     {
-                        letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
+                        //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
                     }
                     foreach (Player usefulTargetPlayer in settings.players)
                     {
