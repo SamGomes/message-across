@@ -285,7 +285,7 @@ public class GameManager : MonoBehaviour
 
             //set buttons for touch screen
             GameObject playerUI = playerUIs[i];
-            playerUI.GetComponent<Image>().color = currPlayer.GetButtonColor();
+            playerUI.GetComponentInChildren<Image>().color = currPlayer.GetButtonColor();
             UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
             for(int buttonI=0; buttonI < playerButtons.Length; buttonI++)
             {
