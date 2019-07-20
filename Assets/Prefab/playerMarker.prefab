@@ -26,8 +26,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 180430332310618772}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2346, y: 16, z: 0}
-  m_LocalScale: {x: 228.26492, y: 55.354664, z: 0}
+  m_LocalPosition: {x: -1868, y: 16, z: 58}
+  m_LocalScale: {x: 165.70099, y: 55.354664, z: 0}
   m_Children: []
   m_Father: {fileID: 8066838020553107459}
   m_RootOrder: 2
@@ -74,8 +74,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1805285119
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 41ca5291697915d45915618b4cd0259b, type: 3}
   m_Color: {r: 1, g: 0, b: 0, a: 0.8}
@@ -225,8 +225,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5001661850880121488}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2346, y: 16, z: 0}
-  m_LocalScale: {x: 228.26492, y: 55.354664, z: 0}
+  m_LocalPosition: {x: -1868, y: 16, z: 58}
+  m_LocalScale: {x: 165.70099, y: 55.354664, z: 0}
   m_Children: []
   m_Father: {fileID: 8066838020553107459}
   m_RootOrder: 1
@@ -273,8 +273,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: -1805285119
+  m_SortingLayer: 1
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 52b87dad3eeef7c409bceee9683014dc, type: 3}
   m_Color: {r: 1, g: 0, b: 0, a: 0.8}
@@ -501,8 +501,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 110.43317, y: 124.593994, z: 45.737976}
-  m_Center: {x: 27.8378, y: 15.015625, z: -34.87964}
+  m_Size: {x: 160.36267, y: 124.594, z: 124.36183}
+  m_Center: {x: -135.66728, y: 15.015624, z: 4.4322867}
 --- !u!82 &930604261190994116
 AudioSource:
   m_ObjectHideFlags: 0
