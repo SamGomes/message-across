@@ -294,7 +294,7 @@ public class GameManager : MonoBehaviour
                 {
                     currButton.onClick.AddListener(delegate()
                     {
-                        settings.players[0].SetActiveButton(i, pointerPlaceholders[i].transform.position);
+                        currPlayer.SetActiveButton(i, pointerPlaceholders[i].transform.position);
                         UpdateButtonOverlaps();
                     });
                 }
