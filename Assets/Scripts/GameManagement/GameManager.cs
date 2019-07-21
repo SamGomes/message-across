@@ -189,9 +189,19 @@ public class GameManager : MonoBehaviour
     }
 
 
-    private void UpdateButtonOverlaps()
+    private void UpdateButtonOverlaps(Player currPlayer, int potentialIndex)
     {
-        foreach(Player player in settings.players)
+        isButtonOverlap = false;
+        foreach (Player player in settings.players)
+        {
+            if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
+            {
+                isButtonOverlap = true;
+                break;
+            }
+        }
+
+        foreach (Player player in settings.players)
         {
             foreach(GameObject obj in player.GetMaskedHalf())
             {
@@ -272,7 +282,6 @@ public class GameManager : MonoBehaviour
 
         performanceMetrics = new PerformanceMetrics();
         performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
-
         
         for (int i = 0; i < settings.players.Count; i++)
         {
@@ -285,17 +294,20 @@ public class GameManager : MonoBehaviour
 
             //set buttons for touch screen
             GameObject playerUI = playerUIs[i];
-            playerUI.GetComponentInChildren<Image>().color = currPlayer.GetButtonColor();
+            playerUI.GetComponentInChildren<Image>().color = currPlayer.GetButtonColor(); //set background color (background as first child)
             UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
-            for(int buttonI=0; buttonI < playerButtons.Length; buttonI++)
+            
+            for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
             {
                 UnityEngine.UI.Button currButton = playerButtons[buttonI];
-                if (i < pointerPlaceholders.Count)
+                if (buttonI < pointerPlaceholders.Count)
                 {
+                    int innerButtonI = buttonI; //for corotine to save the iterated values
                     currButton.onClick.AddListener(delegate()
                     {
-                        currPlayer.SetActiveButton(i, pointerPlaceholders[i].transform.position);
-                        UpdateButtonOverlaps();
+                        Debug.Log(innerButtonI);
+                        currPlayer.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
+                        UpdateButtonOverlaps(currPlayer, innerButtonI);
                     });
                 }
                 else
@@ -345,40 +357,23 @@ public class GameManager : MonoBehaviour
                     {
                         int potentialIndex = (currPlayer.GetActivebuttonIndex() - 1);
                         potentialIndex = (potentialIndex < 0)? 0 : potentialIndex;
-                        isButtonOverlap = false;
-                        foreach (Player player in settings.players)
-                        {
-                            if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
-                            {
-                                isButtonOverlap = true;
-                                break;
-                            }
-                        }
                         currPlayer.SetActiveButton(potentialIndex, pointerPlaceholders[potentialIndex].transform.position);
-                        UpdateButtonOverlaps();
+                        UpdateButtonOverlaps(currPlayer, potentialIndex);
                     }, false);
             inputManager.AddKeyBinding(
                     new List<KeyCode>() { keys[pointerPlaceholders.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                     {
                         int potentialIndex = (currPlayer.GetActivebuttonIndex() + 1);
                         potentialIndex = (potentialIndex > (pointerPlaceholders.Count - 1)) ? (pointerPlaceholders.Count - 1) : potentialIndex;
-                        isButtonOverlap = false;
-                        foreach (Player player in settings.players)
-                        {
-                            if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
-                            {
-                                isButtonOverlap = true;
-                                break;
-                            }
-                        }
                         currPlayer.SetActiveButton(potentialIndex, pointerPlaceholders[potentialIndex].transform.position);
-                        UpdateButtonOverlaps();
+                        UpdateButtonOverlaps(currPlayer, potentialIndex);
                     }, false);
 
             currPlayer.SetActiveButton(0, pointerPlaceholders[0].transform.position);
             currPlayer.SetScore(0);
         }
-        UpdateButtonOverlaps();
+
+        UpdateButtonOverlaps(settings.players[0], 0);
 
         ChangeGameParametrizations(true);
         
