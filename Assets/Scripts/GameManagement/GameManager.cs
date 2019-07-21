@@ -385,10 +385,10 @@ public class GameManager : MonoBehaviour
         ChangeGameParametrizations(true);
 
         
-        inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) {
+        //inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) {
             globalAudioManager.PlayClip("Audio/wordChangeBad");
             gameSceneManager.StartAndPauseGame();
-        }, false);
+        //}, false);
 
 
         Shuffle<ExercisesListWrapper>(settings.exercisesGroups);
