@@ -265,7 +265,7 @@ public class GameManager : MonoBehaviour
         ////exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
 
 
-        string path = Application.streamingAssetsPath + "/config.cfg";
+        string path = Application.streamingAssetsPath + "/configComp.cfg";
         string configText = "";
         if (path.Contains("://") || path.Contains(":///")) //url instead of path
         {
