@@ -40,6 +40,10 @@ public class Player
     public bool isCurrExerciseFinished;
     private string currWordState;
 
+    //log stuff
+    public int numGivePresses;
+    public int numTakePresses;
+
     public Player(List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB)
     {
         this.buttonRGB = buttonRGB;
@@ -185,7 +189,7 @@ public class Player
             gameManagerRef.StopCoroutine(currButtonLerp);
         }
 
-        currButtonLerp = Globals.LerpAnimation(marker, activeButtonPos, 3.5f);
+        currButtonLerp = Globals.LerpAnimation(marker, activeButtonPos, 10.0f);
         gameManagerRef.StartCoroutine(currButtonLerp);
 
         this.activeButtonIndex = activeButtonIndex;

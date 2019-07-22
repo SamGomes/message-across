@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
@@ -139,6 +140,7 @@ public class GameManager : MonoBehaviour
     
     private float timeLeft;
 
+
     public void PauseGame()
     {
         //Time.timeScale = 0;
@@ -208,6 +210,16 @@ public class GameManager : MonoBehaviour
                 obj.SetActive(!isButtonOverlap);
             }
         }
+    }
+
+    void triggerGiveOrTake(Player currPlayer, Globals.KeyInteractionType iType)
+    {
+        currPlayer.SetActiveInteraction(iType);
+        int activeIndex = currPlayer.GetActivebuttonIndex();
+        currPlayer.GetMarker().GetComponentInChildren<Button>().RegisterButtonPress(currPlayer);
+
+        //if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
+        //else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
     }
 
 
@@ -282,7 +294,8 @@ public class GameManager : MonoBehaviour
 
         performanceMetrics = new PerformanceMetrics();
         performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
-        
+       
+
         for (int i = 0; i < settings.players.Count; i++)
         {
             Player currPlayer = settings.players[i];
@@ -305,7 +318,6 @@ public class GameManager : MonoBehaviour
                     int innerButtonI = buttonI; //for corotine to save the iterated values
                     currButton.onClick.AddListener(delegate()
                     {
-                        Debug.Log(innerButtonI);
                         currPlayer.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
                         UpdateButtonOverlaps(currPlayer, innerButtonI);
                     });
@@ -313,13 +325,15 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     int j = buttonI - pointerPlaceholders.Count;
-                    Globals.KeyInteractionType currInt = (Globals.KeyInteractionType) j;
-                    currButton.onClick.AddListener(delegate ()
+                    Globals.KeyInteractionType iType = (Globals.KeyInteractionType) j;
+                    EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
+                    var pointerDown = new EventTrigger.Entry();
+                    pointerDown.eventID = EventTriggerType.PointerDown;
+                    pointerDown.callback.AddListener(delegate (BaseEventData eventData)
                     {
-                        currPlayer.SetActiveInteraction(currInt);
-                        int activeIndex = currPlayer.GetActivebuttonIndex();
-                        currPlayer.GetMarker().GetComponentInChildren<Button>().RegisterButtonPress(currPlayer);
+                        triggerGiveOrTake(currPlayer, iType);
                     });
+                    trigger.triggers.Add(pointerDown);
                 }
                 
             }
@@ -343,13 +357,11 @@ public class GameManager : MonoBehaviour
             isButtonOverlap = true;
             for (int j = 1; j < Globals.keyInteractionTypes.Length ; j++)
             {
-                Globals.KeyInteractionType currInt = (Globals.KeyInteractionType) j;
+                Globals.KeyInteractionType iType = (Globals.KeyInteractionType) j;
                 inputManager.AddKeyBinding(
                     new List<KeyCode>(){ keys[j] }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
                     {
-                        currPlayer.SetActiveInteraction(currInt);
-                        int activeIndex = currPlayer.GetActivebuttonIndex();
-                        currPlayer.GetMarker().GetComponentInChildren<Button>().RegisterButtonPress(currPlayer);
+                        triggerGiveOrTake(currPlayer, iType);
                     }, false);
             }
             inputManager.AddKeyBinding(
@@ -437,12 +449,17 @@ public class GameManager : MonoBehaviour
             ////    { "playerCompPercentage", simultaneousHitsPercentage.ToString() },
             ////    { "playerSelfPercentage", playerHitsPercentage.ToString() }
             ////}));
-            //StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
-            //    { "playerName", player.GetName() },
-            //    { "currWord", currWordStates[player] },
-            //    { "playerHitsPercentage", playerHitsPercentage.ToString() },
-            //    { "simultaneousHitsPercentage", simultaneousHitsPercentage.ToString() }
-            //}));
+            StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
+                { "name", player.GetName() },
+                { "color", player.GetButtonColor().ToString() },
+                { "currWord", player.GetCurrExercise().targetWord },
+                { "score", player.GetScore().ToString() },
+                //{ "activeButtonIndex", player.GetActivebuttonIndex() },
+                { "numberOfGives", player.numGivePresses.ToString() },
+                { "numberOfTakes", player.numTakePresses.ToString() }
+            }));
+
+
         }
         
     }
