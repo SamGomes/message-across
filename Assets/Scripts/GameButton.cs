@@ -16,6 +16,8 @@ public class GameButton : MonoBehaviour {
     private HashSet<Player> currHitters;
 
     private bool isBeingPressed;
+
+    private Collider currCollidingLetter;
     
     public void RegisterButtonPress(Player hitter) {
         currHitters.Add(hitter);
@@ -33,6 +35,7 @@ public class GameButton : MonoBehaviour {
 
     void Start()
     {
+        currCollidingLetter = null;
         buttonAudioManager = new AudioManager();
         gameManager = GameObject.FindObjectOfType<GameManager>();
         currHitters = new HashSet<Player>();  
@@ -52,26 +55,29 @@ public class GameButton : MonoBehaviour {
         }
         if(!isBeingPressed)
             this.keyPressed = false;
+
+        if (this.isClicked && this.currCollidingLetter!=null)
+        {
+            buttonAudioManager.PlayClip("Audio/note");
+            GameObject letter = currCollidingLetter.gameObject;
+            letter.transform.localScale *= 1.2f;
+            gameManager.RecordHit(currCollidingLetter.gameObject.GetComponent<Letter>().letterText, letter, currHitters);
+            currHitters.Clear();
+            this.currCollidingLetter = null;
+        }
     }
 
 
     void OnTriggerEnter(Collider otherObject)
     {
-
         if (otherObject.GetComponent<Letter>() == null){
             return;
         }
-        if (this.isClicked)
-        {
-            buttonAudioManager.PlayClip("Audio/note");
-            
-            GameObject letter = otherObject.gameObject;
-            
-            letter.transform.localScale *= 1.2f;
-
-            gameManager.RecordHit(otherObject.gameObject.GetComponent<Letter>().letterText, letter, currHitters);
-
-            currHitters.Clear();
-        }
+        this.currCollidingLetter = otherObject;
+    }
+    
+    void OnTriggerExit(Collider otherObject)
+    {
+        this.currCollidingLetter = null;
     }
 }

@@ -398,17 +398,14 @@ public class GameManager : MonoBehaviour
         }
 
         UpdateButtonOverlaps(settings.players[0], 0);
-
         ChangeGameParametrizations(true);
         
-
         performanceMetrics.multiplayerButtonHits = 0;
         isGameplayStarted = true;
 
         exerciseGroupIndex = UnityEngine.Random.Range(0, settings.exercisesGroups.Count);
         ChangeGameParametrizations(true);
 
-        
         //inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) {
             globalAudioManager.PlayClip("Audio/wordChangeBad");
             gameSceneManager.StartAndPauseGame();
