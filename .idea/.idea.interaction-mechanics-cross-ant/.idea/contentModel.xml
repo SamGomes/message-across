@@ -11,6 +11,10 @@
           <e p="Animations" t="Include">
             <e p="empty.txt" t="Include" />
           </e>
+          <e p="Shaders" t="Include">
+            <e p="3DSprite.shader" t="Include" />
+            <e p="3DText.shader" t="Include" />
+          </e>
           <e p="Textures" t="Include">
             <e p="empty.txt" t="Include" />
           </e>
@@ -25,7 +29,7 @@
             <e p="Exercise.cs" t="Include" />
             <e p="Player.cs" t="Include" />
           </e>
-          <e p="Button.cs" t="Include" />
+          <e p="GameButton.cs" t="Include" />
           <e p="GameManagement" t="Include">
             <e p="AudioManager.cs" t="Include" />
             <e p="GameManager.cs" t="Include" />

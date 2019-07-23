@@ -212,15 +212,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void triggerGiveOrTake(Player currPlayer, Globals.KeyInteractionType iType)
-    {
-        currPlayer.SetActiveInteraction(iType);
-        int activeIndex = currPlayer.GetActivebuttonIndex();
-        currPlayer.GetMarker().GetComponentInChildren<Button>().RegisterButtonPress(currPlayer);
-
-        //if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
-        //else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
-    }
 
 
     private IEnumerator YieldedStart()
@@ -327,13 +318,30 @@ public class GameManager : MonoBehaviour
                     int j = buttonI - pointerPlaceholders.Count;
                     Globals.KeyInteractionType iType = (Globals.KeyInteractionType) j;
                     EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
-                    var pointerDown = new EventTrigger.Entry();
+                    EventTrigger.Entry pointerDown = new EventTrigger.Entry();
                     pointerDown.eventID = EventTriggerType.PointerDown;
                     pointerDown.callback.AddListener(delegate (BaseEventData eventData)
                     {
-                        triggerGiveOrTake(currPlayer, iType);
+                        Debug.Log("Pointer down");
+                        currPlayer.SetActiveInteraction(iType);
+                        int activeIndex = currPlayer.GetActivebuttonIndex();
+                        currPlayer.GetMarker().GetComponentInChildren<GameButton>().RegisterButtonDown(currPlayer);
+                        //if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
+                        //else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
                     });
                     trigger.triggers.Add(pointerDown);
+                    EventTrigger.Entry pointerUp = new EventTrigger.Entry();
+                    pointerUp.eventID = EventTriggerType.PointerUp;
+                    pointerUp.callback.AddListener(delegate (BaseEventData eventData)
+                    {
+                        Debug.Log("Pointer up");
+                        currPlayer.SetActiveInteraction(iType);
+                        int activeIndex = currPlayer.GetActivebuttonIndex();
+                        currPlayer.GetMarker().GetComponentInChildren<GameButton>().RegisterButtonUp(currPlayer);
+                        //if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
+                        //else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
+                    });
+                    trigger.triggers.Add(pointerUp);
                 }
                 
             }
@@ -361,7 +369,11 @@ public class GameManager : MonoBehaviour
                 inputManager.AddKeyBinding(
                     new List<KeyCode>(){ keys[j] }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
                     {
-                        triggerGiveOrTake(currPlayer, iType);
+                        currPlayer.SetActiveInteraction(iType);
+                        int activeIndex = currPlayer.GetActivebuttonIndex();
+                        currPlayer.GetMarker().GetComponentInChildren<GameButton>().RegisterButtonPress(currPlayer);
+                        //if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
+                        //else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
                     }, false);
             }
             inputManager.AddKeyBinding(

@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 
-public class Button : MonoBehaviour {
+public class GameButton : MonoBehaviour {
 
     private GameManager gameManager;
 
@@ -15,9 +15,20 @@ public class Button : MonoBehaviour {
 
     private HashSet<Player> currHitters;
 
+    private bool isBeingPressed;
+    
     public void RegisterButtonPress(Player hitter) {
         currHitters.Add(hitter);
         this.keyPressed = true;
+    }
+    public void RegisterButtonDown(Player hitter) {
+        currHitters.Add(hitter);
+        this.keyPressed = true;
+        this.isBeingPressed = true;
+    }
+    public void RegisterButtonUp(Player hitter) {
+        currHitters.Remove(hitter);
+        this.isBeingPressed = false;
     }
 
     void Start()
@@ -39,7 +50,8 @@ public class Button : MonoBehaviour {
             this.isClicked = false;
             this.gameObject.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
         }
-        this.keyPressed = false;
+        if(!isBeingPressed)
+            this.keyPressed = false;
     }
 
 

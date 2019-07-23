@@ -21,7 +21,6 @@
       <Path>Temp</Path>
       <Path>build</Path>
       <Path>crossAnt</Path>
-      <Path>docs</Path>
       <Path>obj</Path>
     </explicitExcludes>
   </component>
