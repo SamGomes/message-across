@@ -29,7 +29,7 @@ public class GameButton : MonoBehaviour {
         this.isBeingPressed = true;
     }
     public void RegisterButtonUp(Player hitter) {
-        currHitters.Remove(hitter);
+        //currHitters.Remove(hitter);
         this.isBeingPressed = false;
     }
 

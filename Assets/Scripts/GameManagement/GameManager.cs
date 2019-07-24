@@ -315,14 +315,13 @@ public class GameManager : MonoBehaviour
                 }
                 else
                 {
-                    int j = buttonI - pointerPlaceholders.Count;
+                    int j = buttonI - pointerPlaceholders.Count + 1;
                     Globals.KeyInteractionType iType = (Globals.KeyInteractionType) j;
                     EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
                     EventTrigger.Entry pointerDown = new EventTrigger.Entry();
                     pointerDown.eventID = EventTriggerType.PointerDown;
                     pointerDown.callback.AddListener(delegate (BaseEventData eventData)
                     {
-                        Debug.Log("Pointer down");
                         currPlayer.SetActiveInteraction(iType);
                         int activeIndex = currPlayer.GetActivebuttonIndex();
                         currPlayer.GetMarker().GetComponentInChildren<GameButton>().RegisterButtonDown(currPlayer);
@@ -334,7 +333,6 @@ public class GameManager : MonoBehaviour
                     pointerUp.eventID = EventTriggerType.PointerUp;
                     pointerUp.callback.AddListener(delegate (BaseEventData eventData)
                     {
-                        Debug.Log("Pointer up");
                         currPlayer.SetActiveInteraction(iType);
                         int activeIndex = currPlayer.GetActivebuttonIndex();
                         currPlayer.GetMarker().GetComponentInChildren<GameButton>().RegisterButtonUp(currPlayer);
