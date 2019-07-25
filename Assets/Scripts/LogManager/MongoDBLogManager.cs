@@ -14,7 +14,6 @@ public class MongoDBLogManager : LogManager
     Hashtable postHeader;
     private List<PendingCall> pendingCalls;
     private UnityWebRequestAsyncOperation currRequest;
-    
 
     private struct PendingCall
     {

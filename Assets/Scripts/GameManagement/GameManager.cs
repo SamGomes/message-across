@@ -37,6 +37,7 @@ public static class Globals
     public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Globals.ButtonId));
     
     public static int currLevelId = 0;
+    public static string gameId = "";
 
 
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
@@ -216,6 +217,12 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator YieldedStart()
     {
+        for(int i=0; i < 20; i++)
+        {
+            Globals.gameId += (char)('A' + UnityEngine.Random.Range(0, 26));
+        }
+
+
         globalAudioManager = new AudioManager();
 
         logManager = new MongoDBLogManager();
@@ -325,8 +332,8 @@ public class GameManager : MonoBehaviour
                         currPlayer.SetActiveInteraction(iType);
                         int activeIndex = currPlayer.GetActivebuttonIndex();
                         currPlayer.GetMarker().GetComponentInChildren<GameButton>().RegisterButtonDown(currPlayer);
-                        //if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
-                        //else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
+                        if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
+                        else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
                     });
                     trigger.triggers.Add(pointerDown);
                     EventTrigger.Entry pointerUp = new EventTrigger.Entry();
@@ -336,8 +343,8 @@ public class GameManager : MonoBehaviour
                         currPlayer.SetActiveInteraction(iType);
                         int activeIndex = currPlayer.GetActivebuttonIndex();
                         currPlayer.GetMarker().GetComponentInChildren<GameButton>().RegisterButtonUp(currPlayer);
-                        //if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
-                        //else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
+                        if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
+                        else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
                     });
                     trigger.triggers.Add(pointerUp);
                 }
@@ -365,13 +372,22 @@ public class GameManager : MonoBehaviour
             {
                 Globals.KeyInteractionType iType = (Globals.KeyInteractionType) j;
                 inputManager.AddKeyBinding(
-                    new List<KeyCode>(){ keys[j] }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
+                    new List<KeyCode>(){ keys[j] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
                     {
                         currPlayer.SetActiveInteraction(iType);
                         int activeIndex = currPlayer.GetActivebuttonIndex();
-                        currPlayer.GetMarker().GetComponentInChildren<GameButton>().RegisterButtonPress(currPlayer);
-                        //if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
-                        //else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
+                        currPlayer.GetMarker().GetComponentInChildren<GameButton>().RegisterButtonDown(currPlayer);
+                        if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
+                        else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
+                    }, false);
+                inputManager.AddKeyBinding(
+                    new List<KeyCode>() { keys[j] }, InputManager.ButtonPressType.UP, delegate (List<KeyCode> triggeredKeys)
+                    {
+                        currPlayer.SetActiveInteraction(iType);
+                        int activeIndex = currPlayer.GetActivebuttonIndex();
+                        currPlayer.GetMarker().GetComponentInChildren<GameButton>().RegisterButtonUp(currPlayer);
+                        if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
+                        else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
                     }, false);
             }
             inputManager.AddKeyBinding(
@@ -445,40 +461,17 @@ public class GameManager : MonoBehaviour
         //spawn questionnaires before changing word
         foreach (Player player in settings.players)
         {
-            ////record metrics
-            //int totalButtonHits = performanceMetrics.singlebuttonHits[player] + performanceMetrics.multiplayerButtonHits;
-            //float playerHitsPercentage = ((float)performanceMetrics.singlebuttonHits[player] / (float)totalButtonHits) * 100.0f;
-            //float simultaneousHitsPercentage = ((float)performanceMetrics.multiplayerButtonHits / (float)totalButtonHits) * 100.0f;
-            ////StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
-            ////    { "playerName", player.GetName() },
-            ////    { "currWord", currWordState },
-            ////    { "playerCollPercentage", simultaneousHitsPercentage.ToString() },
-            ////    { "playerCompPercentage", simultaneousHitsPercentage.ToString() },
-            ////    { "playerSelfPercentage", playerHitsPercentage.ToString() }
-            ////}));
             StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
+                { "gameId", Globals.gameId.ToString() },
                 { "name", player.GetName() },
                 { "color", player.GetButtonColor().ToString() },
                 { "currWord", player.GetCurrExercise().targetWord },
                 { "score", player.GetScore().ToString() },
-                //{ "activeButtonIndex", player.GetActivebuttonIndex() },
-                { "numberOfGives", player.numGivePresses.ToString() },
-                { "numberOfTakes", player.numTakePresses.ToString() }
+                { "numberOfGivePresses", player.numGivePresses.ToString() },
+                { "numberOfTakePresses", player.numTakePresses.ToString() }
             }));
-
-
         }
         
-    }
-
-    private void PoppupQuestionnaires()
-    {
-        //gameSceneManager.PauseForQuestionnaires();
-        ////spawn questionnaires before changing word
-        //foreach (Player player in settings.players)
-        //{
-        //    Application.OpenURL("https://docs.google.com/forms/d/e/1FAIpQLSeM3Xn5qDBdX7QCtyrPILLbqpYj3ueDcLa_-9CbxCPzxVsMzg/viewform?usp=pp_url&entry.100873100=" + player.GetName()); //spawn questionaires
-        //}
     }
 
     void ChangeLevel()
@@ -535,11 +528,10 @@ public class GameManager : MonoBehaviour
         timePanelText.text =  (int)((timeLeft/ settings.initialTimeLeft)*100) + " %";
     }
 
-    private void OnApplicationQuit()
-    {
-        //RecordMetrics();
-        //PoppupQuestionnaires();
-    }
+    //private void OnApplicationQuit()
+    //{
+    //    RecordMetrics();
+    //}
     
 
     private void ChangeGameParametrizations(bool firstTimeCall)
