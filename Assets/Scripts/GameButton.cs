@@ -20,15 +20,27 @@ public class GameButton : MonoBehaviour {
     private Collider currCollidingLetter;
     
     public void RegisterButtonPress(Player hitter) {
+        //if (hitter.GetCurrNumPossibleActionsPerLevel() < 1)
+        //{
+        //    return;
+        //}
         currHitters.Add(hitter);
         this.keyPressed = true;
     }
     public void RegisterButtonDown(Player hitter) {
+        //if (hitter.GetCurrNumPossibleActionsPerLevel() < 1)
+        //{
+        //    return;
+        //}
         currHitters.Add(hitter);
         this.keyPressed = true;
         this.isBeingPressed = true;
     }
     public void RegisterButtonUp(Player hitter) {
+        //if (hitter.GetCurrNumPossibleActionsPerLevel() < 1)
+        //{
+        //    return;
+        //}
         //currHitters.Remove(hitter);
         this.isBeingPressed = false;
     }

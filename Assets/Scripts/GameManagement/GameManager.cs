@@ -58,6 +58,9 @@ public class ScoreValue
 {
     public bool usefulForMe;
     public bool usefulForOther;
+
+    public int inLead;
+
     public int myValue;
     public int otherValue;
 }
@@ -82,7 +85,7 @@ public struct GameSettings
     public List<ExercisesListWrapper> exercisesGroups;
     public List<Player> players;
     public int gameId;
-    public int initialTimeLeft;
+    //public int initialTimeLeft;
 
     public ScoreSystem scoreSystem;
 }
@@ -144,20 +147,27 @@ public class GameManager : MonoBehaviour
 
     public void PauseGame()
     {
-        //Time.timeScale = 0;
         foreach(LetterSpawner ls in letterSpawners)
         {
+            foreach(Letter letter in ls.GetComponentsInChildren<Letter>())
+            {
+                letter.isTranslationEnabled = false;
+            }
             ls.enabled = false;
         }
+
         
         isGameplayPaused = true;
     }
 
     public void ResumeGame()
     {
-        //Time.timeScale = 1;
         foreach (LetterSpawner ls in letterSpawners)
         {
+            foreach (Letter letter in ls.GetComponentsInChildren<Letter>())
+            {
+                letter.isTranslationEnabled = true;
+            }
             ls.enabled = true;
         }
         isGameplayPaused = false;
@@ -222,48 +232,15 @@ public class GameManager : MonoBehaviour
             Globals.gameId += (char)('A' + UnityEngine.Random.Range(0, 26));
         }
 
-
         globalAudioManager = new AudioManager();
 
         logManager = new MongoDBLogManager();
         logManager.InitLogs(this);
-
-        //currExercises = new Dictionary<Player, Exercise>();
-        //currWordStates = new Dictionary<Player, string>();
-
-
+        
         isGameplayPaused = false;
         gameSceneManager.MainSceneLoadedNotification();
-
-        //settings = new GameSettings();
-
-        //settings.maxSimultaneousKeyPresses = 2;
-
-        //settings.players = new List<Player>();
-        //settings.players.Add(new Player(new List<KeyCode>() { KeyCode.Q, KeyCode.W, KeyCode.E }, new List<string> { "YButtonJoy1", "BButtonJoy1" }));
-        //settings.players.Add(new Player(new List<KeyCode>() { KeyCode.I, KeyCode.O, KeyCode.P }, new List<string> { "YButtonJoy2", "BButtonJoy2" }));
-        ////players.Add(new Player(Utilities.PlayerId.PLAYER_2, new KeyCode[] { KeyCode.V, KeyCode.B, KeyCode.N }, new string[] { "YButtonJoy3" , "BButtonJoy3" }));
-
-
-        //settings.exercises = new List<Exercise>();
-        //settings.exercises.Add(new Exercise("Fck yourself:_", "HFESUIHFUESIGHUFISEHUFESIHFESI"));
-        ////exercises.Add(new Exercise("Word to match: CAKE \n Your Word:_", "CAKE"));
-        ////exercises.Add(new Exercise("Word to match: BANANA \n Your Word:_", "BANANA"));
-        ////exercises.Add(new Exercise("Word to match: PIE \n Your Word:_", "PIE"));
-        ////exercises.Add(new Exercise("Word to match: PIZZA \n Your Word:_", "PIZZA"));
-        ////exercises.Add(new Exercise("Word to match: CROISSANT \n Your Word:_", "CROISSANT"));
-        ////exercises.Add(new Exercise("Word to match: DONUT \n Your Word:_", "DONUT"));
-        ////exercises.Add(new Exercise("Word to match: CHERRY \n Your Word:_", "CHERRY"));
-        ////exercises.Add(new Exercise("Word to match: XMASCOOKIES \n Your Word:_", "XMASCOOKIES"));
-        ////exercises.Add(new Exercise("Word to match: KIWI \n Your Word:_", "KIWI"));
-        ////exercises.Add(new Exercise("Word to match: QUICHE \n Your Word:_", "QUICHE"));
-        ////exercises.Add(new Exercise("Word to match: MANGO \n Your Word:_", "MANGO"));
-        ////exercises.Add(new Exercise("Word to match: FISH \n Your Word:_", "FISH"));
-        ////exercises.Add(new Exercise("Word to match: VANILLA \n Your Word:_", "VANILLA"));
-        ////exercises.Add(new Exercise("Word to match: JELLY \n Your Word:_", "JELLY"));
-
-
-        string path = Application.streamingAssetsPath + "/configComp.cfg";
+        
+        string path = Application.streamingAssetsPath + "/config.cfg";
         string configText = "";
         if (path.Contains("://") || path.Contains(":///")) //url instead of path
         {
@@ -279,12 +256,10 @@ public class GameManager : MonoBehaviour
         //string json = JsonUtility.ToJson(settings, true);
         settings = JsonUtility.FromJson<GameSettings>(configText);
 
-        //Application.targetFrameRate = 60;
+        //timeLeft = settings.initialTimeLeft;
+        //timePanel.GetComponent<Animator>().StopPlayback();
 
-        timeLeft = settings.initialTimeLeft;
-        timePanel.GetComponent<Animator>().StopPlayback();
-
-        InvokeRepeating("TimeDependentEvents", 0.0f, 1.0f);
+        //InvokeRepeating("TimeDependentEvents", 0.0f, 1.0f);
 
 
         gameSceneManager.StartAndPauseGame(); //for the initial screen
@@ -442,17 +417,10 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Debug.Log("multi: " + performanceMetrics.multiplayerButtonHits);
         if (isGameplayPaused || !isGameplayStarted)
         {
             return;
         }
-
-        ////if no lifes end game immediately
-        //if (lifes < 1)
-        //{
-        //    gameSceneManager.EndGame();
-        //}
         
     }
 
@@ -474,59 +442,65 @@ public class GameManager : MonoBehaviour
         
     }
 
-    void ChangeLevel()
+    void ChangeLevel(bool areWordsUnfinished)
     {
-        if (timeLeft > 1)
+        if (areWordsUnfinished)
+        {
+            globalAudioManager.PlayClip("Audio/wordChangeBad");
+            emoji.GetComponent<Animator>().Play("Sad");
+        }
+        else
         {
 
             globalAudioManager.PlayClip("Audio/wordChangeGood");
             emoji.GetComponent<Animator>().Play("Smiling");
         }
-        else
+        //timeLeft = settings.initialTimeLeft;
+
+        foreach(Player player in settings.players)
         {
-            globalAudioManager.PlayClip("Audio/wordChangeBad");
-            emoji.GetComponent<Animator>().Play("Sad");
+            player.ResetNumPossibleActions();
         }
-        timeLeft = settings.initialTimeLeft;
+
         RecordMetrics();
         ChangeGameParametrizations(false);
     }
 
-    void TimeDependentEvents()
-    {
-        if (isGameplayPaused)
-        {
-            return;
-        }
+    //void TimeDependentEvents()
+    //{
+    //    if (isGameplayPaused)
+    //    {
+    //        return;
+    //    }
 
-        Color panelColor = Color.white;
-        Color panelTextColor = Color.white;
-        if (timeLeft > 1){
-            timeLeft--;
+    //    Color panelColor = Color.white;
+    //    Color panelTextColor = Color.white;
+    //    if (timeLeft > 1){
+    //        timeLeft--;
 
-            if(timeLeft < 0.1f*settings.initialTimeLeft)
-            {
-                globalAudioManager.PlayClip("Audio/timeRunningOut");
-                timePanel.GetComponent<Animator>().Play(0);
-                panelColor = Color.red;
-                panelTextColor = Color.white;
-            }
-            else
-            {
-                globalAudioManager.StopCurrentClip();
-                timePanel.GetComponent<Animator>().StopPlayback();
-            }
-        }
-        else
-        {
-            ChangeLevel();
-        }
-        TextMesh timePanelText = timePanel.GetComponentInChildren<TextMesh>();
-        SpriteRenderer timePanelImage = timePanel.GetComponentInChildren<SpriteRenderer>();
-        timePanelImage.color = panelColor;
-        timePanelText.color = panelTextColor;
-        timePanelText.text =  (int)((timeLeft/ settings.initialTimeLeft)*100) + " %";
-    }
+    //        if(timeLeft < 0.1f*settings.initialTimeLeft)
+    //        {
+    //            globalAudioManager.PlayClip("Audio/timeRunningOut");
+    //            timePanel.GetComponent<Animator>().Play(0);
+    //            panelColor = Color.red;
+    //            panelTextColor = Color.white;
+    //        }
+    //        else
+    //        {
+    //            globalAudioManager.StopCurrentClip();
+    //            timePanel.GetComponent<Animator>().StopPlayback();
+    //        }
+    //    }
+    //    else
+    //    {
+    //        ChangeLevel();
+    //    }
+    //    TextMesh timePanelText = timePanel.GetComponentInChildren<TextMesh>();
+    //    SpriteRenderer timePanelImage = timePanel.GetComponentInChildren<SpriteRenderer>();
+    //    timePanelImage.color = panelColor;
+    //    timePanelText.color = panelTextColor;
+    //    timePanelText.text =  (int)((timeLeft/ settings.initialTimeLeft)*100) + " %";
+    //}
 
     //private void OnApplicationQuit()
     //{
@@ -607,6 +581,15 @@ public class GameManager : MonoBehaviour
     {
         foreach (Player player in currHitters)
         {
+            if (player.GetCurrNumPossibleActionsPerLevel() > 0)
+            {
+                player.DecreasePossibleActionsPerLevel();
+            }
+            else
+            {
+                continue;
+            }
+
             bool usefulForMe = false;
             bool usefulForOther = false;
 
@@ -682,8 +665,14 @@ public class GameManager : MonoBehaviour
         }
 
         bool areWordsUnfinished = false;
+        bool arePlayersWithoutActions = true;
         foreach (Player player in settings.players)
         {
+            if (player.GetCurrNumPossibleActionsPerLevel() > 0)
+            {
+                arePlayersWithoutActions = false;
+            }
+
             string currWordState = player.GetCurrWordState();
             string currTargetWord = player.GetCurrExercise().targetWord;
             if (currWordState.CompareTo(currTargetWord) != 0)
@@ -709,9 +698,9 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        if (!areWordsUnfinished)
+        if (!areWordsUnfinished || arePlayersWithoutActions)
         {
-            ChangeLevel();
+            ChangeLevel(areWordsUnfinished);
         }
 
 

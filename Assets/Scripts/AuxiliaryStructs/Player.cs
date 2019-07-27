@@ -19,14 +19,22 @@ public class Player
 
     [SerializeField]
     private List<string> myButtons;
-   
+
+    [SerializeField]
+    private int numPossibleActionsPerLevel;
+
+    private int currNumPossibleActionsPerLevel;
+
     private int score;
     private int activeButtonIndex;
 
     private Globals.KeyInteractionType activeInteraction;
 
     private GameObject wordPanel;
-    private GameObject scorePanel;
+    private GameObject statePanel;
+    private Text possibleActionsText;
+    private Text scoreText;
+    private Text nameText;
 
     private GameObject marker;
     private List<GameObject> maskedHalf;
@@ -44,15 +52,18 @@ public class Player
     public int numGivePresses;
     public int numTakePresses;
 
-    public Player(List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB)
+    public Player(List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB, int numPossibleActionsPerLevel)
     {
         this.buttonRGB = buttonRGB;
 
         this.myKeys = myKeys;
         this.myButtons = myButtons;
+
+        this.numPossibleActionsPerLevel = numPossibleActionsPerLevel;
+        this.currNumPossibleActionsPerLevel = numPossibleActionsPerLevel;
     }
 
-    public void Init(GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject wordPanel, GameObject scorePanel, bool isTopMask)
+    public void Init(GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject wordPanel, GameObject statePanel, bool isTopMask)
     {
         //this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
         this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 0.8f);
@@ -70,13 +81,18 @@ public class Player
         maskedHalf.Add((isTopMask == true) ? marker.transform.Find("trackTH").gameObject : marker.transform.Find("trackBH").gameObject);
 
         this.wordPanel = wordPanel;
-        this.scorePanel = scorePanel;
+        this.statePanel = statePanel;
+        this.possibleActionsText = statePanel.transform.Find("possibleActionsText").GetComponent<Text>();
+        this.scoreText = statePanel.transform.Find("scoreText").GetComponent<Text>();
+        this.nameText = statePanel.transform.Find("nameText").GetComponent<Text>();
 
 
-        scorePanel.GetComponentInChildren<Image>().color = this.buttonColor;
+        statePanel.GetComponentInChildren<Image>().color = this.buttonColor;
 
         this.name = "";
         this.score = -1;
+
+        ResetNumPossibleActions();
     }
     
     public void SetCurrExercise(Exercise newExercise)
@@ -128,9 +144,8 @@ public class Player
             this.score = score;
 
             //update UI
-            Text playerPanelText = scorePanel.GetComponentInChildren<Text>();
-            playerPanelText.text = "Player " + name + " Score: " + score;
-            scorePanel.GetComponent<Animator>().Play(0);
+            scoreText.text = "Score: " + score;
+            statePanel.GetComponent<Animator>().Play(0);
         }
 
     }
@@ -138,18 +153,10 @@ public class Player
     {
         return this.score;
     }
-
-    public void SetScorePanel(GameObject scorePanel)
-    {
-        this.scorePanel = scorePanel;
-    }
+    
     public void SetWordPanel(GameObject wordPanel)
     {
         this.wordPanel = wordPanel;
-    }
-    public GameObject GetScorePanel()
-    {
-        return this.scorePanel;
     }
     public GameObject GetWordPanel()
     {
@@ -173,8 +180,7 @@ public class Player
         this.name = name;
 
         //update UI
-        Text playerPanelText = scorePanel.GetComponentInChildren<Text>();
-        playerPanelText.text = "Player " + name + " Score: " + score;
+        nameText.text = "Player " + name;
     }
 
     public int GetActivebuttonIndex()
@@ -220,4 +226,24 @@ public class Player
         return this.marker;
     }
 
+    public void ResetNumPossibleActions()
+    {
+        this.currNumPossibleActionsPerLevel = numPossibleActionsPerLevel;
+        //update UI
+        possibleActionsText.text = "Actions: " + numPossibleActionsPerLevel;
+        statePanel.GetComponent<Animator>().Play(0);
+    }
+
+    public int GetCurrNumPossibleActionsPerLevel()
+    {
+        return this.currNumPossibleActionsPerLevel;
+    }
+
+    public void DecreasePossibleActionsPerLevel()
+    {
+        currNumPossibleActionsPerLevel--;
+        //update UI
+        possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
+        statePanel.GetComponent<Animator>().Play(0);
+    }
 }
