@@ -603,7 +603,7 @@ public class GameManager : MonoBehaviour
         UnityEngine.Object.Destroy(letter);
     }
 
-    public void RecordHit(char letterText, GameObject letter, HashSet<Player> currHitters)
+    public void RecordHit(char letterText, GameObject letter, List<Player> currHitters)
     {
         foreach (Player player in currHitters)
         {
@@ -678,7 +678,7 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            
+            break; // only the first one gets the points (maintained in the for loop for the change to be easily undone)
         }
 
         bool areWordsUnfinished = false;

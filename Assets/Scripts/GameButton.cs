@@ -13,7 +13,7 @@ public class GameButton : MonoBehaviour {
 
     private AudioManager buttonAudioManager;
 
-    private HashSet<Player> currHitters;
+    private List<Player> currHitters;
 
     private bool isBeingPressed;
 
@@ -38,7 +38,7 @@ public class GameButton : MonoBehaviour {
         currCollidingLetter = null;
         buttonAudioManager = new AudioManager();
         gameManager = GameObject.FindObjectOfType<GameManager>();
-        currHitters = new HashSet<Player>();  
+        currHitters = new List<Player>();  
     }
 
     // Update is called once per frame
