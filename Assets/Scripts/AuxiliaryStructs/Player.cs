@@ -38,11 +38,11 @@ public class Player
 
     private GameObject marker;
     private List<GameObject> maskedHalf;
+    private GameButton gameButton;
 
     private GameManager gameManagerRef;
 
     private IEnumerator currButtonLerp;
-
 
     private Exercise currExercise;
     public bool isCurrExerciseFinished;
@@ -93,11 +93,13 @@ public class Player
         this.score = -1;
 
         ResetNumPossibleActions();
+
+        this.gameButton = marker.GetComponentInChildren<GameButton>();
+        this.gameButton.SetOwner(this);
     }
     
     public void SetCurrExercise(Exercise newExercise)
     {
-        //currWordState = "";
         currExercise = newExercise;
     }
     public Exercise GetCurrExercise()
@@ -245,5 +247,10 @@ public class Player
         //update UI
         possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
         statePanel.GetComponent<Animator>().Play(0);
+    }
+
+    public GameButton GetGameButton()
+    {
+        return this.gameButton;
     }
 }
