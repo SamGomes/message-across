@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
@@ -510,7 +511,7 @@ public class GameManager : MonoBehaviour
             
             //displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
             player.SetCurrExercise(newExercise);
-            player.SetCurrWordState("");
+            player.InitCurrWordState();
 
             //animate transition
             player.GetWordPanel().GetComponentInChildren<Animator>().Play(0);
@@ -520,15 +521,33 @@ public class GameManager : MonoBehaviour
 
     private bool TestAndExecuteHit(bool execute, char letterText, GameObject letter, Player player)
     {
-        string currWordState = player.GetCurrWordState() + letterText;
+        string currWordState = player.GetCurrWordState();
         string currTargetWord = player.GetCurrExercise().targetWord;
 
         //check the utility of word
-        bool usefulForMe = (currWordState.Length <= currTargetWord.Length && currTargetWord[currWordState.Length - 1] == currWordState[currWordState.Length - 1]);
+        bool usefulForMe = (currWordState.Length <= currTargetWord.Length && currTargetWord.Contains(letterText));
+
 
         if (execute && usefulForMe)
         {
-            player.SetCurrWordState(player.GetCurrWordState() + letterText);
+            int changeIndex = currTargetWord.IndexOf(letterText);
+            while(true)
+            {
+                if (changeIndex == -1)
+                {
+                    return false;
+                }else if(currWordState[changeIndex] == '_')
+                {
+                    break;
+                }
+                changeIndex = currTargetWord.IndexOf(letterText, changeIndex+1);
+            }
+            
+            StringBuilder sb = new StringBuilder(currWordState);
+            sb[changeIndex] = letterText;
+            currWordState = sb.ToString();
+            
+            player.SetCurrWordState(currWordState);
             letter.GetComponent<Letter>().isTranslationEnabled = false;
             StartCoroutine(AnimateLetter(letter,player));
         }

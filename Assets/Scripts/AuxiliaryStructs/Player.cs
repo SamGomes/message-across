@@ -97,7 +97,7 @@ public class Player
         this.gameButton = marker.GetComponentInChildren<GameButton>();
         this.gameButton.SetOwner(this);
     }
-    
+
     public void SetCurrExercise(Exercise newExercise)
     {
         currExercise = newExercise;
@@ -107,32 +107,25 @@ public class Player
         return currExercise;
     }
 
+    public void InitCurrWordState()
+    {
+        currWordState = "";
+        int missingLength = currExercise.targetWord.Length;
+        for (int i = 0; i < missingLength; i++) {
+            currWordState += "_";
+        }
+
+        //Update UI
+        TextMesh playerDisplayText = wordPanel.GetComponentInChildren<TextMesh>();
+        playerDisplayText.text = currExercise.targetWord+" : "+currWordState;
+    }
     public void SetCurrWordState(string newCurrWordState)
     {
         currWordState = newCurrWordState;
-
-        //update UI
-        string displayString = "";
-        int missingLength = currExercise.targetWord.Length - currWordState.Length;
-        string[] substrings = currExercise.displayMessage.Split('_');
-
-        if (substrings.Length > 0)
-        {
-            displayString += substrings[0];
-            displayString += currWordState;
-            for (int i = 0; i < missingLength; i++)
-            {
-                displayString += "_";
-            }
-            if (substrings.Length > 1)
-            {
-                displayString += substrings[1];
-            }
-        }
-        displayString += "\n";
-
+        
+        //Update UI
         TextMesh playerDisplayText = wordPanel.GetComponentInChildren<TextMesh>();
-        playerDisplayText.text = displayString;
+        playerDisplayText.text = currExercise.targetWord + " : " + currWordState;
     }
     public string GetCurrWordState()
     {
