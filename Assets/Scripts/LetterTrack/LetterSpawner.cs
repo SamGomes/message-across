@@ -17,15 +17,18 @@ public class LetterSpawner : MonoBehaviour
     private string currStarredWord;
 
 
-    //private char[] letters = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'L', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+    private List<char> letters = new List<char>(){ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
     //"1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
-    private char[] letters = { 'A' };
 
     private List<char> lettersPool;
 
+    public float exerciseWordsPercentage; //to export
+
+
     private void Awake()
     {
+        exerciseWordsPercentage = 0.8f; //default to 80\%
         lettersPool = new List<char>();
     }
 
@@ -78,16 +81,28 @@ public class LetterSpawner : MonoBehaviour
 
     private void ResetPool()
     {
-        lettersPool = letters.ToList<char>();
-        List<char> currWordLetters = new List<char>();
-        foreach(Player player in gameManager.settings.players)
+
+        float total = letters.Count / (1.0f - exerciseWordsPercentage);
+
+        List<char> currWordsLetters = new List<char>();
+        List<char> remainingWordsLetters = new List<char>();
+        foreach (Player player in gameManager.settings.players)
         {
-            currWordLetters = currWordLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
+            currWordsLetters = currWordsLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
         }
 
-        //bias generation of letters in word
-        lettersPool.AddRange(currWordLetters);
-        lettersPool.AddRange(currWordLetters);
+        lettersPool.AddRange(letters);
+        while (lettersPool.Count < total)
+        {
+            if (remainingWordsLetters.Count == 0)
+            {
+                remainingWordsLetters.AddRange(currWordsLetters);
+            }
+
+            char newLetter = remainingWordsLetters[Random.Range(0, remainingWordsLetters.Count - 1)];
+            lettersPool.Add(newLetter);
+            remainingWordsLetters.Remove(newLetter);
+        }
     }
 
 
