@@ -259,7 +259,7 @@ public class GameManager : MonoBehaviour
         gameSceneManager.MainSceneLoadedNotification();
         
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
-        string scoreConfigPath = Application.streamingAssetsPath + "/scoreSystemConfig.cfg";
+        string scoreConfigPath = Application.streamingAssetsPath + "/scoreSystemConfigSelf.cfg";
         string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
         string generalConfigText = "";
         string scoreConfigText = "";
