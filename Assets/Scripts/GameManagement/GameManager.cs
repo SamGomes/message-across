@@ -68,7 +68,7 @@ public class ScoreValue
     public bool usefulForMe;
     public bool usefulForOther;
 
-    public Globals.DiffLetters diffLetters;
+    public string diffLetters;
 
     public int myValue;
     public int otherValue;
@@ -88,14 +88,25 @@ public class ExercisesListWrapper
 {
     public List<Exercise> exercises;
 }
+
+[Serializable]
+public class ExerciseGroupsWrapper
+{
+    public List<ExercisesListWrapper> exerciseGroups;
+}
+
+[Serializable]
+public struct GeneralSettings
+{
+    public List<Player> players;
+    public int gameId;
+}
+
 [Serializable]
 public struct GameSettings
 {
-    public List<ExercisesListWrapper> exercisesGroups;
-    public List<Player> players;
-    public int gameId;
-    //public int initialTimeLeft;
-
+    public ExerciseGroupsWrapper exercisesGroups;
+    public GeneralSettings generalSettings;
     public ScoreSystem scoreSystem;
 }
 
@@ -212,7 +223,7 @@ public class GameManager : MonoBehaviour
     private void UpdateButtonOverlaps(Player currPlayer, int potentialIndex)
     {
         isButtonOverlap = false;
-        foreach (Player player in settings.players)
+        foreach (Player player in settings.generalSettings.players)
         {
             if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
             {
@@ -221,7 +232,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        foreach (Player player in settings.players)
+        foreach (Player player in settings.generalSettings.players)
         {
             foreach(GameObject obj in player.GetMaskedHalf())
             {
@@ -247,38 +258,62 @@ public class GameManager : MonoBehaviour
         isGameplayPaused = false;
         gameSceneManager.MainSceneLoadedNotification();
         
-        string path = Application.streamingAssetsPath + "/config.cfg";
-        string configText = "";
-        if (path.Contains("://") || path.Contains(":///")) //url instead of path
+        string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
+        string scoreConfigPath = Application.streamingAssetsPath + "/scoreSystemConfig.cfg";
+        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
+        string generalConfigText = "";
+        string scoreConfigText = "";
+        string exercisesConfigText = "";
+        if (generalConfigPath.Contains("://") || generalConfigPath.Contains(":///")) //url instead of path
         {
-            UnityWebRequest www = UnityWebRequest.Get(path);
+            UnityWebRequest www = UnityWebRequest.Get(generalConfigPath);
             yield return www.SendWebRequest();
-            configText = www.downloadHandler.text;
+            generalConfigText = www.downloadHandler.text;
         }
         else
         {
-            configText = File.ReadAllText(path);
+            generalConfigText = File.ReadAllText(generalConfigPath);
+        }
+
+        if (scoreConfigPath.Contains("://") || scoreConfigPath.Contains(":///")) //url instead of path
+        {
+            UnityWebRequest www = UnityWebRequest.Get(scoreConfigPath);
+            yield return www.SendWebRequest();
+            scoreConfigText = www.downloadHandler.text;
+        }
+        else
+        {
+            scoreConfigText = File.ReadAllText(scoreConfigPath);
+        }
+
+        if (exercisesConfigPath.Contains("://") || exercisesConfigPath.Contains(":///")) //url instead of path
+        {
+            UnityWebRequest www = UnityWebRequest.Get(generalConfigPath);
+            yield return www.SendWebRequest();
+            exercisesConfigText = www.downloadHandler.text;
+        }
+        else
+        {
+            exercisesConfigText = File.ReadAllText(exercisesConfigPath);
         }
 
         //string json = JsonUtility.ToJson(settings, true);
-        settings = JsonUtility.FromJson<GameSettings>(configText);
+        settings.generalSettings = JsonUtility.FromJson<GeneralSettings>(generalConfigText);
+        settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
+        settings.exercisesGroups = JsonUtility.FromJson<ExerciseGroupsWrapper>(exercisesConfigText);
 
         //timeLeft = settings.initialTimeLeft;
         //timePanel.GetComponent<Animator>().StopPlayback();
-
         //InvokeRepeating("TimeDependentEvents", 0.0f, 1.0f);
-
 
         gameSceneManager.StartAndPauseGame(); //for the initial screen
 
-
         performanceMetrics = new PerformanceMetrics();
         performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
-       
 
-        for (int i = 0; i < settings.players.Count; i++)
+        for (int i = 0; i < settings.generalSettings.players.Count; i++)
         {
-            Player currPlayer = settings.players[i];
+            Player currPlayer = settings.generalSettings.players[i];
             
             currPlayer.Init(this, playerMarkerPrefab, playerMarkersContainer, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
 
@@ -342,7 +377,7 @@ public class GameManager : MonoBehaviour
             input.onValueChanged.AddListener(delegate
             {
                 List<InputField> inputFields = new List<InputField>(namesInputLocation.GetComponentsInChildren<InputField>());
-                settings.players[inputFields.IndexOf(input)].SetName(input.text);
+                settings.generalSettings.players[inputFields.IndexOf(input)].SetName(input.text);
             });
 
             performanceMetrics.singlebuttonHits.Add(currPlayer, 0);
@@ -393,13 +428,13 @@ public class GameManager : MonoBehaviour
             currPlayer.SetScore(0);
         }
 
-        UpdateButtonOverlaps(settings.players[0], 0);
+        UpdateButtonOverlaps(settings.generalSettings.players[0], 0);
         ChangeGameParametrizations(true);
         
         performanceMetrics.multiplayerButtonHits = 0;
         isGameplayStarted = true;
 
-        exerciseGroupIndex = UnityEngine.Random.Range(0, settings.exercisesGroups.Count);
+        exerciseGroupIndex = UnityEngine.Random.Range(0, settings.exercisesGroups.exerciseGroups.Count);
         ChangeGameParametrizations(true);
 
         //inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) {
@@ -408,7 +443,7 @@ public class GameManager : MonoBehaviour
         //}, false);
 
 
-        Shuffle<ExercisesListWrapper>(settings.exercisesGroups);
+        Shuffle<ExercisesListWrapper>(settings.exercisesGroups.exerciseGroups);
 
 
     }
@@ -434,7 +469,7 @@ public class GameManager : MonoBehaviour
     private void RecordMetrics()
     {
         //spawn questionnaires before changing word
-        foreach (Player player in settings.players)
+        foreach (Player player in settings.generalSettings.players)
         {
             StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
                 { "gameId", Globals.gameId.ToString() },
@@ -464,7 +499,7 @@ public class GameManager : MonoBehaviour
         }
         //timeLeft = settings.initialTimeLeft;
 
-        foreach(Player player in settings.players)
+        foreach(Player player in settings.generalSettings.players)
         {
             player.ResetNumPossibleActions();
         }
@@ -496,12 +531,12 @@ public class GameManager : MonoBehaviour
     
     private void ChangeTargetWords()
     {
-        List<Exercise> selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups[exerciseGroupIndex++ % settings.exercisesGroups.Count].exercises);
-        foreach (Player player in settings.players)
+        List<Exercise> selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups.exerciseGroups[exerciseGroupIndex++ % settings.exercisesGroups.exerciseGroups.Count].exercises);
+        foreach (Player player in settings.generalSettings.players)
         {
             if(selectedExerciseGroup.Count <= 0)
             {
-                selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups[exerciseGroupIndex++ % settings.exercisesGroups.Count].exercises);
+                selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups.exerciseGroups[exerciseGroupIndex++ % settings.exercisesGroups.exerciseGroups.Count].exercises);
             }
 
             int random = UnityEngine.Random.Range(0, selectedExerciseGroup.Count);
@@ -581,7 +616,7 @@ public class GameManager : MonoBehaviour
         {
             case Globals.KeyInteractionType.GIVE:
                 usefulForMe = TestAndExecuteHit(false, letterText, letter, currHitter);
-                foreach (Player usefulTargetPlayer in settings.players)
+                foreach (Player usefulTargetPlayer in settings.generalSettings.players)
                 {
                     if (usefulTargetPlayer == currHitter)
                     {
@@ -603,7 +638,7 @@ public class GameManager : MonoBehaviour
                 {
                     //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
                 }
-                foreach (Player usefulTargetPlayer in settings.players)
+                foreach (Player usefulTargetPlayer in settings.generalSettings.players)
                 {
                     if (usefulTargetPlayer == currHitter)
                     {
@@ -626,9 +661,9 @@ public class GameManager : MonoBehaviour
         }
 
         float otherPlayersCompletionMean = 0;
-        int otherPlayersCount = settings.players.Count() - 1;
+        int otherPlayersCount = settings.generalSettings.players.Count() - 1;
         float currPlayerCompletion = currHitter.GetCurrWordState().Count();
-        foreach (Player innerPlayer in settings.players)
+        foreach (Player innerPlayer in settings.generalSettings.players)
         {
             if (innerPlayer == currHitter)
             {
@@ -641,10 +676,10 @@ public class GameManager : MonoBehaviour
         bool scoreOptionFound = false;
         foreach (ScoreValue score in scores)
         {
-            if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff== score.diffLetters)
+            if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff == (Globals.DiffLetters)Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
             {
                 currHitter.SetScore(currHitter.GetScore() + score.myValue);
-                foreach (Player innerPlayer in settings.players)
+                foreach (Player innerPlayer in settings.generalSettings.players)
                 {
                     if (innerPlayer == currHitter)
                     {
@@ -665,7 +700,7 @@ public class GameManager : MonoBehaviour
 
         bool areWordsUnfinished = false;
         bool arePlayersWithoutActions = true;
-        foreach (Player player in settings.players)
+        foreach (Player player in settings.generalSettings.players)
         {
             if (player.GetCurrNumPossibleActionsPerLevel() > 0)
             {
@@ -686,7 +721,7 @@ public class GameManager : MonoBehaviour
             {
                 if (!player.isCurrExerciseFinished)
                     player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore);
-                foreach (Player innerPlayer in settings.players)
+                foreach (Player innerPlayer in settings.generalSettings.players)
                 {
                     if (player == innerPlayer)
                     {
@@ -706,7 +741,7 @@ public class GameManager : MonoBehaviour
 
     public List<Player> GetPlayers()
     {
-        return settings.players;
+        return settings.generalSettings.players;
     }
 }
 

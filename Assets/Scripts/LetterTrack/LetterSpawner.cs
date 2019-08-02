@@ -86,7 +86,7 @@ public class LetterSpawner : MonoBehaviour
 
         List<char> currWordsLetters = new List<char>();
         List<char> remainingWordsLetters = new List<char>();
-        foreach (Player player in gameManager.settings.players)
+        foreach (Player player in gameManager.settings.generalSettings.players)
         {
             currWordsLetters = currWordsLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
         }
