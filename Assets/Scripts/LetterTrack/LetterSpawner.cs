@@ -23,12 +23,11 @@ public class LetterSpawner : MonoBehaviour
 
     private List<char> lettersPool;
 
-    public float exerciseWordsPercentage; //to export
+    public float exerciseWordsPercentage = 0.8f; //to export
 
 
     private void Awake()
     {
-        exerciseWordsPercentage = 0.8f; //default to 80\%
         lettersPool = new List<char>();
     }
 
@@ -82,26 +81,29 @@ public class LetterSpawner : MonoBehaviour
     private void ResetPool()
     {
 
-        float total = letters.Count / (1.0f - exerciseWordsPercentage);
-
         List<char> currWordsLetters = new List<char>();
-        List<char> remainingWordsLetters = new List<char>();
+        List<char> allLetters = new List<char>();
         foreach (Player player in gameManager.settings.generalSettings.players)
         {
             currWordsLetters = currWordsLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
         }
 
-        lettersPool.AddRange(letters);
+        float total = currWordsLetters.Count / exerciseWordsPercentage;
+        lettersPool.AddRange(currWordsLetters);
+
         while (lettersPool.Count < total)
         {
-            if (remainingWordsLetters.Count == 0)
+            if (allLetters.Count == 0)
             {
-                remainingWordsLetters.AddRange(currWordsLetters);
+                allLetters.AddRange(letters);
             }
 
-            char newLetter = remainingWordsLetters[Random.Range(0, remainingWordsLetters.Count - 1)];
-            lettersPool.Add(newLetter);
-            remainingWordsLetters.Remove(newLetter);
+            char newLetter = allLetters[Random.Range(0, allLetters.Count - 1)];
+            if (!currWordsLetters.Contains(newLetter))
+            {
+                lettersPool.Add(newLetter);
+            }
+            allLetters.Remove(newLetter);
         }
     }
 
