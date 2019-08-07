@@ -52,8 +52,12 @@ public class Player
     public int numGivePresses;
     public int numTakePresses;
 
-    public Player(List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB, int numPossibleActionsPerLevel)
+    private int id;
+
+    public Player(int id, List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB, int numPossibleActionsPerLevel)
     {
+        this.id = id;
+
         this.buttonRGB = buttonRGB;
 
         this.myKeys = myKeys;
@@ -96,6 +100,11 @@ public class Player
 
         this.gameButton = marker.GetComponentInChildren<GameButton>();
         this.gameButton.SetOwner(this);
+    }
+
+    public int GetId()
+    {
+        return id;
     }
 
     public void SetCurrExercise(Exercise newExercise)

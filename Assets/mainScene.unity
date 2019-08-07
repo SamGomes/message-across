@@ -320,9 +320,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   settings:
-    exercisesGroups: []
-    players: []
-    gameId: 0
+    exercisesGroups:
+      exerciseGroups: []
+    generalSettings:
+      players: []
+      gameId: 0
     scoreSystem:
       giveScores: []
       takeScores: []
@@ -1146,8 +1148,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1584114817}
   m_HandleRect: {fileID: 1584114816}
   m_Direction: 0
-  m_Value: 1
-  m_Size: 0.9844211
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1350,7 +1352,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -245.41035, y: 103.39036}
+  m_AnchoredPosition: {x: -245.37349, y: 103.405945}
   m_SizeDelta: {x: 490, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &590588134
@@ -1933,8 +1935,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1881891083}
   m_HandleRect: {fileID: 1881891082}
   m_Direction: 2
-  m_Value: 1.0001674
-  m_Size: 0.67860085
+  m_Value: 1.0000004
+  m_Size: 0.6893733
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2212,6 +2214,11 @@ PrefabInstance:
       propertyPath: canvas
       value: 
       objectReference: {fileID: 1723295595}
+    - target: {fileID: 4983876230461793476, guid: 7dabd3d9b97bf4443a393d22030ea94a,
+        type: 3}
+      propertyPath: exerciseWordsPercentage
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 4983876230427927264, guid: 7dabd3d9b97bf4443a393d22030ea94a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3070,6 +3077,11 @@ PrefabInstance:
       propertyPath: canvas
       value: 
       objectReference: {fileID: 1723295595}
+    - target: {fileID: 4983876230461793476, guid: 7dabd3d9b97bf4443a393d22030ea94a,
+        type: 3}
+      propertyPath: exerciseWordsPercentage
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 4983876230427927264, guid: 7dabd3d9b97bf4443a393d22030ea94a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -8949,6 +8961,11 @@ PrefabInstance:
       propertyPath: track
       value: 
       objectReference: {fileID: 942293535}
+    - target: {fileID: 4983876230461793476, guid: 7dabd3d9b97bf4443a393d22030ea94a,
+        type: 3}
+      propertyPath: exerciseWordsPercentage
+      value: 0.4
+      objectReference: {fileID: 0}
     - target: {fileID: 4983876230427927264, guid: 7dabd3d9b97bf4443a393d22030ea94a,
         type: 3}
       propertyPath: m_LocalPosition.x

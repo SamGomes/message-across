@@ -163,6 +163,8 @@ public class GameManager : MonoBehaviour
     private float timeLeft;
 
 
+    private string scoreSystemName; //to be able to recover condition
+
     public void PauseGame()
     {
         foreach(LetterSpawner ls in letterSpawners)
@@ -259,7 +261,11 @@ public class GameManager : MonoBehaviour
         gameSceneManager.MainSceneLoadedNotification();
         
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
-        string scoreConfigPath = Application.streamingAssetsPath + "/scoreSystemConfigSelf.cfg";
+        scoreSystemName = "scoreSystemConfigComp";
+        scoreSystemName = "scoreSystemConfigMutualHelp";
+        scoreSystemName = "scoreSystemConfigPAltruistic";
+        scoreSystemName = "scoreSystemConfigIndividualistic";
+        string scoreConfigPath = Application.streamingAssetsPath + "/"+ scoreSystemName + ".cfg";
         string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
         string generalConfigText = "";
         string scoreConfigText = "";
@@ -472,10 +478,12 @@ public class GameManager : MonoBehaviour
         foreach (Player player in settings.generalSettings.players)
         {
             StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
-                { "gameId", Globals.gameId.ToString() },
-                { "name", player.GetName() },
+                { "sessionId", Globals.gameId.ToString() },
+                { "gameId", Globals.currLevelId.ToString() },
+                { "playerId", player.GetId().ToString() },
                 { "color", player.GetButtonColor().ToString() },
                 { "currWord", player.GetCurrExercise().targetWord },
+                { "scoreSystem", scoreSystemName },
                 { "score", player.GetScore().ToString() },
                 { "numberOfGivePresses", player.numGivePresses.ToString() },
                 { "numberOfTakePresses", player.numTakePresses.ToString() }
@@ -503,9 +511,10 @@ public class GameManager : MonoBehaviour
         {
             player.ResetNumPossibleActions();
         }
-
         RecordMetrics();
         ChangeGameParametrizations(false);
+
+        Globals.currLevelId++;
     }
     
 
@@ -598,7 +607,6 @@ public class GameManager : MonoBehaviour
 
     public void RecordHit(char letterText, GameObject letter, Player currHitter)
     {
-        
         if (currHitter.GetCurrNumPossibleActionsPerLevel() <= 0)
         {
             return;

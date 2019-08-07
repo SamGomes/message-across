@@ -8,9 +8,11 @@ public class Letter : MonoBehaviour {
     public char letterText;
 
     public bool isTranslationEnabled;
+    private bool isLocked;
 
-	void Awake() {
+    void Awake() {
         isTranslationEnabled = true;
+        isLocked = false;
         //speed = 10.5f;
     }
 	
@@ -21,6 +23,15 @@ public class Letter : MonoBehaviour {
             float translation = Time.deltaTime * speed;
             transform.Translate(translation, 0, 0);
         }
+    }
+
+    public void Lock()
+    {
+        isLocked = true;
+    }
+    public bool IsLocked()
+    {
+        return isLocked;
     }
 
     void DestroyLetter() {

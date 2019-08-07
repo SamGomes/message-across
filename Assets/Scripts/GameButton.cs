@@ -16,7 +16,7 @@ public class GameButton : MonoBehaviour {
 
     private bool isBeingPressed;
 
-    private Collider currCollidingLetter;
+    private Collider currCollidingLetterCollider;
 
     private Player owner;
 
@@ -37,7 +37,7 @@ public class GameButton : MonoBehaviour {
 
     void Start()
     {
-        currCollidingLetter = null;
+        currCollidingLetterCollider = null;
         buttonAudioManager = new AudioManager();
         gameManager = GameObject.FindObjectOfType<GameManager>();
     }
@@ -64,28 +64,41 @@ public class GameButton : MonoBehaviour {
             return;
         }
 
-        if (this.isClicked && this.currCollidingLetter!=null)
+        if (this.isClicked && this.currCollidingLetterCollider!=null)
         {
             buttonAudioManager.PlayClip("Audio/note");
-            GameObject letter = currCollidingLetter.gameObject;
-            letter.transform.localScale *= 1.2f;
-            gameManager.RecordHit(currCollidingLetter.gameObject.GetComponent<Letter>().letterText, letter, owner);
-            this.currCollidingLetter = null;
+            GameObject currCollidingLetterObject = currCollidingLetterCollider.gameObject;
+            currCollidingLetterObject.transform.localScale *= 1.2f;
+
+            Letter theActualLetter = currCollidingLetterCollider.gameObject.GetComponent<Letter>();
+            if (!theActualLetter.IsLocked())
+            {
+                gameManager.RecordHit(theActualLetter.letterText, currCollidingLetterObject, owner);
+            }
+            else
+            {
+                theActualLetter.Lock();
+            }
+            this.currCollidingLetterCollider = null;
         }
     }
 
+    public bool IsButtonBeingPressed()
+    {
+        return isBeingPressed;
+    }
 
     void OnTriggerEnter(Collider otherObject)
     {
         if (otherObject.GetComponent<Letter>() == null){
             return;
         }
-        this.currCollidingLetter = otherObject;
+        this.currCollidingLetterCollider = otherObject;
     }
     
     void OnTriggerExit(Collider otherObject)
     {
-        this.currCollidingLetter = null;
+        this.currCollidingLetterCollider = null;
     }
 
     public void SetOwner(Player player)
