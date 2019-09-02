@@ -347,7 +347,6 @@ MonoBehaviour:
   scorePanelsObject: {fileID: 1942357765}
   timePanel: {fileID: 1240623164}
   emoji: {fileID: 1924658964869277}
-  inputManager: {fileID: 1263921786}
   letterSpawners:
   - {fileID: 264394624}
   - {fileID: 1694314219}
@@ -1352,7 +1351,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -245.37349, y: 103.405945}
+  m_AnchoredPosition: {x: -245.37325, y: 103.40585}
   m_SizeDelta: {x: 490, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &590588134
@@ -1935,8 +1934,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1881891083}
   m_HandleRect: {fileID: 1881891082}
   m_Direction: 2
-  m_Value: 1.0000004
-  m_Size: 0.6893733
+  m_Value: 1.000001
+  m_Size: 0.6893732
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2777,6 +2776,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 1.5610092
+      objectReference: {fileID: 0}
+    - target: {fileID: 6437796575539313630, guid: ef4726a09ee12634f845596792d6cc6d,
+        type: 3}
+      propertyPath: m_SortingOrder
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 1417947569470791370, guid: ef4726a09ee12634f845596792d6cc6d,
         type: 3}
