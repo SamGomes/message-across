@@ -493,20 +493,21 @@ public class GameManager : MonoBehaviour
     private void ChangeTargetWords()
     {
         List<Exercise> selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups.exerciseGroups[exerciseGroupIndex++ % settings.exercisesGroups.exerciseGroups.Count].exercises);
+        //if (selectedExerciseGroup.Count <= 0)
+        //{
+        //    selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups.exerciseGroups[exerciseGroupIndex++ % settings.exercisesGroups.exerciseGroups.Count].exercises);
+        //}
+
+        int random = UnityEngine.Random.Range(0, selectedExerciseGroup.Count);
+        Exercise newExercise = selectedExerciseGroup[random];
+        selectedExerciseGroup.RemoveAt(random);
+
+
+        int i = UnityEngine.Random.Range(0,1);
         foreach (Player player in settings.generalSettings.players)
         {
-            if(selectedExerciseGroup.Count <= 0)
-            {
-                selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups.exerciseGroups[exerciseGroupIndex++ % settings.exercisesGroups.exerciseGroups.Count].exercises);
-            }
-
-            int random = UnityEngine.Random.Range(0, selectedExerciseGroup.Count);
-            Exercise newExercise = selectedExerciseGroup[random];
-            selectedExerciseGroup.RemoveAt(random);
-            
-            
             //displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
-            player.SetCurrExercise(newExercise);
+            player.SetCurrExercise(newExercise.playerExercises[(i++) % newExercise.playerExercises.Count]);
             player.InitCurrWordState();
 
             //animate transition

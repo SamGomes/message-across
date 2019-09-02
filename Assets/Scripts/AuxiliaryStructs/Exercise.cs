@@ -6,6 +6,12 @@ using UnityEngine;
 [Serializable]
 public struct Exercise
 {
+    public List<PlayerExercise> playerExercises;
+}
+
+[Serializable]
+public struct PlayerExercise
+{
     public string displayMessage;
     public string targetWord;
 }

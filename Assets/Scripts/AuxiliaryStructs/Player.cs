@@ -44,7 +44,7 @@ public class Player
 
     private IEnumerator currButtonLerp;
 
-    private Exercise currExercise;
+    private PlayerExercise currExercise;
     public bool currExerciseFinished;
     private string currWordState;
 
@@ -113,11 +113,11 @@ public class Player
         return id;
     }
 
-    public void SetCurrExercise(Exercise newExercise)
+    public void SetCurrExercise(PlayerExercise newExercise)
     {
         currExercise = newExercise;
     }
-    public Exercise GetCurrExercise()
+    public PlayerExercise GetCurrExercise()
     {
         return currExercise;
     }
@@ -258,7 +258,6 @@ public class Player
 
     public void PressGameButton()
     {
-
         foreach (Player player in gameManagerRef.settings.generalSettings.players)
         {
             if (player != this && player.IsPressingButton() && player.GetActivebuttonIndex() == this.GetActivebuttonIndex())
