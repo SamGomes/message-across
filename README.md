@@ -3,7 +3,7 @@ This is a modified version of CrossAnt, which aims to allow players to interact 
 
 ## Adaptation made by:
 - Samuel Gomes - [@SamGomes](https://github.com/SamGomes)
-
+- Tomás Alves - [@SirMastermind](https://github.com/SirMastermind)
 
 ## Original game repository: https://github.com/SamGomes/cross-ant
 
