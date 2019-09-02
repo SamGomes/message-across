@@ -45,7 +45,7 @@ public class Player
     private IEnumerator currButtonLerp;
 
     private Exercise currExercise;
-    public bool isCurrExerciseFinished;
+    public bool currExerciseFinished;
     private string currWordState;
 
     //log stuff
@@ -53,6 +53,10 @@ public class Player
     public int numTakePresses;
 
     private int id;
+
+    public bool pressingButton;
+
+
 
     public Player(int id, List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB, int numPossibleActionsPerLevel)
     {
@@ -100,6 +104,8 @@ public class Player
 
         this.gameButton = marker.GetComponentInChildren<GameButton>();
         this.gameButton.SetOwner(this);
+
+        this.pressingButton = false;
     }
 
     public int GetId()
@@ -187,11 +193,6 @@ public class Player
         nameText.text = "Player " + name;
     }
 
-    public int GetActivebuttonIndex()
-    {
-        return activeButtonIndex;
-    }
-
     public void SetActiveButton(int activeButtonIndex, Vector3 activeButtonPos)
     {
         if (currButtonLerp != null)
@@ -217,6 +218,10 @@ public class Player
     public Globals.KeyInteractionType GetActiveInteraction()
     {
         return activeInteraction;
+    }
+    public int GetActivebuttonIndex()
+    {
+        return this.activeButtonIndex;
     }
 
 
@@ -251,8 +256,30 @@ public class Player
         statePanel.GetComponent<Animator>().Play(0);
     }
 
-    public GameButton GetGameButton()
+    public void PressGameButton()
     {
-        return this.gameButton;
+
+        foreach (Player player in gameManagerRef.settings.generalSettings.players)
+        {
+            if (player != this && player.IsPressingButton() && player.GetActivebuttonIndex() == this.GetActivebuttonIndex())
+            {
+                return;
+            }
+        }
+
+        this.pressingButton = true;
+        this.gameButton.RegisterButtonDown();
     }
+
+    public void ReleaseGameButton()
+    {
+        this.pressingButton = false;
+        this.gameButton.RegisterButtonUp();
+    }
+
+    public bool IsPressingButton()
+    {
+        return pressingButton;
+    }
+
 }

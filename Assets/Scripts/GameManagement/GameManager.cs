@@ -353,8 +353,7 @@ public class GameManager : MonoBehaviour
                     pointerDown.callback.AddListener(delegate (BaseEventData eventData)
                     {
                         currPlayer.SetActiveInteraction(iType);
-                        //int activeIndex = currPlayer.GetActivebuttonIndex();
-                        currPlayer.GetGameButton().RegisterButtonDown();
+                        currPlayer.PressGameButton();
                         if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
                         else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
                     });
@@ -363,11 +362,10 @@ public class GameManager : MonoBehaviour
                     pointerUp.eventID = EventTriggerType.PointerUp;
                     pointerUp.callback.AddListener(delegate (BaseEventData eventData)
                     {
-                        currPlayer.SetActiveInteraction(iType);
-                        //int activeIndex = currPlayer.GetActivebuttonIndex();
-                        currPlayer.GetGameButton().RegisterButtonUp();
-                        if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
-                        else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
+                        currPlayer.SetActiveInteraction(Globals.KeyInteractionType.NONE);
+                        currPlayer.ReleaseGameButton();
+                        //if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
+                        //else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
                     });
                     trigger.triggers.Add(pointerUp);
                 }
@@ -399,7 +397,7 @@ public class GameManager : MonoBehaviour
                     {
                         currPlayer.SetActiveInteraction(iType);
                         int activeIndex = currPlayer.GetActivebuttonIndex();
-                        currPlayer.GetGameButton().RegisterButtonDown();
+                        currPlayer.PressGameButton();
                         if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
                         else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
                     }, false);
@@ -408,7 +406,7 @@ public class GameManager : MonoBehaviour
                     {
                         currPlayer.SetActiveInteraction(iType);
                         int activeIndex = currPlayer.GetActivebuttonIndex();
-                        currPlayer.GetGameButton().RegisterButtonUp();
+                        currPlayer.ReleaseGameButton();
                         if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
                         else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
                     }, false);
@@ -607,6 +605,7 @@ public class GameManager : MonoBehaviour
 
     public void RecordHit(char letterText, GameObject letter, Player currHitter)
     {
+        
         if (currHitter.GetCurrNumPossibleActionsPerLevel() <= 0)
         {
             return;
@@ -722,12 +721,12 @@ public class GameManager : MonoBehaviour
                 if(!areWordsUnfinished)
                     areWordsUnfinished = true;
 
-                if (!player.isCurrExerciseFinished)
-                    player.isCurrExerciseFinished = true;
+                if (!player.currExerciseFinished)
+                    player.currExerciseFinished = true;
             }
             else
             {
-                if (!player.isCurrExerciseFinished)
+                if (!player.currExerciseFinished)
                     player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore);
                 foreach (Player innerPlayer in settings.generalSettings.players)
                 {
@@ -735,7 +734,7 @@ public class GameManager : MonoBehaviour
                     {
                         continue;
                     }
-                    if (!innerPlayer.isCurrExerciseFinished)
+                    if (!innerPlayer.currExerciseFinished)
                         innerPlayer.SetScore(innerPlayer.GetScore() + settings.scoreSystem.completeWordOtherScore);
                 }
             }

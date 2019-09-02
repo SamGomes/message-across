@@ -34,10 +34,16 @@ public class InputManager : MonoBehaviour {
     {
         keyBindings = new Dictionary<List<KeyCode>, KeyBindingData>();
 
-        //AddKeyBinding(new List<KeyCode>() { KeyCode.Z, KeyCode.X, KeyCode.C }, InputManager.ButtonPressType.DOWN, 
-        //delegate(List<KeyCode> triggeredKey) {
-        //    Debug.Log("rfegyregfyreugfryeufr");
-        //}, false);
+        AddKeyBinding(new List<KeyCode>() { KeyCode.Z }, InputManager.ButtonPressType.DOWN,
+        delegate (List<KeyCode> triggeredKey)
+        {
+            Debug.Log("rfegyregfyreugfryeufr");
+        }, false);
+        AddKeyBinding(new List<KeyCode>() { KeyCode.Z }, InputManager.ButtonPressType.UP,
+        delegate (List<KeyCode> triggeredKey)
+        {
+            Debug.Log("aaaa");
+        }, false);
     }
 
 
@@ -74,9 +80,8 @@ public class InputManager : MonoBehaviour {
             }
         }
 
-        bool keysDown = !currPressedKeys.Keys.ToList().TrueForAll(oldPressedKeys.Keys.ToList().Contains);
-        bool keysUp = !oldPressedKeys.Keys.ToList().TrueForAll(currPressedKeys.Keys.ToList().Contains) || currPressedKeys.Count == 0;
-        if (currPressedKeys.Count > 0 && (keysDown || keysUp))
+        bool keysChange = !(currPressedKeys.Keys.ToList().TrueForAll(oldPressedKeys.Keys.ToList().Contains) && oldPressedKeys.Keys.ToList().TrueForAll(currPressedKeys.Keys.ToList().Contains));
+        if (currPressedKeys.Count > 0 && keysChange)
         {
             foreach(KeyCode key in currPressedKeys.Keys)
             {
@@ -105,7 +110,7 @@ public class InputManager : MonoBehaviour {
 
                     if (!(simultaneouskeysList.TrueForAll(delegate(KeyCode key) {
                         return (bufferMod.Contains(key) || key == (KeyCode)(-1));
-                    }) && keysDown))
+                    }) && keysChange && currPressedKeys.Count > oldPressedKeys.Count))
                     {
                         continue;
                     }
@@ -119,7 +124,7 @@ public class InputManager : MonoBehaviour {
 
                     if (!(simultaneouskeysList.TrueForAll(delegate (KeyCode key) {
                         return (bufferMod.Contains(key) || key == (KeyCode)(-1));
-                    }) && keysUp))
+                    }) && keysChange && currPressedKeys.Count < oldPressedKeys.Count))
                     {
                         continue;
                     }
