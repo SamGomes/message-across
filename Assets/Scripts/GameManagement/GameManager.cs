@@ -152,7 +152,6 @@ public class GameManager : MonoBehaviour
     
     public GameObject emoji;
 
-    public InputManager inputManager;
     public LogManager logManager;
     
     public LetterSpawner[] letterSpawners;
@@ -320,24 +319,21 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < settings.generalSettings.players.Count; i++)
         {
             Player currPlayer = settings.generalSettings.players[i];
-            
             currPlayer.Init(this, playerMarkerPrefab, playerMarkersContainer, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
-
             currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetButtonColor();
-
 
             //set buttons for touch screen
             GameObject playerUI = playerUIs[i];
             playerUI.GetComponentInChildren<Image>().color = currPlayer.GetButtonColor(); //set background color (background as first child)
             UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
-            
+
             for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
             {
                 UnityEngine.UI.Button currButton = playerButtons[buttonI];
                 if (buttonI < pointerPlaceholders.Count)
                 {
                     int innerButtonI = buttonI; //for corotine to save the iterated values
-                    currButton.onClick.AddListener(delegate()
+                    currButton.onClick.AddListener(delegate ()
                     {
                         currPlayer.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
                         UpdateButtonOverlaps(currPlayer, innerButtonI);
@@ -346,7 +342,7 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     int j = buttonI - pointerPlaceholders.Count + 1;
-                    Globals.KeyInteractionType iType = (Globals.KeyInteractionType) j;
+                    Globals.KeyInteractionType iType = (Globals.KeyInteractionType)j;
                     EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
                     EventTrigger.Entry pointerDown = new EventTrigger.Entry();
                     pointerDown.eventID = EventTriggerType.PointerDown;
@@ -364,15 +360,11 @@ public class GameManager : MonoBehaviour
                     {
                         currPlayer.SetActiveInteraction(Globals.KeyInteractionType.NONE);
                         currPlayer.ReleaseGameButton();
-                        //if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
-                        //else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
                     });
                     trigger.triggers.Add(pointerUp);
                 }
-                
             }
 
-            
 
             GameObject newNameInput = Instantiate(playerNameInputFieldPrefabRef, namesInputLocation.transform);
             InputField input = newNameInput.GetComponent<InputField>();
@@ -389,44 +381,6 @@ public class GameManager : MonoBehaviour
             List<KeyCode> keys = currPlayer.GetMyKeys();
             
             isButtonOverlap = true;
-            for (int j = 1; j < Globals.keyInteractionTypes.Length ; j++)
-            {
-                Globals.KeyInteractionType iType = (Globals.KeyInteractionType) j;
-                inputManager.AddKeyBinding(
-                    new List<KeyCode>(){ keys[j] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
-                    {
-                        currPlayer.SetActiveInteraction(iType);
-                        int activeIndex = currPlayer.GetActivebuttonIndex();
-                        currPlayer.PressGameButton();
-                        if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
-                        else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
-                    }, false);
-                inputManager.AddKeyBinding(
-                    new List<KeyCode>() { keys[j] }, InputManager.ButtonPressType.UP, delegate (List<KeyCode> triggeredKeys)
-                    {
-                        currPlayer.SetActiveInteraction(iType);
-                        int activeIndex = currPlayer.GetActivebuttonIndex();
-                        currPlayer.ReleaseGameButton();
-                        if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
-                        else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
-                    }, false);
-            }
-            inputManager.AddKeyBinding(
-                    new List<KeyCode>() { keys[pointerPlaceholders.Count] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
-                    {
-                        int potentialIndex = (currPlayer.GetActivebuttonIndex() - 1);
-                        potentialIndex = (potentialIndex < 0)? 0 : potentialIndex;
-                        currPlayer.SetActiveButton(potentialIndex, pointerPlaceholders[potentialIndex].transform.position);
-                        UpdateButtonOverlaps(currPlayer, potentialIndex);
-                    }, false);
-            inputManager.AddKeyBinding(
-                    new List<KeyCode>() { keys[pointerPlaceholders.Count + 1] }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys)
-                    {
-                        int potentialIndex = (currPlayer.GetActivebuttonIndex() + 1);
-                        potentialIndex = (potentialIndex > (pointerPlaceholders.Count - 1)) ? (pointerPlaceholders.Count - 1) : potentialIndex;
-                        currPlayer.SetActiveButton(potentialIndex, pointerPlaceholders[potentialIndex].transform.position);
-                        UpdateButtonOverlaps(currPlayer, potentialIndex);
-                    }, false);
 
             currPlayer.SetActiveButton(0, pointerPlaceholders[0].transform.position);
             currPlayer.SetScore(0);

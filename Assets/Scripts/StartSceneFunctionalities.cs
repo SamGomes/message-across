@@ -5,25 +5,12 @@ using UnityEngine.SceneManagement;
 
 public class StartSceneFunctionalities : MonoBehaviour
 {
-    public InputManager inputManager;
     public UnityEngine.UI.Button startButton;
     // Start is called before the first frame update
     void Start()
     {
-        inputManager.AddKeyBinding(
-        new List<KeyCode>() { KeyCode.Space }, InputManager.ButtonPressType.PRESSED, delegate (List<KeyCode> triggeredKeys)
-        {
-            SceneManager.LoadScene("mainScene");
-        }, false);
-
         startButton.onClick.AddListener(delegate () {
             SceneManager.LoadScene("mainScene");
         });
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
