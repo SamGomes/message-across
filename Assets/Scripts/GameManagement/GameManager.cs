@@ -541,7 +541,7 @@ public class GameManager : MonoBehaviour
         string currTargetWord = player.GetCurrExercise().targetWord;
 
         //check the utility of word
-        bool usefulForMe = (currWordState.Length <= currTargetWord.Length && currTargetWord.Contains(letterText));
+        bool usefulForMe = (currWordState.Length <= currTargetWord.Length && !currWordState.Contains(letterText) && currTargetWord.Contains(letterText));
 
 
         if (execute && usefulForMe)
@@ -552,7 +552,7 @@ public class GameManager : MonoBehaviour
                 if (changeIndex == -1)
                 {
                     return false;
-                }else if(currWordState[changeIndex] == '_')
+                }else if(currWordState[changeIndex] == '\u2002')
                 {
                     break;
                 }
@@ -583,6 +583,14 @@ public class GameManager : MonoBehaviour
         if (currHitter.GetCurrNumPossibleActionsPerLevel() <= 0)
         {
             return;
+        }
+
+        foreach (Player player in settings.generalSettings.players)
+        {
+            if (player != currHitter && player.IsPressingButton() && player.GetActivebuttonIndex() == currHitter.GetActivebuttonIndex())
+            {
+                return;
+            }
         }
 
         currHitter.DecreasePossibleActionsPerLevel();

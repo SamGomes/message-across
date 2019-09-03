@@ -88,6 +88,106 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &2610792709094426273
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4054813854353003503}
+  - component: {fileID: 7277391325868739370}
+  - component: {fileID: 1226821945938502059}
+  - component: {fileID: 5034707273394056989}
+  m_Layer: 5
+  m_Name: currState
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4054813854353003503
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2610792709094426273}
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
+  m_LocalPosition: {x: 1.83, y: 1.04, z: 2.33}
+  m_LocalScale: {x: 0.079063565, y: 0.13758108, z: 0.12150925}
+  m_Children: []
+  m_Father: {fileID: 4641608461490912262}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!222 &7277391325868739370
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2610792709094426273}
+  m_CullTransparentMesh: 0
+--- !u!23 &1226821945938502059
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2610792709094426273}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: b03cf8117b061ec449b6ed4b1a198075, type: 3}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!102 &5034707273394056989
+TextMesh:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2610792709094426273}
+  m_Text: WORDS
+  m_OffsetZ: 0
+  m_CharacterSize: 1
+  m_LineSpacing: 1
+  m_Anchor: 0
+  m_Alignment: 0
+  m_TabSize: 50
+  m_FontSize: 200
+  m_FontStyle: 0
+  m_RichText: 1
+  m_Font: {fileID: 12800000, guid: b03cf8117b061ec449b6ed4b1a198075, type: 3}
+  m_Color:
+    serializedVersion: 2
+    rgba: 4278230783
 --- !u!1 &4641608461490912263
 GameObject:
   m_ObjectHideFlags: 0
@@ -120,6 +220,7 @@ RectTransform:
   - {fileID: 636408892968959671}
   - {fileID: 1040088480315390297}
   - {fileID: 1417947569470791370}
+  - {fileID: 4054813854353003503}
   m_Father: {fileID: 6122524075123724770}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
@@ -191,7 +292,7 @@ GameObject:
   - component: {fileID: 2950698393924792459}
   - component: {fileID: 755972459641029196}
   m_Layer: 5
-  m_Name: reqPanel
+  m_Name: word
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -205,8 +306,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8879688393586379075}
   m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
-  m_LocalPosition: {x: 3.14, y: 1.6, z: -0.18}
-  m_LocalScale: {x: 0.05244953, y: 0.091269195, z: 0.08060736}
+  m_LocalPosition: {x: 1.83, y: 1.04, z: 2.56}
+  m_LocalScale: {x: 0.079063565, y: 0.13758108, z: 0.12150925}
   m_Children: []
   m_Father: {fileID: 4641608461490912262}
   m_RootOrder: 3
@@ -264,7 +365,7 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8879688393586379075}
-  m_Text: WORDS:______
+  m_Text: WORDS
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1

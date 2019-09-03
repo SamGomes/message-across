@@ -149,20 +149,22 @@ public class Player
         currWordState = "";
         int missingLength = currExercise.targetWord.Length;
         for (int i = 0; i < missingLength; i++) {
-            currWordState += "_";
+            currWordState += "\u2002";
         }
 
         //Update UI
-        TextMesh playerDisplayText = wordPanel.GetComponentInChildren<TextMesh>();
-        playerDisplayText.text = currExercise.targetWord+" : "+currWordState;
+        TextMesh[] playerDisplayTexts = wordPanel.GetComponentsInChildren<TextMesh>();
+        playerDisplayTexts[0].text = currExercise.targetWord;
+        playerDisplayTexts[1].text = currWordState;
     }
     public void SetCurrWordState(string newCurrWordState)
     {
         currWordState = newCurrWordState;
-        
+
         //Update UI
-        TextMesh playerDisplayText = wordPanel.GetComponentInChildren<TextMesh>();
-        playerDisplayText.text = currExercise.targetWord + " : " + currWordState;
+        TextMesh[] playerDisplayTexts = wordPanel.GetComponentsInChildren<TextMesh>();
+        playerDisplayTexts[0].text = currExercise.targetWord;
+        playerDisplayTexts[1].text = currWordState;
     }
     public string GetCurrWordState()
     {
@@ -285,14 +287,6 @@ public class Player
 
     public void PressGameButton()
     {
-        foreach (Player player in gameManagerRef.settings.generalSettings.players)
-        {
-            if (player != this && player.IsPressingButton() && player.GetActivebuttonIndex() == this.GetActivebuttonIndex())
-            {
-                return;
-            }
-        }
-
         this.pressingButton = true;
         this.gameButton.RegisterButtonDown();
     }
