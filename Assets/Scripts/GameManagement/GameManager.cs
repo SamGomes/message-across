@@ -11,6 +11,15 @@ using UnityEngine.UI;
 
 public static class Globals
 {
+    public enum ExercisesConfig
+    {
+        COMPETITIVE,
+        INDIVIDUALISTIC,
+        MUTUAL_HELP,
+        P_ALTROISTIC,
+        NEUTRAL
+    }
+
     public enum PlayerId
     {
         PLAYER_0,
@@ -47,6 +56,7 @@ public static class Globals
     
     public static int currLevelId = 0;
     public static string gameId = "";
+    public static ExercisesConfig gameParam = ExercisesConfig.NEUTRAL;
 
 
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
@@ -268,11 +278,25 @@ public class GameManager : MonoBehaviour
         gameSceneManager.MainSceneLoadedNotification();
         
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
-        scoreSystemName = "scoreSystemConfigComp";
-        //scoreSystemName = "scoreSystemConfigMutualHelp";
-        //scoreSystemName = "scoreSystemConfigPAltruistic";
-        //scoreSystemName = "scoreSystemConfigIndividualistic";
-        //scoreSystemName = "scoreSystemConfigNeutral";
+        switch (Globals.gameParam)
+        {
+            case Globals.ExercisesConfig.NEUTRAL:
+                scoreSystemName = "scoreSystemConfigNeutral";
+                break;
+            case Globals.ExercisesConfig.COMPETITIVE:
+                scoreSystemName = "scoreSystemConfigComp";
+                break;
+            case Globals.ExercisesConfig.INDIVIDUALISTIC:
+                scoreSystemName = "scoreSystemConfigIndividualistic";
+                break;
+            case Globals.ExercisesConfig.MUTUAL_HELP:
+                scoreSystemName = "scoreSystemConfigMutualHelp";
+                break;
+            case Globals.ExercisesConfig.P_ALTROISTIC:
+                scoreSystemName = "scoreSystemConfigPAltruistic";
+                break;
+        }
+
         string scoreConfigPath = Application.streamingAssetsPath + "/"+ scoreSystemName + ".cfg";
         string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
         string generalConfigText = "";
