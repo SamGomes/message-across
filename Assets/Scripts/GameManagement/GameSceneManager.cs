@@ -12,27 +12,16 @@ public class GameSceneManager : MonoBehaviour {
     private GameObject currPauseMenu;
     private GameObject plainPauseMenu;
     private GameObject initialConfigMenu;
-
-    public void StartAndPauseGame()
-    {
-        if (!isGameLoaded)
-        {
-            this.StartGame();
-        }
-        else
-        {
-            this.PauseGame();
-        }
-    }
+    
 
     public void MainSceneLoadedNotification()
     {
         isGameLoaded = true;
         this.plainPauseMenu = GameObject.Find("CanvasForUI/PauseCanvas");
         this.initialConfigMenu = GameObject.Find("CanvasForUI/InitialConfigPauseCanvas");
-        plainPauseMenu.SetActive(false);
         //initialConfigMenu.SetActive(false);
         this.currPauseMenu = initialConfigMenu;
+        Object.DontDestroyOnLoad(this);
     }
 
     private void StartGame()
@@ -50,31 +39,13 @@ public class GameSceneManager : MonoBehaviour {
         isGameLoaded = false;
 
         SceneManager.LoadScene("gameover");
+        StartCoroutine(DelayedQuitGame(3.0f));
+
     }
 
-    private void PauseGame()
+    public IEnumerator DelayedQuitGame(float delay)
     {
-        if (!isGamePaused)
-        {
-            gameManager.PauseGame();
-            currPauseMenu.SetActive(true);
-        }
-        else
-        {
-            gameManager.ResumeGame();
-            currPauseMenu.SetActive(false);
-
-            //regain pause menu everytime user unpauses the questionnaire menu
-//            if (currPauseMenu != plainPauseMenu)
-//            {
-                currPauseMenu = plainPauseMenu;
-//            }
-        }
-        isGamePaused = !isGamePaused;
-    }
-
-    public void QuitGame()
-    {
+        yield return new WaitForSeconds(delay);
         Application.Quit();
     }
 }

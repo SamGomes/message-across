@@ -100,6 +100,7 @@ public struct GeneralSettings
 {
     public List<Player> players;
     public int gameId;
+    public int numLevels;
 }
 
 [Serializable]
@@ -122,6 +123,9 @@ public struct PerformanceMetrics
 
 public class GameManager : MonoBehaviour
 {
+    public Button quitButton;
+    private int numLevelsLeft;
+
     private AudioManager globalAudioManager;
     private int exerciseGroupIndex;
 
@@ -246,14 +250,18 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator YieldedStart()
     {
-        for(int i=0; i < 20; i++)
+        quitButton.onClick.AddListener(delegate(){
+            gameSceneManager.EndGame();
+        });
+
+        for (int i=0; i < 20; i++)
         {
             Globals.gameId += (char)('A' + UnityEngine.Random.Range(0, 26));
         }
 
         globalAudioManager = new AudioManager();
 
-        logManager = new MongoDBLogManager();
+        logManager = new DebugLogManager();
         logManager.InitLogs(this);
         
         isGameplayPaused = false;
@@ -261,9 +269,10 @@ public class GameManager : MonoBehaviour
         
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
         scoreSystemName = "scoreSystemConfigComp";
-        scoreSystemName = "scoreSystemConfigMutualHelp";
-        scoreSystemName = "scoreSystemConfigPAltruistic";
-        scoreSystemName = "scoreSystemConfigIndividualistic";
+        //scoreSystemName = "scoreSystemConfigMutualHelp";
+        //scoreSystemName = "scoreSystemConfigPAltruistic";
+        //scoreSystemName = "scoreSystemConfigIndividualistic";
+        //scoreSystemName = "scoreSystemConfigNeutral";
         string scoreConfigPath = Application.streamingAssetsPath + "/"+ scoreSystemName + ".cfg";
         string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
         string generalConfigText = "";
@@ -311,20 +320,23 @@ public class GameManager : MonoBehaviour
         //timePanel.GetComponent<Animator>().StopPlayback();
         //InvokeRepeating("TimeDependentEvents", 0.0f, 1.0f);
 
-        gameSceneManager.StartAndPauseGame(); //for the initial screen
+        numLevelsLeft = settings.generalSettings.numLevels;
 
         performanceMetrics = new PerformanceMetrics();
         performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
 
+
+        UnityEngine.Object.DontDestroyOnLoad(canvas);
+
         for (int i = 0; i < settings.generalSettings.players.Count; i++)
         {
+            GameObject playerUI = playerUIs[i];
+
             Player currPlayer = settings.generalSettings.players[i];
-            currPlayer.Init(this, playerMarkerPrefab, playerMarkersContainer, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
+            currPlayer.Init(this, playerMarkerPrefab, playerMarkersContainer, playerUI, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
             currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetButtonColor();
 
             //set buttons for touch screen
-            GameObject playerUI = playerUIs[i];
-            playerUI.GetComponentInChildren<Image>().color = currPlayer.GetButtonColor(); //set background color (background as first child)
             UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
 
             for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
@@ -383,7 +395,7 @@ public class GameManager : MonoBehaviour
             isButtonOverlap = true;
 
             currPlayer.SetActiveButton(0, pointerPlaceholders[0].transform.position);
-            currPlayer.SetScore(0);
+            currPlayer.SetScore(0, 0);
         }
 
         UpdateButtonOverlaps(settings.generalSettings.players[0], 0);
@@ -397,7 +409,6 @@ public class GameManager : MonoBehaviour
 
         //inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) {
             globalAudioManager.PlayClip("Audio/wordChangeBad");
-            gameSceneManager.StartAndPauseGame();
         //}, false);
 
 
@@ -446,6 +457,14 @@ public class GameManager : MonoBehaviour
 
     void ChangeLevel(bool areWordsUnfinished)
     {
+        if (numLevelsLeft > 0) { //<= 0 tells the game it is an infinite game (tutorial purposes)
+            numLevelsLeft--;
+            if (numLevelsLeft < 1) //quit on max num levels reached
+            {
+                gameSceneManager.EndGame();
+            }
+        }
+
         if (areWordsUnfinished)
         {
             globalAudioManager.PlayClip("Audio/wordChangeBad");
@@ -640,14 +659,14 @@ public class GameManager : MonoBehaviour
         {
             if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff == (Globals.DiffLetters)Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
             {
-                currHitter.SetScore(currHitter.GetScore() + score.myValue);
+                currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue);
                 foreach (Player innerPlayer in settings.generalSettings.players)
                 {
                     if (innerPlayer == currHitter)
                     {
                         continue;
                     }
-                    innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue);
+                    innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue);
                 }
                 scoreOptionFound = true;
                 break;
@@ -682,7 +701,7 @@ public class GameManager : MonoBehaviour
             else
             {
                 if (!player.currExerciseFinished)
-                    player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore);
+                    player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore, settings.scoreSystem.completeWordMyScore);
                 foreach (Player innerPlayer in settings.generalSettings.players)
                 {
                     if (player == innerPlayer)
@@ -690,7 +709,7 @@ public class GameManager : MonoBehaviour
                         continue;
                     }
                     if (!innerPlayer.currExerciseFinished)
-                        innerPlayer.SetScore(innerPlayer.GetScore() + settings.scoreSystem.completeWordOtherScore);
+                        innerPlayer.SetScore(innerPlayer.GetScore() + settings.scoreSystem.completeWordOtherScore, settings.scoreSystem.completeWordOtherScore);
                 }
             }
         }

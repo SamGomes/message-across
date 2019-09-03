@@ -34,7 +34,6 @@ public class Player
     private GameObject statePanel;
     private Text possibleActionsText;
     private Text scoreText;
-    private Text nameText;
 
     private GameObject marker;
     private List<GameObject> maskedHalf;
@@ -54,6 +53,8 @@ public class Player
 
     private int id;
 
+    private GameObject ui;
+
     public bool pressingButton;
 
 
@@ -71,8 +72,10 @@ public class Player
         this.currNumPossibleActionsPerLevel = numPossibleActionsPerLevel;
     }
 
-    public void Init(GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject wordPanel, GameObject statePanel, bool isTopMask)
+    public void Init(GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
     {
+        this.ui = ui;
+
         //this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
         this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 0.8f);
         //marker.transform.position = activeButtonPos;
@@ -92,10 +95,9 @@ public class Player
         this.statePanel = statePanel;
         this.possibleActionsText = statePanel.transform.Find("possibleActionsText").GetComponent<Text>();
         this.scoreText = statePanel.transform.Find("scoreText").GetComponent<Text>();
-        this.nameText = statePanel.transform.Find("nameText").GetComponent<Text>();
 
+        SetColor(this.buttonColor);
 
-        statePanel.GetComponentInChildren<Image>().color = this.buttonColor;
 
         this.name = "";
         this.score = -1;
@@ -106,6 +108,26 @@ public class Player
         this.gameButton.SetOwner(this);
 
         this.pressingButton = false;
+    }
+
+    private void SetColor(Color newColor)
+    {
+        statePanel.GetComponentInChildren<Image>().color = newColor;
+        ui.GetComponentInChildren<Image>().color = newColor;
+
+        float g = 1.0f - newColor.grayscale*0.8f;
+        Text[] texts = statePanel.GetComponentsInChildren<Text>();
+        List<Image> imgs = new List<Image>(ui.GetComponentsInChildren<Image>());
+        imgs.RemoveAt(0);
+        foreach (Text text in texts)
+        {
+            text.color = new Color(g, g, g); //set background color (background as first child)
+        }
+        foreach (Image img in imgs)
+        {
+            img.color = new Color(g, g, g); //set background color (background as first child)
+        }
+
     }
 
     public int GetId()
@@ -147,7 +169,14 @@ public class Player
         return currWordState;
     }
 
-    public void SetScore(int score)
+    private IEnumerator TimedSetColor(float timeAmount, Color newColor)
+    {
+        SetColor(newColor);
+        yield return new WaitForSeconds(timeAmount);
+        SetColor(this.buttonColor);
+    }
+
+    public void SetScore(int score, int increase)
     {
         if(this.score != score)
         {
@@ -156,6 +185,7 @@ public class Player
             //update UI
             scoreText.text = "Score: " + score;
             statePanel.GetComponent<Animator>().Play(0);
+            gameManagerRef.StartCoroutine(TimedSetColor(0.5f, (increase>0)? new Color(0.0f, 1.0f, 0.0f) : (increase < 0) ? new Color(1.0f, 0.0f, 0.0f): this.buttonColor));
         }
 
     }
@@ -188,9 +218,6 @@ public class Player
     public void SetName(string name)
     {
         this.name = name;
-
-        //update UI
-        nameText.text = "Player " + name;
     }
 
     public void SetActiveButton(int activeButtonIndex, Vector3 activeButtonPos)
