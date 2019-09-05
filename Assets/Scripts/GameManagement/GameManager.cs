@@ -387,7 +387,7 @@ public class GameManager : MonoBehaviour
         ChangeGameParametrizations(true);
 
         //inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) {
-            Globals.effectsAudioManager.PlayClip("Audio/wordChangeBad");
+            //Globals.effectsAudioManager.PlayClip("Audio/wordChangeBad");
         //}, false);
 
 
@@ -448,7 +448,7 @@ public class GameManager : MonoBehaviour
 
         if (areWordsUnfinished)
         {
-            Globals.effectsAudioManager.PlayClip("Audio/wordChangeBad");
+            //Globals.effectsAudioManager.PlayClip("Audio/wordChangeBad");
             emoji.GetComponent<Animator>().Play("Sad");
         }
         else
@@ -559,12 +559,12 @@ public class GameManager : MonoBehaviour
 
     public void RecordHit(char letterText, GameObject letter, Player currHitter)
     {
-
-        currHitter.DecreasePossibleActionsPerLevel();
-
+        
         //verify if button should be pressed
-        if (currHitter.GetCurrNumPossibleActionsPerLevel() > 0)
+        if (currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
         {
+            Globals.effectsAudioManager.PlayClip("Audio/note"); //also approaches the last actions update
+            currHitter.DecreasePossibleActionsPerLevel();
 
             bool usefulForMe = false;
             bool usefulForOther = false;
@@ -684,7 +684,7 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                if (!player.currExerciseFinished)
+                if (!player.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
                     player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore, settings.scoreSystem.completeWordMyScore);
                 foreach (Player innerPlayer in settings.generalSettings.players)
                 {
@@ -692,7 +692,7 @@ public class GameManager : MonoBehaviour
                     {
                         continue;
                     }
-                    if (!innerPlayer.currExerciseFinished)
+                    if (!innerPlayer.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
                         innerPlayer.SetScore(innerPlayer.GetScore() + settings.scoreSystem.completeWordOtherScore, settings.scoreSystem.completeWordOtherScore);
                 }
             }

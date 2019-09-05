@@ -59,7 +59,6 @@ public class GameButton : MonoBehaviour {
         
         if (this.isClicked && this.currCollidingLetterCollider!=null)
         {
-            Globals.effectsAudioManager.PlayClip("Audio/note");
             GameObject currCollidingLetterObject = currCollidingLetterCollider.gameObject;
             currCollidingLetterObject.transform.localScale *= 1.2f;
 
