@@ -149,7 +149,7 @@ public class Player
         currWordState = "";
         int missingLength = currExercise.targetWord.Length;
         for (int i = 0; i < missingLength; i++) {
-            currWordState += "\u2002";
+            currWordState += ' ';
         }
 
         //Update UI
@@ -187,7 +187,17 @@ public class Player
             //update UI
             scoreText.text = "Score: " + score;
             statePanel.GetComponent<Animator>().Play(0);
-            gameManagerRef.StartCoroutine(TimedSetColor(0.5f, (increase>0)? new Color(0.0f, 1.0f, 0.0f) : (increase < 0) ? new Color(1.0f, 0.0f, 0.0f): this.buttonColor));
+            Color newColor = this.buttonColor;
+            if(increase > 0)
+            {
+                Globals.effectsAudioManager.PlayClip("Audio/goodMove");
+                newColor = new Color(0.0f, 1.0f, 0.0f);
+            }
+            else if(increase < 0)
+            {
+                newColor = new Color(1.0f, 0.0f, 0.0f);
+            }
+            gameManagerRef.StartCoroutine(TimedSetColor(0.5f, newColor));
         }
 
     }
@@ -302,4 +312,8 @@ public class Player
         return pressingButton;
     }
 
+    public GameObject GetStatePanel()
+    {
+        return this.statePanel;
+    }
 }

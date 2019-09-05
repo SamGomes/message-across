@@ -38,7 +38,6 @@ public class GameButton : MonoBehaviour {
     void Start()
     {
         currCollidingLetterCollider = null;
-        buttonAudioManager = new AudioManager();
         gameManager = GameObject.FindObjectOfType<GameManager>();
     }
 
@@ -60,7 +59,7 @@ public class GameButton : MonoBehaviour {
         
         if (this.isClicked && this.currCollidingLetterCollider!=null)
         {
-            buttonAudioManager.PlayClip("Audio/note");
+            Globals.effectsAudioManager.PlayClip("Audio/note");
             GameObject currCollidingLetterObject = currCollidingLetterCollider.gameObject;
             currCollidingLetterObject.transform.localScale *= 1.2f;
 

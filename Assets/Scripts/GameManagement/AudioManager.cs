@@ -9,15 +9,27 @@ public class AudioManager{
     private AudioSource source;
     private AudioSource loopSource;
     
-    public AudioManager()
+    public AudioManager(bool includeAudioListener)
     {
         this.audioManagerObject = new GameObject();
-
         Object.DontDestroyOnLoad(audioManagerObject);
         Globals.savedObjects.Add(audioManagerObject);
 
         this.source = audioManagerObject.AddComponent<AudioSource>();
         this.loopSource = audioManagerObject.AddComponent<AudioSource>();
+        if (includeAudioListener)
+        {
+            audioManagerObject.AddComponent<AudioListener>();
+        }
+    }
+
+    public AudioSource GetSource()
+    {
+        return this.source;
+    }
+    public AudioSource GetLoopSource()
+    {
+        return this.loopSource;
     }
 
     public void PlayInfinitClip(string introClipPath, string loopClipPath)

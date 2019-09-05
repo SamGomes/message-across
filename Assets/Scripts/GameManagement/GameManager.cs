@@ -9,68 +9,6 @@ using UnityEngine.EventSystems;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 
-public static class Globals
-{
-    public enum ExercisesConfig
-    {
-        COMPETITIVE,
-        INDIVIDUALISTIC,
-        MUTUAL_HELP,
-        P_ALTROISTIC,
-        NEUTRAL
-    }
-
-    public enum PlayerId
-    {
-        PLAYER_0,
-        PLAYER_1,
-        PLAYER_2,
-        NONE
-    }
-
-    public enum ButtonId
-    {
-        BTN_0,
-        BTN_1,
-        BTN_2,
-        NONE
-    }
-    
-    public enum KeyInteractionType
-    {
-        NONE,
-        TAKE,
-        GIVE
-    }
-
-
-    public enum DiffLetters
-    {
-        HIGHER,
-        EQUAL,
-        LOWER
-    }
-
-    public static KeyInteractionType[] keyInteractionTypes = (KeyInteractionType[]) Enum.GetValues(typeof(Globals.KeyInteractionType));
-    public static ButtonId[] buttonIds = (ButtonId[]) Enum.GetValues(typeof(Globals.ButtonId));
-    
-    public static int currLevelId = 0;
-    public static string gameId = "";
-    public static ExercisesConfig gameParam = ExercisesConfig.NEUTRAL;
-    internal static List<GameObject> savedObjects = new List<GameObject>();
-
-    public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
-    {
-        Vector3 sourcePos = source.transform.position;
-        float totalDist = (targetPos - sourcePos).sqrMagnitude;
-        float currT = 0;
-        while (currT < 1.0f && source != null)
-        {
-            source.transform.position = Vector3.Lerp(sourcePos, targetPos, currT += speed * 0.025f);
-            yield return new WaitForSeconds(0.025f);
-        }
-    }
-}
 
 [Serializable]
 public class ScoreValue
@@ -137,15 +75,14 @@ public class GameManager : MonoBehaviour
     public Button resetButton;
     private int numLevelsLeft;
 
-    private AudioManager globalAudioManager;
     private int exerciseGroupIndex;
 
     public GameSettings settings;
     private PerformanceMetrics performanceMetrics;
 
     public GameObject canvas;
+    public GameObject stateCanvas;
 
-    public GameSceneManager gameSceneManager;
 
     public GameObject playerMarkersContainer;
     public GameObject playerMarkerPrefab;
@@ -175,7 +112,6 @@ public class GameManager : MonoBehaviour
     public List<GameObject> playerUIs;
     
     private float timeLeft;
-
 
     private string scoreSystemName; //to be able to recover condition
 
@@ -262,25 +198,22 @@ public class GameManager : MonoBehaviour
     private IEnumerator YieldedStart()
     {
         quitButton.onClick.AddListener(delegate(){
-            gameSceneManager.EndGame();
+            Globals.gameSceneManager.EndGame();
         });
         resetButton.onClick.AddListener(delegate () {
-            gameSceneManager.EndGame();
-            gameSceneManager.StartGame();
+            Globals.gameSceneManager.EndGame();
+            Globals.gameSceneManager.StartGame();
         });
 
         for (int i=0; i < 20; i++)
         {
             Globals.gameId += (char)('A' + UnityEngine.Random.Range(0, 26));
         }
-
-        globalAudioManager = new AudioManager();
-
+        
         logManager = new DebugLogManager();
         logManager.InitLogs(this);
         
         isGameplayPaused = false;
-        gameSceneManager.MainSceneLoadedNotification();
         
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
         switch (Globals.gameParam)
@@ -355,10 +288,10 @@ public class GameManager : MonoBehaviour
 
         performanceMetrics = new PerformanceMetrics();
         performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
-        
 
-        UnityEngine.Object.DontDestroyOnLoad(canvas);
-        Globals.savedObjects.Add(canvas);
+
+        DontDestroyOnLoad(stateCanvas);
+        Globals.savedObjects.Add(stateCanvas);
 
         for (int i = 0; i < settings.generalSettings.players.Count; i++)
         {
@@ -367,7 +300,7 @@ public class GameManager : MonoBehaviour
             Player currPlayer = settings.generalSettings.players[i];
             currPlayer.Init(this, playerMarkerPrefab, playerMarkersContainer, playerUI, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
             currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetButtonColor();
-
+            
             //set buttons for touch screen
             UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
 
@@ -454,12 +387,14 @@ public class GameManager : MonoBehaviour
         ChangeGameParametrizations(true);
 
         //inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) {
-            globalAudioManager.PlayClip("Audio/wordChangeBad");
+            Globals.effectsAudioManager.PlayClip("Audio/wordChangeBad");
         //}, false);
 
 
         Shuffle<ExercisesListWrapper>(settings.exercisesGroups.exerciseGroups);
 
+        Globals.backgroundAudioManager.StopCurrentClip();
+        Globals.backgroundAudioManager.PlayInfinitClip("Audio/backgroundLoop", "Audio/backgroundLoop");
 
     }
 
@@ -507,19 +442,18 @@ public class GameManager : MonoBehaviour
             numLevelsLeft--;
             if (numLevelsLeft < 1) //quit on max num levels reached
             {
-                gameSceneManager.EndGame();
+                Globals.gameSceneManager.EndGame();
             }
         }
 
         if (areWordsUnfinished)
         {
-            globalAudioManager.PlayClip("Audio/wordChangeBad");
+            Globals.effectsAudioManager.PlayClip("Audio/wordChangeBad");
             emoji.GetComponent<Animator>().Play("Sad");
         }
         else
         {
-
-            globalAudioManager.PlayClip("Audio/wordChangeGood");
+            Globals.effectsAudioManager.PlayClip("Audio/wordChangeGood");
             emoji.GetComponent<Animator>().Play("Smiling");
         }
         //timeLeft = settings.initialTimeLeft;
@@ -598,7 +532,7 @@ public class GameManager : MonoBehaviour
                 if (changeIndex == -1)
                 {
                     return false;
-                }else if(currWordState[changeIndex] == '\u2002')
+                }else if(currWordState[changeIndex] == ' ')
                 {
                     break;
                 }

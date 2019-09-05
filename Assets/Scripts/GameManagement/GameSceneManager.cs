@@ -3,26 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameSceneManager : MonoBehaviour {
+public class GameSceneManager {
 
     private bool isGamePaused;
     private bool isGameLoaded;
-    public GameManager gameManager;
 
-    private GameObject currPauseMenu;
-    private GameObject plainPauseMenu;
-    private GameObject initialConfigMenu;
-    
-
-    public void MainSceneLoadedNotification()
+    public void Init()
     {
         isGameLoaded = true;
-        this.plainPauseMenu = GameObject.Find("CanvasForUI/PauseCanvas");
-        this.initialConfigMenu = GameObject.Find("CanvasForUI/InitialConfigPauseCanvas");
         //initialConfigMenu.SetActive(false);
-        this.currPauseMenu = initialConfigMenu;
-        Object.DontDestroyOnLoad(this);
-        Globals.savedObjects.Add(this.gameObject);
     }
 
     public void StartGame()
@@ -30,7 +19,12 @@ public class GameSceneManager : MonoBehaviour {
         //set stuff
         isGamePaused = false;
         isGameLoaded = false;
-        StartCoroutine(DelayedRestartGame(3.0f));
+
+        foreach (var obj in Globals.savedObjects)
+        {
+            Object.Destroy(obj);
+        }
+        SceneManager.LoadScene("start");
 
     }
     public void EndGame()
@@ -39,23 +33,8 @@ public class GameSceneManager : MonoBehaviour {
         isGamePaused = false;
         isGameLoaded = false;
 
+        Globals.backgroundAudioManager.PlayClip("Audio/backgroundLoop");
         SceneManager.LoadScene("gameover");
-        StartCoroutine(DelayedQuitGame(3.0f));
 
-    }
-
-    public IEnumerator DelayedQuitGame(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        Application.Quit();
-    }
-    public IEnumerator DelayedRestartGame(float delay)
-    {
-        yield return DelayedQuitGame(delay);
-        foreach (var obj in Globals.savedObjects)
-        {
-            Destroy(obj);
-        }
-        SceneManager.LoadScene("start");
     }
 }
