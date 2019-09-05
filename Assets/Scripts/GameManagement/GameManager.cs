@@ -57,7 +57,7 @@ public static class Globals
     public static int currLevelId = 0;
     public static string gameId = "";
     public static ExercisesConfig gameParam = ExercisesConfig.NEUTRAL;
-
+    internal static List<GameObject> savedObjects = new List<GameObject>();
 
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
     {
@@ -134,6 +134,7 @@ public struct PerformanceMetrics
 public class GameManager : MonoBehaviour
 {
     public Button quitButton;
+    public Button resetButton;
     private int numLevelsLeft;
 
     private AudioManager globalAudioManager;
@@ -263,6 +264,10 @@ public class GameManager : MonoBehaviour
         quitButton.onClick.AddListener(delegate(){
             gameSceneManager.EndGame();
         });
+        resetButton.onClick.AddListener(delegate () {
+            gameSceneManager.EndGame();
+            gameSceneManager.StartGame();
+        });
 
         for (int i=0; i < 20; i++)
         {
@@ -280,7 +285,9 @@ public class GameManager : MonoBehaviour
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
         switch (Globals.gameParam)
         {
-            case Globals.ExercisesConfig.NEUTRAL:
+            case Globals.ExercisesConfig.NEUTRAL: //special condition also removes the score
+                scorePanelsObject.transform.GetChild(0).GetComponentInChildren<Text>().gameObject.SetActive(false);
+                scorePanelsObject.transform.GetChild(1).GetComponentInChildren<Text>().gameObject.SetActive(false);
                 scoreSystemName = "scoreSystemConfigNeutral";
                 break;
             case Globals.ExercisesConfig.COMPETITIVE:
@@ -348,9 +355,10 @@ public class GameManager : MonoBehaviour
 
         performanceMetrics = new PerformanceMetrics();
         performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
-
+        
 
         UnityEngine.Object.DontDestroyOnLoad(canvas);
+        Globals.savedObjects.Add(canvas);
 
         for (int i = 0; i < settings.generalSettings.players.Count; i++)
         {
@@ -385,9 +393,23 @@ public class GameManager : MonoBehaviour
                     pointerDown.callback.AddListener(delegate (BaseEventData eventData)
                     {
                         currPlayer.SetActiveInteraction(iType);
-                        currPlayer.PressGameButton();
                         if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
                         else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
+
+                        //verify if button should be pressed
+                        if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1)
+                        {
+                            return;
+                        }
+
+                        foreach (Player player in settings.generalSettings.players)
+                        {
+                            if (player != currPlayer && player.IsPressingButton() && player.GetActivebuttonIndex() == currPlayer.GetActivebuttonIndex())
+                            {
+                                return;
+                            }
+                        }
+                        currPlayer.PressGameButton();
                     });
                     trigger.triggers.Add(pointerDown);
                     EventTrigger.Entry pointerUp = new EventTrigger.Entry();
@@ -603,111 +625,107 @@ public class GameManager : MonoBehaviour
 
     public void RecordHit(char letterText, GameObject letter, Player currHitter)
     {
-        
-        if (currHitter.GetCurrNumPossibleActionsPerLevel() <= 0)
-        {
-            return;
-        }
-
-        foreach (Player player in settings.generalSettings.players)
-        {
-            if (player != currHitter && player.IsPressingButton() && player.GetActivebuttonIndex() == currHitter.GetActivebuttonIndex())
-            {
-                return;
-            }
-        }
 
         currHitter.DecreasePossibleActionsPerLevel();
 
-        bool usefulForMe = false;
-        bool usefulForOther = false;
-
-        //diferent rewards in different utility conditions
-        Globals.KeyInteractionType playerIT = currHitter.GetActiveInteraction();
-        List<ScoreValue> scores = new List<ScoreValue>();
-        switch (playerIT)
+        //verify if button should be pressed
+        if (currHitter.GetCurrNumPossibleActionsPerLevel() > 0)
         {
-            case Globals.KeyInteractionType.GIVE:
-                usefulForMe = TestAndExecuteHit(false, letterText, letter, currHitter);
-                foreach (Player usefulTargetPlayer in settings.generalSettings.players)
-                {
-                    if (usefulTargetPlayer == currHitter)
+
+            bool usefulForMe = false;
+            bool usefulForOther = false;
+
+            //diferent rewards in different utility conditions
+            Globals.KeyInteractionType playerIT = currHitter.GetActiveInteraction();
+            List<ScoreValue> scores = new List<ScoreValue>();
+            switch (playerIT)
+            {
+                case Globals.KeyInteractionType.GIVE:
+                    usefulForMe = TestAndExecuteHit(false, letterText, letter, currHitter);
+                    foreach (Player usefulTargetPlayer in settings.generalSettings.players)
                     {
-                        continue;
+                        if (usefulTargetPlayer == currHitter)
+                        {
+                            continue;
+                        }
+                        usefulForOther = TestAndExecuteHit(true, letterText, letter, usefulTargetPlayer);
+                        if (usefulForOther)
+                        {
+                            //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
+                            break;
+                        }
+
                     }
-                    usefulForOther = TestAndExecuteHit(true, letterText, letter, usefulTargetPlayer);
-                    if (usefulForOther)
+                    scores = settings.scoreSystem.giveScores;
+                    break;
+                case Globals.KeyInteractionType.TAKE:
+                    usefulForMe = TestAndExecuteHit(true, letterText, letter, currHitter);
+                    if (usefulForMe)
                     {
                         //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
-                        break;
                     }
-
-                }
-                scores = settings.scoreSystem.giveScores;
-                break;
-            case Globals.KeyInteractionType.TAKE:
-                usefulForMe = TestAndExecuteHit(true, letterText, letter, currHitter);
-                if (usefulForMe)
-                {
-                    //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
-                }
-                foreach (Player usefulTargetPlayer in settings.generalSettings.players)
-                {
-                    if (usefulTargetPlayer == currHitter)
+                    foreach (Player usefulTargetPlayer in settings.generalSettings.players)
                     {
-                        continue;
+                        if (usefulTargetPlayer == currHitter)
+                        {
+                            continue;
+                        }
+                        if (usefulForOther)
+                        {
+                            break;
+                        }
+
+                        usefulForOther = TestAndExecuteHit(false, letterText, letter, usefulTargetPlayer);
                     }
-                    if (usefulForOther)
-                    {
-                        break;
-                    }
-
-                    usefulForOther = TestAndExecuteHit(false, letterText, letter, usefulTargetPlayer);
-                }
-                scores = settings.scoreSystem.takeScores;
-                break;
-        }
-
-        if (usefulForMe || usefulForOther)
-        {
-            emoji.GetComponent<Animator>().Play("Nice");
-        }
-
-        float otherPlayersCompletionMean = 0;
-        int otherPlayersCount = settings.generalSettings.players.Count() - 1;
-        float currPlayerCompletion = currHitter.GetCurrWordState().Count();
-        foreach (Player innerPlayer in settings.generalSettings.players)
-        {
-            if (innerPlayer == currHitter)
-            {
-                continue;
+                    scores = settings.scoreSystem.takeScores;
+                    break;
             }
-            otherPlayersCompletionMean += (float) innerPlayer.GetCurrWordState().Count() / otherPlayersCount;
-        }
-        Globals.DiffLetters playerDiff = (currPlayerCompletion > otherPlayersCompletionMean) ? Globals.DiffLetters.HIGHER : (currPlayerCompletion == otherPlayersCompletionMean) ? Globals.DiffLetters.EQUAL : Globals.DiffLetters.LOWER;
 
-        bool scoreOptionFound = false;
-        foreach (ScoreValue score in scores)
-        {
-            if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff == (Globals.DiffLetters)Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
+            if (usefulForMe || usefulForOther)
             {
-                currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue);
-                foreach (Player innerPlayer in settings.generalSettings.players)
+                emoji.GetComponent<Animator>().Play("Nice");
+            }
+
+            float otherPlayersCompletionMean = 0;
+            int otherPlayersCount = settings.generalSettings.players.Count() - 1;
+            float currPlayerCompletion = currHitter.GetCurrWordState().Count();
+            foreach (Player innerPlayer in settings.generalSettings.players)
+            {
+                if (innerPlayer == currHitter)
                 {
-                    if (innerPlayer == currHitter)
-                    {
-                        continue;
-                    }
-                    innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue);
+                    continue;
                 }
-                scoreOptionFound = true;
-                break;
+                otherPlayersCompletionMean += (float)innerPlayer.GetCurrWordState().Count() / otherPlayersCount;
+            }
+            Globals.DiffLetters playerDiff = (currPlayerCompletion > otherPlayersCompletionMean) ? Globals.DiffLetters.HIGHER : (currPlayerCompletion == otherPlayersCompletionMean) ? Globals.DiffLetters.EQUAL : Globals.DiffLetters.LOWER;
+
+            bool scoreOptionFound = false;
+            foreach (ScoreValue score in scores)
+            {
+                if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff == (Globals.DiffLetters)Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
+                {
+                    currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue);
+                    foreach (Player innerPlayer in settings.generalSettings.players)
+                    {
+                        if (innerPlayer == currHitter)
+                        {
+                            continue;
+                        }
+                        innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue);
+                    }
+                    scoreOptionFound = true;
+                    break;
+                }
+            }
+
+            if (!scoreOptionFound)
+            {
+                Debug.Log("could not find score option for <usefulForMe: " + usefulForMe + ", usefulForOther: " + usefulForOther + ", playerDiff: " + playerDiff + ">");
             }
         }
-
-        if (!scoreOptionFound)
+        else
         {
-            Debug.Log("could not find score option for <usefulForMe: " + usefulForMe + ", usefulForOther: " + usefulForOther + ", playerDiff: " + playerDiff + ">");
+            currHitter.ReleaseGameButton();
         }
 
 

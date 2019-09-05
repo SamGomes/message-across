@@ -12,7 +12,10 @@ public class AudioManager{
     public AudioManager()
     {
         this.audioManagerObject = new GameObject();
+
         Object.DontDestroyOnLoad(audioManagerObject);
+        Globals.savedObjects.Add(audioManagerObject);
+
         this.source = audioManagerObject.AddComponent<AudioSource>();
         this.loopSource = audioManagerObject.AddComponent<AudioSource>();
     }

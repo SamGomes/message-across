@@ -57,13 +57,7 @@ public class GameButton : MonoBehaviour {
         if(!isBeingPressed)
             this.keyPressed = false;
 
-        if (owner.GetCurrNumPossibleActionsPerLevel() < 1)
-        {
-            this.isBeingPressed = false;
-            this.keyPressed = false;
-            return;
-        }
-
+        
         if (this.isClicked && this.currCollidingLetterCollider!=null)
         {
             buttonAudioManager.PlayClip("Audio/note");

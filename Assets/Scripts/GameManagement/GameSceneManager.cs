@@ -22,15 +22,16 @@ public class GameSceneManager : MonoBehaviour {
         //initialConfigMenu.SetActive(false);
         this.currPauseMenu = initialConfigMenu;
         Object.DontDestroyOnLoad(this);
+        Globals.savedObjects.Add(this.gameObject);
     }
 
-    private void StartGame()
+    public void StartGame()
     {
         //set stuff
         isGamePaused = false;
         isGameLoaded = false;
-        
-        SceneManager.LoadScene("crossAnt");
+        StartCoroutine(DelayedRestartGame(3.0f));
+
     }
     public void EndGame()
     {
@@ -47,5 +48,14 @@ public class GameSceneManager : MonoBehaviour {
     {
         yield return new WaitForSeconds(delay);
         Application.Quit();
+    }
+    public IEnumerator DelayedRestartGame(float delay)
+    {
+        yield return DelayedQuitGame(delay);
+        foreach (var obj in Globals.savedObjects)
+        {
+            Destroy(obj);
+        }
+        SceneManager.LoadScene("start");
     }
 }

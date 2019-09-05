@@ -8,6 +8,8 @@ public class StartSceneFunctionalities : MonoBehaviour
 {
     public Button startButton;
     public Button[] paramsButtons;
+
+   
     // Start is called before the first frame update
     void Start()
     {
