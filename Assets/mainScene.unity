@@ -987,7 +987,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1584114816}
   m_Direction: 0
   m_Value: 0
-  m_Size: 0.9673742
+  m_Size: 0.95884526
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -1190,7 +1190,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -245.28601, y: 103.369095}
+  m_AnchoredPosition: {x: -245.25328, y: 103.3553}
   m_SizeDelta: {x: 490, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &590588134
@@ -1737,8 +1737,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1881891083}
   m_HandleRect: {fileID: 1881891082}
   m_Direction: 2
-  m_Value: 1.0003957
-  m_Size: 0.6668819
+  m_Value: 1.0005436
+  m_Size: 0.6610023
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2405,10 +2405,10 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1290038252}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 71e9cdad352fbf549a5d6471ccff58f7, type: 3}
+  m_audioClip: {fileID: 8300000, guid: aa46fa698aaa2eb439257f82c38f99a8, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.63
   m_Pitch: 1
@@ -9536,6 +9536,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 1.3154933
+      objectReference: {fileID: 0}
+    - target: {fileID: 4605586923724700431, guid: cb101c93c0e8e67e79baf3a01d4838c0,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 32.200012
+      objectReference: {fileID: 0}
+    - target: {fileID: 4605586923724700431, guid: cb101c93c0e8e67e79baf3a01d4838c0,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -21
+      objectReference: {fileID: 0}
+    - target: {fileID: 3025114358945360849, guid: cb101c93c0e8e67e79baf3a01d4838c0,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -23.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3025114358945360849, guid: cb101c93c0e8e67e79baf3a01d4838c0,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -20.999989
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cb101c93c0e8e67e79baf3a01d4838c0, type: 3}
