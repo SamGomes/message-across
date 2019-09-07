@@ -559,105 +559,106 @@ public class GameManager : MonoBehaviour
 
     public void RecordHit(char letterText, GameObject letter, Player currHitter)
     {
-        
+
         //verify if button should be pressed
-        if (currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
+
+        Globals.effectsAudioManager.PlayClip("Audio/note"); //also approaches the last actions update
+        currHitter.DecreasePossibleActionsPerLevel();
+
+
+        bool usefulForMe = false;
+        bool usefulForOther = false;
+
+        //diferent rewards in different utility conditions
+        Globals.KeyInteractionType playerIT = currHitter.GetActiveInteraction();
+        List<ScoreValue> scores = new List<ScoreValue>();
+        switch (playerIT)
         {
-            Globals.effectsAudioManager.PlayClip("Audio/note"); //also approaches the last actions update
-            currHitter.DecreasePossibleActionsPerLevel();
-
-            bool usefulForMe = false;
-            bool usefulForOther = false;
-
-            //diferent rewards in different utility conditions
-            Globals.KeyInteractionType playerIT = currHitter.GetActiveInteraction();
-            List<ScoreValue> scores = new List<ScoreValue>();
-            switch (playerIT)
-            {
-                case Globals.KeyInteractionType.GIVE:
-                    usefulForMe = TestAndExecuteHit(false, letterText, letter, currHitter);
-                    foreach (Player usefulTargetPlayer in settings.generalSettings.players)
+            case Globals.KeyInteractionType.GIVE:
+                usefulForMe = TestAndExecuteHit(false, letterText, letter, currHitter);
+                foreach (Player usefulTargetPlayer in settings.generalSettings.players)
+                {
+                    if (usefulTargetPlayer == currHitter)
                     {
-                        if (usefulTargetPlayer == currHitter)
-                        {
-                            continue;
-                        }
-                        usefulForOther = TestAndExecuteHit(true, letterText, letter, usefulTargetPlayer);
-                        if (usefulForOther)
-                        {
-                            //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
-                            break;
-                        }
-
+                        continue;
                     }
-                    scores = settings.scoreSystem.giveScores;
-                    break;
-                case Globals.KeyInteractionType.TAKE:
-                    usefulForMe = TestAndExecuteHit(true, letterText, letter, currHitter);
-                    if (usefulForMe)
+                    usefulForOther = TestAndExecuteHit(true, letterText, letter, usefulTargetPlayer);
+                    if (usefulForOther)
                     {
                         //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
+                        break;
                     }
-                    foreach (Player usefulTargetPlayer in settings.generalSettings.players)
-                    {
-                        if (usefulTargetPlayer == currHitter)
-                        {
-                            continue;
-                        }
-                        if (usefulForOther)
-                        {
-                            break;
-                        }
 
-                        usefulForOther = TestAndExecuteHit(false, letterText, letter, usefulTargetPlayer);
-                    }
-                    scores = settings.scoreSystem.takeScores;
-                    break;
-            }
-
-            if (usefulForMe || usefulForOther)
-            {
-                emoji.GetComponent<Animator>().Play("Nice");
-            }
-
-            float otherPlayersCompletionMean = 0;
-            int otherPlayersCount = settings.generalSettings.players.Count() - 1;
-            float currPlayerCompletion = currHitter.GetCurrWordState().Count();
-            foreach (Player innerPlayer in settings.generalSettings.players)
-            {
-                if (innerPlayer == currHitter)
-                {
-                    continue;
                 }
-                otherPlayersCompletionMean += (float)innerPlayer.GetCurrWordState().Count() / otherPlayersCount;
-            }
-            Globals.DiffLetters playerDiff = (currPlayerCompletion > otherPlayersCompletionMean) ? Globals.DiffLetters.HIGHER : (currPlayerCompletion == otherPlayersCompletionMean) ? Globals.DiffLetters.EQUAL : Globals.DiffLetters.LOWER;
-
-            bool scoreOptionFound = false;
-            foreach (ScoreValue score in scores)
-            {
-                if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff == (Globals.DiffLetters)Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
+                scores = settings.scoreSystem.giveScores;
+                break;
+            case Globals.KeyInteractionType.TAKE:
+                usefulForMe = TestAndExecuteHit(true, letterText, letter, currHitter);
+                if (usefulForMe)
                 {
-                    currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue);
-                    foreach (Player innerPlayer in settings.generalSettings.players)
-                    {
-                        if (innerPlayer == currHitter)
-                        {
-                            continue;
-                        }
-                        innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue);
-                    }
-                    scoreOptionFound = true;
-                    break;
+                    //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
                 }
-            }
+                foreach (Player usefulTargetPlayer in settings.generalSettings.players)
+                {
+                    if (usefulTargetPlayer == currHitter)
+                    {
+                        continue;
+                    }
+                    if (usefulForOther)
+                    {
+                        break;
+                    }
 
-            if (!scoreOptionFound)
+                    usefulForOther = TestAndExecuteHit(false, letterText, letter, usefulTargetPlayer);
+                }
+                scores = settings.scoreSystem.takeScores;
+                break;
+        }
+
+        if (usefulForMe || usefulForOther)
+        {
+            emoji.GetComponent<Animator>().Play("Nice");
+        }
+
+        float otherPlayersCompletionMean = 0;
+        int otherPlayersCount = settings.generalSettings.players.Count() - 1;
+        float currPlayerCompletion = currHitter.GetCurrWordState().Count();
+        foreach (Player innerPlayer in settings.generalSettings.players)
+        {
+            if (innerPlayer == currHitter)
             {
-                Debug.Log("could not find score option for <usefulForMe: " + usefulForMe + ", usefulForOther: " + usefulForOther + ", playerDiff: " + playerDiff + ">");
+                continue;
+            }
+            otherPlayersCompletionMean += (float)innerPlayer.GetCurrWordState().Count() / otherPlayersCount;
+        }
+        Globals.DiffLetters playerDiff = (currPlayerCompletion > otherPlayersCompletionMean) ? Globals.DiffLetters.HIGHER : (currPlayerCompletion == otherPlayersCompletionMean) ? Globals.DiffLetters.EQUAL : Globals.DiffLetters.LOWER;
+
+        bool scoreOptionFound = false;
+        foreach (ScoreValue score in scores)
+        {
+            if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff == (Globals.DiffLetters)Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
+            {
+                currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue);
+                foreach (Player innerPlayer in settings.generalSettings.players)
+                {
+                    if (innerPlayer == currHitter)
+                    {
+                        continue;
+                    }
+                    innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue);
+                }
+                scoreOptionFound = true;
+                break;
             }
         }
-        else
+
+        if (!scoreOptionFound)
+        {
+            Debug.Log("could not find score option for <usefulForMe: " + usefulForMe + ", usefulForOther: " + usefulForOther + ", playerDiff: " + playerDiff + ">");
+        }
+
+
+        if (currHitter.GetCurrNumPossibleActionsPerLevel() < 1)
         {
             currHitter.ReleaseGameButton();
         }
