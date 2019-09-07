@@ -56,6 +56,10 @@ public static class Globals
     public static ExercisesConfig gameParam;
     internal static List<GameObject> savedObjects;
 
+    public static AudioManager backgroundAudioManager;
+    public static AudioManager effectsAudioManager;
+    public static GameSceneManager gameSceneManager;
+
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
     {
         Vector3 sourcePos = source.transform.position;
@@ -68,18 +72,7 @@ public static class Globals
         }
     }
 
-    public static AudioManager backgroundAudioManager;
-    public static AudioManager effectsAudioManager;
-    public static GameSceneManager gameSceneManager;
-}
-
-
-public class StartSceneFunctionalities : MonoBehaviour
-{
-    public Button startButton;
-    public Button[] paramsButtons;
-
-    void InitGlobals()
+    public static void InitGlobals()
     {
         Globals.keyInteractionTypes = (Globals.KeyInteractionType[])Enum.GetValues(typeof(Globals.KeyInteractionType));
         Globals.buttonIds = (Globals.ButtonId[])Enum.GetValues(typeof(Globals.ButtonId));
@@ -96,11 +89,19 @@ public class StartSceneFunctionalities : MonoBehaviour
         Globals.effectsAudioManager = new AudioManager(false);
         Globals.gameSceneManager = new GameSceneManager();
     }
+}
+
+
+public class StartSceneFunctionalities : MonoBehaviour
+{
+    public Button startButton;
+    public Button[] paramsButtons;
+
    
     // Start is called before the first frame update
     void Start()
     {
-        InitGlobals();
+        Globals.InitGlobals();
         Globals.gameSceneManager.Init();
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.PlayInfinitClip("Audio/backgroundLoop", "Audio/backgroundLoop");

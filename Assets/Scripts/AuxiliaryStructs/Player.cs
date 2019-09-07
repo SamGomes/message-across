@@ -37,6 +37,7 @@ public class Player
 
     private GameObject marker;
     private List<GameObject> maskedHalf;
+    private List<GameObject> activeHalf;
     private GameButton gameButton;
 
     private GameManager gameManagerRef;
@@ -91,6 +92,17 @@ public class Player
         maskedHalf.Add((isTopMask == true) ? marker.transform.Find("Button/BackgroundTH").gameObject : marker.transform.Find("Button/BackgroundBH").gameObject);
         maskedHalf.Add((isTopMask == true) ? marker.transform.Find("trackTH").gameObject : marker.transform.Find("trackBH").gameObject);
 
+        activeHalf = new List<GameObject>();
+        activeHalf.Add((isTopMask == false) ? marker.transform.Find("Button/BackgroundTH").gameObject : marker.transform.Find("Button/BackgroundBH").gameObject);
+        activeHalf.Add((isTopMask == false) ? marker.transform.Find("trackTH").gameObject : marker.transform.Find("trackBH").gameObject); //activeHalf[1] is the one of the track
+
+        activeHalf[1].SetActive(false); //lets init it to hidden
+
+        MeshRenderer[] meshes = marker.GetComponentsInChildren<MeshRenderer>();
+        foreach (MeshRenderer mesh in meshes) {
+            mesh.material.color = buttonColor;
+        }
+
         this.wordPanel = wordPanel;
         this.statePanel = statePanel;
         this.possibleActionsText = statePanel.transform.Find("possibleActionsText").GetComponent<Text>();
@@ -129,6 +141,7 @@ public class Player
         }
 
     }
+
 
     public int GetId()
     {
@@ -245,9 +258,30 @@ public class Player
         this.activeButtonIndex = activeButtonIndex;
     }
 
+
     public List<GameObject> GetMaskedHalf()
     {
         return this.maskedHalf;
+    }
+    public List<GameObject> GetActiveHalf()
+    {
+        return this.activeHalf;
+    }
+    public void SetActiveHalf(List<GameObject> activeHalf)
+    {
+        this.activeHalf = activeHalf;
+    }
+    public void UpdateActiveHalf(bool visible)
+    {
+        for (int i = 0; i < activeHalf.Count; i++)
+        {
+            if (i % 2 == 0)
+            {
+                continue;
+            }
+            GameObject currObj = activeHalf[i];
+            currObj.SetActive(visible);
+        }
     }
 
     public void SetActiveInteraction(Globals.KeyInteractionType activeInteraction)
@@ -299,12 +333,15 @@ public class Player
     {
         this.pressingButton = true;
         this.gameButton.RegisterButtonDown();
+        UpdateActiveHalf(true);
     }
 
     public void ReleaseGameButton()
     {
         this.pressingButton = false;
         this.gameButton.RegisterButtonUp();
+        UpdateActiveHalf(false);
+
     }
 
     public bool IsPressingButton()

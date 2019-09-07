@@ -190,6 +190,15 @@ public class GameManager : MonoBehaviour
             {
                 obj.SetActive(!isButtonOverlap);
             }
+            if(!isButtonOverlap)
+            {
+                player.GetActiveHalf().AddRange(player.GetMaskedHalf());
+            }
+            else
+            {
+                player.SetActiveHalf(player.GetActiveHalf().Except(player.GetMaskedHalf()).ToList());
+            }
+            player.UpdateActiveHalf(false);
         }
     }
 
@@ -291,6 +300,10 @@ public class GameManager : MonoBehaviour
 
 
         DontDestroyOnLoad(stateCanvas);
+        if (Globals.savedObjects == null)
+        {
+            Globals.InitGlobals();
+        }
         Globals.savedObjects.Add(stateCanvas);
 
         for (int i = 0; i < settings.generalSettings.players.Count; i++)
@@ -312,8 +325,8 @@ public class GameManager : MonoBehaviour
                     int innerButtonI = buttonI; //for corotine to save the iterated values
                     currButton.onClick.AddListener(delegate ()
                     {
-                        currPlayer.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
                         UpdateButtonOverlaps(currPlayer, innerButtonI);
+                        currPlayer.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
                     });
                 }
                 else
