@@ -32,6 +32,9 @@ public class Player
 
     private GameObject wordPanel;
     private GameObject statePanel;
+    private GameObject scoreUpdateUIup;
+    private GameObject scoreUpdateUIdown;
+
     private Text possibleActionsText;
     private Text scoreText;
 
@@ -105,6 +108,12 @@ public class Player
 
         this.wordPanel = wordPanel;
         this.statePanel = statePanel;
+
+        scoreUpdateUIup = statePanel.transform.Find("scoreUpdateUI/up").gameObject;
+        scoreUpdateUIup.SetActive(false);
+        scoreUpdateUIdown = statePanel.transform.Find("scoreUpdateUI/down").gameObject;
+        scoreUpdateUIdown.SetActive(false);
+
         this.possibleActionsText = statePanel.transform.Find("possibleActionsText").GetComponent<Text>();
         this.scoreText = statePanel.transform.Find("scoreText").GetComponent<Text>();
 
@@ -128,16 +137,17 @@ public class Player
         ui.GetComponentInChildren<Image>().color = newColor;
 
         float g = 1.0f - newColor.grayscale*0.8f;
-        Text[] texts = statePanel.GetComponentsInChildren<Text>();
         List<Image> imgs = new List<Image>(ui.GetComponentsInChildren<Image>());
         imgs.RemoveAt(0);
-        foreach (Text text in texts)
-        {
-            text.color = new Color(g, g, g); //set background color (background as first child)
-        }
+        
+        //for the state display
+        scoreText.color = new Color(g, g, g);
+        possibleActionsText.color = new Color(g, g, g);
+
+        //for player buttons
         foreach (Image img in imgs)
         {
-            img.color = new Color(g, g, g); //set background color (background as first child)
+            img.color = new Color(g, g, g);
         }
 
     }
@@ -203,11 +213,17 @@ public class Player
             Color newColor = this.buttonColor;
             if(increase > 0)
             {
+                scoreUpdateUIup.GetComponentInChildren<Text>().text = "+ " + increase;
+                scoreUpdateUIup.SetActive(false);
+                scoreUpdateUIup.SetActive(true);
                 Globals.effectsAudioManager.PlayClip("Audio/goodMove");
                 newColor = new Color(0.0f, 1.0f, 0.0f);
             }
             else if(increase < 0)
             {
+                scoreUpdateUIdown.GetComponentInChildren<Text>().text = "- " + Math.Abs(increase);
+                scoreUpdateUIdown.SetActive(false);
+                scoreUpdateUIdown.SetActive(true);
                 newColor = new Color(1.0f, 0.0f, 0.0f);
             }
             gameManagerRef.StartCoroutine(TimedSetColor(0.5f, newColor));
