@@ -58,6 +58,7 @@ public static class Globals
 
     public static AudioManager backgroundAudioManager;
     public static AudioManager effectsAudioManager;
+    public static AudioManager trackEffectsAudioManager;
     public static GameSceneManager gameSceneManager;
 
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
@@ -87,6 +88,7 @@ public static class Globals
 
         Globals.backgroundAudioManager = new AudioManager(true);
         Globals.effectsAudioManager = new AudioManager(false);
+        Globals.trackEffectsAudioManager = new AudioManager(false);
         Globals.gameSceneManager = new GameSceneManager();
     }
 }

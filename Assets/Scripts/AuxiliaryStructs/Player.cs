@@ -9,7 +9,7 @@ public class Player
 {
     [SerializeField]
     private List<float> buttonRGB;
-    private Color buttonColor;
+    private Color backgroundColor;
 
     [SerializeField]
     private string name;
@@ -44,6 +44,7 @@ public class Player
     private GameButton gameButton;
 
     private GameManager gameManagerRef;
+    private Color buttonColor;
 
     private IEnumerator currButtonLerp;
 
@@ -81,29 +82,32 @@ public class Player
         this.ui = ui;
 
         //this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
-        this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 0.8f);
+        this.backgroundColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 0.8f);
         //marker.transform.position = activeButtonPos;
         this.gameManagerRef = gameManagerRef;
 
         marker = UnityEngine.Object.Instantiate(markerPrefab, canvas.transform);
         //marker.transform.Rotate(new Vector3(1, 0, 0), angle);
         foreach (SpriteRenderer image in marker.GetComponentsInChildren<SpriteRenderer>()) {
-            image.color = this.buttonColor;
+            image.color = this.backgroundColor;
         }
 
         maskedHalf = new List<GameObject>();
         maskedHalf.Add((isTopMask == true) ? marker.transform.Find("Button/BackgroundTH").gameObject : marker.transform.Find("Button/BackgroundBH").gameObject);
         maskedHalf.Add((isTopMask == true) ? marker.transform.Find("trackTH").gameObject : marker.transform.Find("trackBH").gameObject);
 
+
         activeHalf = new List<GameObject>();
         activeHalf.Add((isTopMask == false) ? marker.transform.Find("Button/BackgroundTH").gameObject : marker.transform.Find("Button/BackgroundBH").gameObject);
         activeHalf.Add((isTopMask == false) ? marker.transform.Find("trackTH").gameObject : marker.transform.Find("trackBH").gameObject); //activeHalf[1] is the one of the track
+        activeHalf.Add((isTopMask == true) ? marker.transform.Find("Button/BackgroundTH").gameObject : marker.transform.Find("Button/BackgroundBH").gameObject);
+        activeHalf.Add((isTopMask == true) ? marker.transform.Find("trackTH").gameObject : marker.transform.Find("trackBH").gameObject);
 
         activeHalf[1].SetActive(false); //lets init it to hidden
 
         MeshRenderer[] meshes = marker.GetComponentsInChildren<MeshRenderer>();
         foreach (MeshRenderer mesh in meshes) {
-            mesh.material.color = buttonColor;
+            mesh.material.color = backgroundColor;
         }
 
         this.wordPanel = wordPanel;
@@ -117,7 +121,7 @@ public class Player
         this.possibleActionsText = statePanel.transform.Find("possibleActionsText").GetComponent<Text>();
         this.scoreText = statePanel.transform.Find("scoreText").GetComponent<Text>();
 
-        SetColor(this.buttonColor);
+        this.buttonColor = SetColor(this.backgroundColor);
 
 
         this.name = "";
@@ -131,7 +135,7 @@ public class Player
         this.pressingButton = false;
     }
 
-    private void SetColor(Color newColor)
+    private Color SetColor(Color newColor)
     {
         statePanel.GetComponentInChildren<Image>().color = newColor;
         ui.GetComponentInChildren<Image>().color = newColor;
@@ -140,15 +144,18 @@ public class Player
         List<Image> imgs = new List<Image>(ui.GetComponentsInChildren<Image>());
         imgs.RemoveAt(0);
         
+        Color dualColor = new Color(g, g, g);
+
         //for the state display
-        scoreText.color = new Color(g, g, g);
-        possibleActionsText.color = new Color(g, g, g);
+        scoreText.color = dualColor;
+        possibleActionsText.color = dualColor;
 
         //for player buttons
         foreach (Image img in imgs)
         {
-            img.color = new Color(g, g, g);
+            img.color = dualColor;
         }
+        return dualColor;
 
     }
 
@@ -198,7 +205,7 @@ public class Player
     {
         SetColor(newColor);
         yield return new WaitForSeconds(timeAmount);
-        SetColor(this.buttonColor);
+        SetColor(this.backgroundColor);
     }
 
     public IEnumerator DelayedScoreDisplay(float score, float delay)
@@ -216,7 +223,7 @@ public class Player
             //update UI
             gameManagerRef.StartCoroutine(DelayedScoreDisplay(score, delay));
             statePanel.GetComponent<Animator>().Play(0);
-            Color newColor = this.buttonColor;
+            Color newColor = this.backgroundColor;
             if(increase > 0)
             {
                 scoreUpdateUIup.GetComponentInChildren<Text>().text = "+ " + increase;
@@ -363,6 +370,11 @@ public class Player
         this.gameButton.RegisterButtonUp();
         UpdateActiveHalf(false);
 
+    }
+
+    public GameObject GetUI()
+    {
+        return this.ui;
     }
 
     public bool IsPressingButton()
