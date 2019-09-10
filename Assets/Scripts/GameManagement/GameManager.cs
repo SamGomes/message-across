@@ -83,6 +83,8 @@ public class GameManager : MonoBehaviour
     public GameObject canvas;
     public GameObject stateCanvas;
 
+    public Text countdownText;
+
 
     public GameObject playerMarkersContainer;
     public GameObject playerMarkerPrefab;
@@ -298,7 +300,7 @@ public class GameManager : MonoBehaviour
         performanceMetrics = new PerformanceMetrics();
         performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
 
-
+        
         DontDestroyOnLoad(stateCanvas);
         if (Globals.savedObjects == null)
         {
@@ -391,16 +393,18 @@ public class GameManager : MonoBehaviour
         }
 
         UpdateButtonOverlaps(settings.generalSettings.players[0], 0);
-        ChangeGameParametrizations(true);
         
         performanceMetrics.multiplayerButtonHits = 0;
         isGameplayStarted = true;
 
         exerciseGroupIndex = UnityEngine.Random.Range(0, settings.exercisesGroups.exerciseGroups.Count);
-        ChangeGameParametrizations(true);
+
+        countdownText.gameObject.SetActive(false);
+
+        StartCoroutine(ChangeLevel(false));
 
         //inputManager.AddKeyBinding(new List<KeyCode> { KeyCode.Space }, InputManager.ButtonPressType.DOWN, delegate (List<KeyCode> triggeredKeys) {
-            //Globals.effectsAudioManager.PlayClip("Audio/wordChangeBad");
+        //Globals.effectsAudioManager.PlayClip("Audio/wordChangeBad");
         //}, false);
 
 
@@ -408,6 +412,7 @@ public class GameManager : MonoBehaviour
 
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.PlayInfinitClip("Audio/backgroundLoop", "Audio/backgroundLoop");
+
 
     }
 
@@ -449,7 +454,7 @@ public class GameManager : MonoBehaviour
         
     }
 
-    void ChangeLevel(bool areWordsUnfinished)
+    IEnumerator ChangeLevel(bool areWordsUnfinished)
     {
         if (numLevelsLeft > 0) { //<= 0 tells the game it is an infinite game (tutorial purposes)
             numLevelsLeft--;
@@ -458,6 +463,14 @@ public class GameManager : MonoBehaviour
                 Globals.gameSceneManager.EndGame();
             }
         }
+
+        foreach (LetterSpawner spawner in letterSpawners)
+        {
+            spawner.UpdateCurrStarredWord("");
+            spawner.StopSpawning();
+        }
+        ChangeTargetWords();
+
 
         if (areWordsUnfinished)
         {
@@ -469,38 +482,41 @@ public class GameManager : MonoBehaviour
             Globals.effectsAudioManager.PlayClip("Audio/wordChangeGood");
             emoji.GetComponent<Animator>().Play("Smiling");
         }
-        //timeLeft = settings.initialTimeLeft;
+        emoji.GetComponent<Animator>().speed = 0;
+
+
+        int i = 5;
+        countdownText.text = i.ToString();
+        yield return new WaitForSeconds(2.0f);
+        countdownText.gameObject.SetActive(true);
+        for (i = 5; i > 0; i--)
+        {
+            countdownText.text = i.ToString();
+            yield return new WaitForSeconds(1.0f);
+        }
+        countdownText.gameObject.SetActive(false);
+
+        emoji.GetComponent<Animator>().speed = 1;
+
+
+        Globals.effectsAudioManager.PlayClip("Audio/snap");
+
+        foreach (LetterSpawner spawner in letterSpawners)
+        {
+            spawner.BeginSpawning();
+        }
+        
 
         foreach(Player player in settings.generalSettings.players)
         {
             player.ResetNumPossibleActions();
         }
         RecordMetrics();
-        ChangeGameParametrizations(false);
 
         Globals.currLevelId++;
     }
     
-
-    private void ChangeGameParametrizations(bool firstTimeCall)
-    {
-        for(int i=0; i<letterSpawners.Length; i++)
-        {
-            if(!firstTimeCall && letterSpawners[i].minIntervalRange > 0.3 && letterSpawners[i].maxIntervalRange > 0.4)
-            {
-                letterSpawners[i].minIntervalRange -= 0.1f;
-                letterSpawners[i].maxIntervalRange -= 0.1f;
-            }
-        }
-
-        for (int i = 0; i < letterSpawners.Length; i++)
-        {
-            letterSpawners[i].UpdateCurrStarredWord("");
-        }
-
-        ChangeTargetWords();
-
-    }
+    
     
     private void ChangeTargetWords()
     {
@@ -574,8 +590,7 @@ public class GameManager : MonoBehaviour
     {
 
         //verify if button should be pressed
-
-        Globals.effectsAudioManager.PlayClip("Audio/note"); //also approaches the last actions update
+        Globals.effectsAudioManager.PlayClip("Audio/badMove");
         currHitter.DecreasePossibleActionsPerLevel();
 
 
@@ -630,6 +645,7 @@ public class GameManager : MonoBehaviour
 
         if (usefulForMe || usefulForOther)
         {
+            Globals.effectsAudioManager.PlayClip("Audio/snap");
             emoji.GetComponent<Animator>().Play("Nice");
         }
 
@@ -651,14 +667,14 @@ public class GameManager : MonoBehaviour
         {
             if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff == (Globals.DiffLetters)Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
             {
-                currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue, 2.0f);
+                currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue, 1.3f);
                 foreach (Player innerPlayer in settings.generalSettings.players)
                 {
                     if (innerPlayer == currHitter)
                     {
                         continue;
                     }
-                    innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue, 2.0f);
+                    innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue, 1.3f);
                 }
                 scoreOptionFound = true;
                 break;
@@ -699,7 +715,7 @@ public class GameManager : MonoBehaviour
             else
             {
                 if (!player.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
-                    player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore, settings.scoreSystem.completeWordMyScore, 2.0f);
+                    player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore, settings.scoreSystem.completeWordMyScore, 1.3f);
                 foreach (Player innerPlayer in settings.generalSettings.players)
                 {
                     if (player == innerPlayer)
@@ -707,13 +723,13 @@ public class GameManager : MonoBehaviour
                         continue;
                     }
                     if (!innerPlayer.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
-                        innerPlayer.SetScore(innerPlayer.GetScore() + settings.scoreSystem.completeWordOtherScore, settings.scoreSystem.completeWordOtherScore, 2.0f);
+                        innerPlayer.SetScore(innerPlayer.GetScore() + settings.scoreSystem.completeWordOtherScore, settings.scoreSystem.completeWordOtherScore, 1.3f);
                 }
             }
         }
         if (!areWordsUnfinished || arePlayersWithoutActions)
         {
-            ChangeLevel(areWordsUnfinished);
+            StartCoroutine(ChangeLevel(areWordsUnfinished));
         }
         
     }

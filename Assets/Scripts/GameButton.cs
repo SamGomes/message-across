@@ -65,6 +65,7 @@ public class GameButton : MonoBehaviour {
             Letter theActualLetter = currCollidingLetterCollider.gameObject.GetComponent<Letter>();
             if (!theActualLetter.IsLocked())
             {
+                currCollidingLetterCollider.gameObject.GetComponent<Rigidbody>().AddForce(new Vector3(0.0f,2.0f,0.0f));
                 gameManager.RecordHit(theActualLetter.letterText, currCollidingLetterObject, owner);
             }
             else

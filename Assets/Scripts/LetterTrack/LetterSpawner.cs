@@ -13,6 +13,7 @@ public class LetterSpawner : MonoBehaviour
     public float maxIntervalRange;
 
     private float randomInterval;
+    private bool isStopped;
 
     private string currStarredWord;
 
@@ -22,6 +23,7 @@ public class LetterSpawner : MonoBehaviour
 
 
     private List<char> lettersPool;
+    private List<GameObject> currLetters;
 
     public float exerciseWordsPercentage = 0.8f; //to export
 
@@ -29,15 +31,27 @@ public class LetterSpawner : MonoBehaviour
     private void Awake()
     {
         lettersPool = new List<char>();
+        currLetters = new List<GameObject>();
     }
 
     // Use this for initialization
     void Start()
     {
-        float initialDelayInSeconds = 1.0f;
+        isStopped = true;
+        float initialDelayInSeconds = Random.Range(minIntervalRange, maxIntervalRange);
         StartCoroutine(SpawnLetterWithDelay(initialDelayInSeconds));
     }
 
+    public void BeginSpawning()
+    {
+        isStopped = false;
+
+    }
+    public void StopSpawning()
+    {
+        isStopped = true;
+
+    }
 
     public void UpdateCurrStarredWord(string currTargetWord)
     {
@@ -47,12 +61,22 @@ public class LetterSpawner : MonoBehaviour
     IEnumerator SpawnLetterWithDelay(float sec)
     {
 
+        while (isStopped)
+        {
+            foreach (GameObject letter in currLetters)
+            {
+                Destroy(letter);
+            }
+            yield return null;
+        }
         yield return new WaitForSeconds(sec);
+
         if (lettersPool.Count == 0)
         {
             ResetPool();
         }
         GameObject newLetter = Instantiate(letterPrefab, transform.GetChild(0));
+        currLetters.Add(newLetter);
 
         TextMesh letterText = newLetter.transform.GetComponentInChildren<TextMesh>();
 

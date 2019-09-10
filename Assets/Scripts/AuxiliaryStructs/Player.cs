@@ -219,20 +219,19 @@ public class Player
             Color newColor = this.buttonColor;
             if(increase > 0)
             {
-                scoreText.text = "Score: UP " + increase;
+                scoreUpdateUIup.GetComponentInChildren<Text>().text = "+ " + increase;
                 scoreUpdateUIup.SetActive(false);
                 scoreUpdateUIup.SetActive(true);
-                Globals.effectsAudioManager.PlayClip("Audio/goodMove");
-                newColor = new Color(0.0f, 1.0f, 0.0f);
+                //newColor = new Color(0.0f, 1.0f, 0.0f);
             }
             else if(increase < 0)
             {
-                scoreText.text = "Score: DOWN " + Math.Abs(increase);
+                scoreUpdateUIdown.GetComponentInChildren<Text>().text = "- " + Math.Abs(increase);
                 scoreUpdateUIdown.SetActive(false);
                 scoreUpdateUIdown.SetActive(true);
-                newColor = new Color(1.0f, 0.0f, 0.0f);
+                //newColor = new Color(1.0f, 0.0f, 0.0f);
             }
-            gameManagerRef.StartCoroutine(TimedSetColor(0.5f, newColor));
+            //gameManagerRef.StartCoroutine(TimedSetColor(0.5f, newColor));
         }
 
     }
