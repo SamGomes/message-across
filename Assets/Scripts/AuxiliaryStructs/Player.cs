@@ -201,19 +201,25 @@ public class Player
         SetColor(this.buttonColor);
     }
 
-    public void SetScore(int score, int increase)
+    public IEnumerator DelayedScoreDisplay(float score, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        scoreText.text = "Score: " + score;
+    }
+
+    public void SetScore(int score, int increase, float delay)
     {
         if(this.score != score)
         {
             this.score = score;
 
             //update UI
-            scoreText.text = "Score: " + score;
+            gameManagerRef.StartCoroutine(DelayedScoreDisplay(score, delay));
             statePanel.GetComponent<Animator>().Play(0);
             Color newColor = this.buttonColor;
             if(increase > 0)
             {
-                scoreUpdateUIup.GetComponentInChildren<Text>().text = "+ " + increase;
+                scoreText.text = "Score: UP " + increase;
                 scoreUpdateUIup.SetActive(false);
                 scoreUpdateUIup.SetActive(true);
                 Globals.effectsAudioManager.PlayClip("Audio/goodMove");
@@ -221,7 +227,7 @@ public class Player
             }
             else if(increase < 0)
             {
-                scoreUpdateUIdown.GetComponentInChildren<Text>().text = "- " + Math.Abs(increase);
+                scoreText.text = "Score: DOWN " + Math.Abs(increase);
                 scoreUpdateUIdown.SetActive(false);
                 scoreUpdateUIdown.SetActive(true);
                 newColor = new Color(1.0f, 0.0f, 0.0f);

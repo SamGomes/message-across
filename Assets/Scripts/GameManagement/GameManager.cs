@@ -387,7 +387,7 @@ public class GameManager : MonoBehaviour
             isButtonOverlap = true;
 
             currPlayer.SetActiveButton(0, pointerPlaceholders[0].transform.position);
-            currPlayer.SetScore(0, 0);
+            currPlayer.SetScore(0, 0, 0);
         }
 
         UpdateButtonOverlaps(settings.generalSettings.players[0], 0);
@@ -651,14 +651,14 @@ public class GameManager : MonoBehaviour
         {
             if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff == (Globals.DiffLetters)Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
             {
-                currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue);
+                currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue, 2.0f);
                 foreach (Player innerPlayer in settings.generalSettings.players)
                 {
                     if (innerPlayer == currHitter)
                     {
                         continue;
                     }
-                    innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue);
+                    innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue, 2.0f);
                 }
                 scoreOptionFound = true;
                 break;
@@ -699,7 +699,7 @@ public class GameManager : MonoBehaviour
             else
             {
                 if (!player.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
-                    player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore, settings.scoreSystem.completeWordMyScore);
+                    player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore, settings.scoreSystem.completeWordMyScore, 2.0f);
                 foreach (Player innerPlayer in settings.generalSettings.players)
                 {
                     if (player == innerPlayer)
@@ -707,7 +707,7 @@ public class GameManager : MonoBehaviour
                         continue;
                     }
                     if (!innerPlayer.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
-                        innerPlayer.SetScore(innerPlayer.GetScore() + settings.scoreSystem.completeWordOtherScore, settings.scoreSystem.completeWordOtherScore);
+                        innerPlayer.SetScore(innerPlayer.GetScore() + settings.scoreSystem.completeWordOtherScore, settings.scoreSystem.completeWordOtherScore, 2.0f);
                 }
             }
         }
