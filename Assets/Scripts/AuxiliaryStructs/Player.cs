@@ -312,6 +312,11 @@ public class Player
         }
     }
 
+    public Color GetBackgroundColor()
+    {
+        return this.backgroundColor;
+    }
+
     public void SetActiveInteraction(Globals.KeyInteractionType activeInteraction)
     {
         this.activeInteraction = activeInteraction;
@@ -336,12 +341,16 @@ public class Player
         return this.marker;
     }
 
+    public void SetNumPossibleActions(int currNumPossibleActionsPerLevel)
+    {
+        this.currNumPossibleActionsPerLevel = currNumPossibleActionsPerLevel;
+        //update UI
+        possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
+        statePanel.GetComponent<Animator>().Play(0);
+    }
     public void ResetNumPossibleActions()
     {
-        this.currNumPossibleActionsPerLevel = numPossibleActionsPerLevel;
-        //update UI
-        possibleActionsText.text = "Actions: " + numPossibleActionsPerLevel;
-        statePanel.GetComponent<Animator>().Play(0);
+        SetNumPossibleActions(numPossibleActionsPerLevel);
     }
 
     public int GetCurrNumPossibleActionsPerLevel()

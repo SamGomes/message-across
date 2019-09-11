@@ -290,10 +290,7 @@ public class GameManager : MonoBehaviour
         settings.generalSettings = JsonUtility.FromJson<GeneralSettings>(generalConfigText);
         settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
         settings.exercisesGroups = JsonUtility.FromJson<ExerciseGroupsWrapper>(exercisesConfigText);
-
-        //timeLeft = settings.initialTimeLeft;
-        //timePanel.GetComponent<Animator>().StopPlayback();
-        //InvokeRepeating("TimeDependentEvents", 0.0f, 1.0f);
+        
 
         numLevelsLeft = settings.generalSettings.numLevels;
 
@@ -315,7 +312,7 @@ public class GameManager : MonoBehaviour
 
             Player currPlayer = settings.generalSettings.players[i];
             currPlayer.Init(this, playerMarkerPrefab, playerMarkersContainer, playerUI, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
-            currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetButtonColor();
+            currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetBackgroundColor();
             
             //set buttons for touch screen
             UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
@@ -361,7 +358,23 @@ public class GameManager : MonoBehaviour
                         if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
                         else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
 
-                        currButton.GetComponent<Image>().color = new Color(1.0f, 0.8f, 0.6f);
+                        bool playerOverlappedAndPressing = false;
+                        foreach (Player player in settings.generalSettings.players)
+                        {
+                            if(player!=currPlayer && player.IsPressingButton())
+                            {
+                                playerOverlappedAndPressing = true;
+                                break;
+                            }
+                        }
+                        if (isButtonOverlap && playerOverlappedAndPressing)
+                        {
+                            currButton.GetComponent<Image>().color = Color.red;
+                        }
+                        else
+                        {
+                            currButton.GetComponent<Image>().color = new Color(1.0f, 0.8f, 0.6f);
+                        }
 
                         foreach (Player player in settings.generalSettings.players)
                         {
@@ -378,7 +391,11 @@ public class GameManager : MonoBehaviour
                     pointerUp.callback.AddListener(delegate (BaseEventData eventData)
                     {
                         Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
-                        currButton.GetComponent<Image>().color = currPlayer.GetButtonColor();
+                        //verify if button should be pressed
+                        if (currPlayer.GetCurrNumPossibleActionsPerLevel() > 0)
+                        {
+                            currButton.GetComponent<Image>().color = currPlayer.GetButtonColor();
+                        }
                         currPlayer.SetActiveInteraction(Globals.KeyInteractionType.NONE);
                         currPlayer.ReleaseGameButton();
                     });
@@ -397,17 +414,11 @@ public class GameManager : MonoBehaviour
             });
 
             performanceMetrics.singlebuttonHits.Add(currPlayer, 0);
-
             List<KeyCode> keys = currPlayer.GetMyKeys();
             
-            //currPlayer.SetActiveButton(0, pointerPlaceholders[0].transform.position);
+            currPlayer.SetScore(0, 0, 0);
         }
-
-        foreach(Player player in settings.generalSettings.players)
-        {
-            player.SetScore(0, 0, 0);
-            player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
-        }
+        
         //UpdateButtonOverlaps(settings.generalSettings.players[0], 0);
 
         performanceMetrics.multiplayerButtonHits = 0;
@@ -492,6 +503,18 @@ public class GameManager : MonoBehaviour
         }
         emoji.GetComponent<Animator>().speed = 0;
 
+        foreach (Player player in settings.generalSettings.players)
+        {
+            player.SetNumPossibleActions(0);
+            player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
+            foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
+            {
+                button.GetComponent<Image>().color = Color.red;
+                player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
+                //button.interactable = false;
+            }
+
+        }
 
         int i = 5;
         countdownText.text = i.ToString();
@@ -505,19 +528,21 @@ public class GameManager : MonoBehaviour
         countdownText.gameObject.SetActive(false);
 
         emoji.GetComponent<Animator>().speed = 1;
-
-
         Globals.effectsAudioManager.PlayClip("Audio/snap");
-
         foreach (LetterSpawner spawner in letterSpawners)
         {
             spawner.BeginSpawning();
         }
         
-
         foreach(Player player in settings.generalSettings.players)
         {
+            foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
+            {
+                button.GetComponent<Image>().color = player.GetButtonColor();
+                button.onClick.Invoke();
+            }
             player.ResetNumPossibleActions();
+            player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
         }
         RecordMetrics();
 
@@ -697,9 +722,9 @@ public class GameManager : MonoBehaviour
 
         if (currHitter.GetCurrNumPossibleActionsPerLevel() < 1)
         {
-            foreach(Button button in currHitter.GetUI().GetComponentsInChildren<Button>())
+            foreach (Button button in currHitter.GetUI().GetComponentsInChildren<Button>())
             {
-                button.GetComponent<Image>().color = new Color(1.0f, 0.0f, 0.0f);
+                button.GetComponent<Image>().color = Color.red;
             }
             currHitter.ReleaseGameButton();
         }
