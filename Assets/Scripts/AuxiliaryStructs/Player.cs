@@ -226,14 +226,14 @@ public class Player
             Color newColor = this.backgroundColor;
             if(increase > 0)
             {
-                scoreUpdateUIup.GetComponentInChildren<Text>().text = "+ " + increase;
+                scoreUpdateUIup.GetComponentInChildren<Text>().text = "+" + increase;
                 scoreUpdateUIup.SetActive(false);
                 scoreUpdateUIup.SetActive(true);
                 //newColor = new Color(0.0f, 1.0f, 0.0f);
             }
             else if(increase < 0)
             {
-                scoreUpdateUIdown.GetComponentInChildren<Text>().text = "- " + Math.Abs(increase);
+                scoreUpdateUIdown.GetComponentInChildren<Text>().text = "-" + Math.Abs(increase);
                 scoreUpdateUIdown.SetActive(false);
                 scoreUpdateUIdown.SetActive(true);
                 //newColor = new Color(1.0f, 0.0f, 0.0f);
