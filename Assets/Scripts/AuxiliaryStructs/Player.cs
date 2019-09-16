@@ -53,8 +53,8 @@ public class Player
     private string currWordState;
 
     //log stuff
-    public int numGivePresses;
-    public int numTakePresses;
+    public int numGives;
+    public int numTakes;
 
     private int id;
 

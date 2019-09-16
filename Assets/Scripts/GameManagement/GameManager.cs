@@ -59,18 +59,12 @@ public struct GameSettings
     public ScoreSystem scoreSystem;
 }
 
-[Serializable]
-public struct PerformanceMetrics
-{
-    public Dictionary<Player,int> singlebuttonHits;
-    public int multiplayerButtonHits;
-}
-
-
 
 
 public class GameManager : MonoBehaviour
 {
+    private int startingLevelDelayInSeconds;
+
     public Button quitButton;
     public Button resetButton;
     private int numLevelsLeft;
@@ -78,7 +72,6 @@ public class GameManager : MonoBehaviour
     private int exerciseGroupIndex;
 
     public GameSettings settings;
-    private PerformanceMetrics performanceMetrics;
 
     public GameObject canvas;
     public GameObject stateCanvas;
@@ -208,6 +201,8 @@ public class GameManager : MonoBehaviour
 
     private IEnumerator YieldedStart()
     {
+        startingLevelDelayInSeconds = 5;
+
         quitButton.onClick.AddListener(delegate(){
             Globals.gameSceneManager.EndGame();
         });
@@ -216,12 +211,8 @@ public class GameManager : MonoBehaviour
             Globals.gameSceneManager.StartGame();
         });
 
-        for (int i=0; i < 20; i++)
-        {
-            Globals.gameId += (char)('A' + UnityEngine.Random.Range(0, 26));
-        }
         
-        logManager = new DebugLogManager();
+        logManager = new MongoDBLogManager();
         logManager.InitLogs(this);
         
         isGameplayPaused = false;
@@ -293,10 +284,6 @@ public class GameManager : MonoBehaviour
         
 
         numLevelsLeft = settings.generalSettings.numLevels;
-
-        performanceMetrics = new PerformanceMetrics();
-        performanceMetrics.singlebuttonHits = new Dictionary<Player, int>();
-
         
         DontDestroyOnLoad(stateCanvas);
         if (Globals.savedObjects == null)
@@ -329,13 +316,17 @@ public class GameManager : MonoBehaviour
                         //verify if button should be pressed
                         if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1)
                         {
+                            Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
                             return;
                         }
-                        Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
+                        if (currPlayer.GetActivebuttonIndex() != innerButtonI)
+                        {
+                            Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
+                        }
                         playerButtons[currPlayer.GetActivebuttonIndex()].GetComponent<Image>().color = currPlayer.GetButtonColor();
                         UpdateButtonOverlaps(currPlayer, innerButtonI);
                         currPlayer.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
-                        currButton.GetComponent<Image>().color = new Color(1.0f, 0.8f, 0.6f);
+                        currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
                     });
                 }
                 else
@@ -347,34 +338,28 @@ public class GameManager : MonoBehaviour
                     pointerDown.eventID = EventTriggerType.PointerDown;
                     pointerDown.callback.AddListener(delegate (BaseEventData eventData)
                     {
+                        currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+
                         //verify if button should be pressed
-                        if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1)
-                        {
-                            return;
-                        }
-
-                        Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
-                        currPlayer.SetActiveInteraction(iType);
-                        if (iType == Globals.KeyInteractionType.GIVE) currPlayer.numGivePresses++;
-                        else if (iType == Globals.KeyInteractionType.TAKE) currPlayer.numTakePresses++;
-
                         bool playerOverlappedAndPressing = false;
                         foreach (Player player in settings.generalSettings.players)
                         {
-                            if(player!=currPlayer && player.IsPressingButton())
+                            if (player != currPlayer && player.IsPressingButton())
                             {
                                 playerOverlappedAndPressing = true;
                                 break;
                             }
                         }
-                        if (isButtonOverlap && playerOverlappedAndPressing)
+                        if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1 || (isButtonOverlap && playerOverlappedAndPressing))
                         {
+                            Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
                             currButton.GetComponent<Image>().color = Color.red;
+                            return;
                         }
-                        else
-                        {
-                            currButton.GetComponent<Image>().color = new Color(1.0f, 0.8f, 0.6f);
-                        }
+
+                        Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
+                        currPlayer.SetActiveInteraction(iType);
+
 
                         foreach (Player player in settings.generalSettings.players)
                         {
@@ -412,16 +397,12 @@ public class GameManager : MonoBehaviour
                 List<InputField> inputFields = new List<InputField>(namesInputLocation.GetComponentsInChildren<InputField>());
                 settings.generalSettings.players[inputFields.IndexOf(input)].SetName(input.text);
             });
-
-            performanceMetrics.singlebuttonHits.Add(currPlayer, 0);
             List<KeyCode> keys = currPlayer.GetMyKeys();
             
             currPlayer.SetScore(0, 0, 0);
         }
         
         //UpdateButtonOverlaps(settings.generalSettings.players[0], 0);
-
-        performanceMetrics.multiplayerButtonHits = 0;
         isGameplayStarted = true;
 
         exerciseGroupIndex = UnityEngine.Random.Range(0, settings.exercisesGroups.exerciseGroups.Count);
@@ -459,16 +440,20 @@ public class GameManager : MonoBehaviour
         foreach (Player player in settings.generalSettings.players)
         {
             StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
-                { "sessionId", Globals.gameId.ToString() },
-                { "gameId", Globals.currLevelId.ToString() },
+                { "gameId", Globals.gameId.ToString() },
+                { "levelId", Globals.currLevelId.ToString() },
                 { "playerId", player.GetId().ToString() },
                 { "color", player.GetButtonColor().ToString() },
-                { "currWord", player.GetCurrExercise().targetWord },
+                { "levelWord", player.GetCurrExercise().targetWord },
+                { "wordState", player.GetCurrWordState() },
                 { "scoreSystem", scoreSystemName },
                 { "score", player.GetScore().ToString() },
-                { "numberOfGivePresses", player.numGivePresses.ToString() },
-                { "numberOfTakePresses", player.numTakePresses.ToString() }
+                { "numberOfGives", player.numGives.ToString() },
+                { "numberOfTakes", player.numTakes.ToString() }
             }));
+
+            player.numGives = 0;
+            player.numTakes = 0;
         }
         
     }
@@ -516,11 +501,11 @@ public class GameManager : MonoBehaviour
 
         }
 
-        int i = 5;
+        int i = startingLevelDelayInSeconds;
         countdownText.text = i.ToString();
         yield return new WaitForSeconds(2.0f);
         countdownText.gameObject.SetActive(true);
-        for (i = 5; i > 0; i--)
+        for (i = startingLevelDelayInSeconds; i > 0; i--)
         {
             countdownText.text = i.ToString();
             yield return new WaitForSeconds(1.0f);
@@ -544,8 +529,7 @@ public class GameManager : MonoBehaviour
             player.ResetNumPossibleActions();
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
         }
-        RecordMetrics();
-
+        
         Globals.currLevelId++;
     }
     
@@ -629,7 +613,7 @@ public class GameManager : MonoBehaviour
 
         bool usefulForMe = false;
         bool usefulForOther = false;
-
+        
         //diferent rewards in different utility conditions
         Globals.KeyInteractionType playerIT = currHitter.GetActiveInteraction();
         List<ScoreValue> scores = new List<ScoreValue>();
@@ -652,6 +636,7 @@ public class GameManager : MonoBehaviour
 
                 }
                 scores = settings.scoreSystem.giveScores;
+                currHitter.numGives++;
                 break;
             case Globals.KeyInteractionType.TAKE:
                 usefulForMe = TestAndExecuteHit(true, letterText, letter, currHitter);
@@ -673,6 +658,7 @@ public class GameManager : MonoBehaviour
                     usefulForOther = TestAndExecuteHit(false, letterText, letter, usefulTargetPlayer);
                 }
                 scores = settings.scoreSystem.takeScores;
+                currHitter.numTakes++;
                 break;
         }
 
@@ -766,6 +752,7 @@ public class GameManager : MonoBehaviour
         }
         if (!areWordsUnfinished || arePlayersWithoutActions)
         {
+            RecordMetrics();
             StartCoroutine(ChangeLevel(areWordsUnfinished));
         }
         
