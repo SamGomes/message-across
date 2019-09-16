@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-
 public static class Globals
 {
     public enum ExercisesConfig
@@ -54,12 +53,17 @@ public static class Globals
     public static int currLevelId;
     public static string gameId;
     public static ExercisesConfig gameParam;
-    internal static List<GameObject> savedObjects;
+    public static List<GameObject> savedObjects;
 
     public static AudioManager backgroundAudioManager;
     public static AudioManager effectsAudioManager;
     public static AudioManager trackEffectsAudioManager;
-    public static GameSceneManager gameSceneManager;
+
+    public static LogManager logManager;
+
+
+    public static List<string> bufferedPlayerIds;
+
 
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
     {
@@ -95,49 +99,28 @@ public static class Globals
         Globals.backgroundAudioManager = new AudioManager(true);
         Globals.effectsAudioManager = new AudioManager(false);
         Globals.trackEffectsAudioManager = new AudioManager(false);
-        Globals.gameSceneManager = new GameSceneManager();
+
+        Globals.logManager = new MongoDBLogManager();
+        Globals.bufferedPlayerIds = new List<string>();
     }
 }
 
-
 public class StartSceneFunctionalities : MonoBehaviour
 {
+    public InputField playerNames;
     public Button startButton;
-    public Button[] paramsButtons;
 
-   
+
     // Start is called before the first frame update
     void Start()
     {
+        startButton.onClick.AddListener(delegate () {
+            Globals.bufferedPlayerIds = new List<string>(playerNames.text.Split(';'));
+            SceneManager.LoadScene("paramsSetup");
+        });
+
         Globals.InitGlobals();
-        Globals.gameSceneManager.Init();
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.PlayInfinitClip("Audio/backgroundLoop", "Audio/backgroundLoop");
-
-        startButton.onClick.AddListener(delegate () {
-            SceneManager.LoadScene("mainScene");
-        });
-        
-
-        int i = 0;
-        foreach(Button button in paramsButtons)
-        {
-            button.GetComponentInChildren<Image>().color = new Color(1.0f, 1.0f, 1.0f);
-            int j = i;
-            button.onClick.AddListener(delegate () {
-                Globals.gameParam = (Globals.ExercisesConfig)j;
-
-                foreach (Button innerButton in paramsButtons)
-                {
-                    if (button == innerButton)
-                    {
-                        continue;
-                    }
-                    innerButton.GetComponentInChildren<Image>().color = new Color(1.0f, 1.0f, 1.0f);
-                }
-                button.GetComponentInChildren<Image>().color = new Color(0.0f, 1.0f, 0.0f);
-            });
-            i++;
-        }
     }
 }

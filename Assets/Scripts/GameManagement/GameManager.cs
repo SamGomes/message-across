@@ -7,6 +7,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
@@ -99,8 +100,6 @@ public class GameManager : MonoBehaviour
     
     public GameObject emoji;
 
-    public LogManager logManager;
-    
     public LetterSpawner[] letterSpawners;
 
     public List<GameObject> pointerPlaceholders;
@@ -136,6 +135,22 @@ public class GameManager : MonoBehaviour
             ls.enabled = true;
         }
         isGameplayPaused = false;
+    }
+
+    public void EndGame()
+    {
+        Globals.backgroundAudioManager.PlayClip("Audio/backgroundLoop");
+        SceneManager.LoadScene("gameover");
+    }
+    public void ResetGame()
+    {
+        EndGame();
+        foreach (var obj in Globals.savedObjects)
+        {
+            Destroy(obj);
+        }
+        Globals.InitGlobals();
+        SceneManager.LoadScene("paramsSetup");
     }
 
     public string OrderedFormOfNumber(int i)
@@ -204,17 +219,18 @@ public class GameManager : MonoBehaviour
         startingLevelDelayInSeconds = 5;
 
         quitButton.onClick.AddListener(delegate(){
-            Globals.gameSceneManager.EndGame();
+            EndGame();
         });
         resetButton.onClick.AddListener(delegate () {
-            Globals.gameSceneManager.EndGame();
-            Globals.gameSceneManager.StartGame();
+            ResetGame();
+
         });
 
-        
-        logManager = new MongoDBLogManager();
-        logManager.InitLogs(this);
-        
+        if (Globals.savedObjects == null)
+        {
+            Globals.InitGlobals();
+        }
+        Globals.logManager.InitLogs(this);
         isGameplayPaused = false;
         
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
@@ -286,10 +302,6 @@ public class GameManager : MonoBehaviour
         numLevelsLeft = settings.generalSettings.numLevels;
         
         DontDestroyOnLoad(stateCanvas);
-        if (Globals.savedObjects == null)
-        {
-            Globals.InitGlobals();
-        }
         Globals.savedObjects.Add(stateCanvas);
 
 
@@ -298,7 +310,13 @@ public class GameManager : MonoBehaviour
             GameObject playerUI = playerUIs[i];
 
             Player currPlayer = settings.generalSettings.players[i];
-            currPlayer.Init(this, playerMarkerPrefab, playerMarkersContainer, playerUI, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
+
+            string bufferedPlayerIds = "";
+            if(i < Globals.bufferedPlayerIds.Count){
+                bufferedPlayerIds = Globals.bufferedPlayerIds[i];
+            }
+
+            currPlayer.Init(bufferedPlayerIds, this, playerMarkerPrefab, playerMarkersContainer, playerUI, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
             currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetBackgroundColor();
             
             //set buttons for touch screen
@@ -388,17 +406,7 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            GameObject newNameInput = Instantiate(playerNameInputFieldPrefabRef, namesInputLocation.transform);
-            InputField input = newNameInput.GetComponent<InputField>();
-            input.placeholder.GetComponent<Text>().text = OrderedFormOfNumber(i + 1) + " player name";
-            
-            input.onValueChanged.AddListener(delegate
-            {
-                List<InputField> inputFields = new List<InputField>(namesInputLocation.GetComponentsInChildren<InputField>());
-                settings.generalSettings.players[inputFields.IndexOf(input)].SetName(input.text);
-            });
             List<KeyCode> keys = currPlayer.GetMyKeys();
-            
             currPlayer.SetScore(0, 0, 0);
         }
         
@@ -439,7 +447,7 @@ public class GameManager : MonoBehaviour
         //spawn questionnaires before changing word
         foreach (Player player in settings.generalSettings.players)
         {
-            StartCoroutine(logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
+            StartCoroutine(Globals.logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
                 { "gameId", Globals.gameId.ToString() },
                 { "levelId", Globals.currLevelId.ToString() },
                 { "playerId", player.GetId().ToString() },
@@ -464,7 +472,7 @@ public class GameManager : MonoBehaviour
             numLevelsLeft--;
             if (numLevelsLeft < 1) //quit on max num levels reached
             {
-                Globals.gameSceneManager.EndGame();
+                EndGame();
             }
         }
 

@@ -15,7 +15,12 @@ public class EndSceneFunctionalities : MonoBehaviour
             Application.Quit();
         });
         restartButton.onClick.AddListener(delegate () {
-            Globals.gameSceneManager.StartGame();
+            foreach (var obj in Globals.savedObjects)
+            {
+                Destroy(obj);
+            }
+            Globals.InitGlobals();
+            SceneManager.LoadScene("paramsSetup");
         });
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.GetSource().pitch = 1.1f;

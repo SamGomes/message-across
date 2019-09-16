@@ -12,7 +12,7 @@ public class Player
     private Color backgroundColor;
 
     [SerializeField]
-    private string name;
+    private string id;
 
     [SerializeField]
     private List<KeyCode> myKeys;
@@ -56,17 +56,18 @@ public class Player
     public int numGives;
     public int numTakes;
 
-    private int id;
-
     private GameObject ui;
 
     public bool pressingButton;
 
 
 
-    public Player(int id, List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB, int numPossibleActionsPerLevel)
+    public Player(string id, List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB, int numPossibleActionsPerLevel)
     {
-        this.id = id;
+        if(this.id != "")
+        {
+            this.id = id;
+        }
 
         this.buttonRGB = buttonRGB;
 
@@ -77,8 +78,9 @@ public class Player
         this.currNumPossibleActionsPerLevel = numPossibleActionsPerLevel;
     }
 
-    public void Init(GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
+    public void Init(string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
     {
+        this.id = id;
         this.ui = ui;
 
         //this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
@@ -122,9 +124,7 @@ public class Player
         this.scoreText = statePanel.transform.Find("scoreText").GetComponent<Text>();
 
         this.buttonColor = SetColor(this.backgroundColor);
-
-
-        this.name = "";
+        
         this.score = -1;
 
         ResetNumPossibleActions();
@@ -160,7 +160,7 @@ public class Player
     }
 
 
-    public int GetId()
+    public string GetId()
     {
         return id;
     }
@@ -256,21 +256,12 @@ public class Player
         return this.wordPanel;
     }
 
-    public string GetName()
-    {
-        return this.name;
-    }
     public List<KeyCode> GetMyKeys() {
         return myKeys;
     }
     public List<string> GetMyButtons()
     {
         return myButtons;
-    }
-
-    public void SetName(string name)
-    {
-        this.name = name;
     }
 
     public void SetActiveButton(int activeButtonIndex, Vector3 activeButtonPos)

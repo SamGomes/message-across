@@ -9,12 +9,12 @@ EditorBuildSettings:
     path: Assets/start.unity
     guid: e6d3a9d5bee034e419b3835f571b07a6
   - enabled: 1
+    path: Assets/paramsSetup.unity
+    guid: b0268f137d278684a8cc5e496c96845f
+  - enabled: 1
     path: Assets/mainScene.unity
     guid: 952d9bc59c3062c45b12ca11acf595ac
   - enabled: 1
     path: Assets/gameover.unity
     guid: b12160f90171cc4459e24c76ebca5fed
-  - enabled: 0
-    path: Assets/pause.unity
-    guid: ed0ee5178aeafce4188ccfd5d34ab958
   m_configObjects: {}
