@@ -208,7 +208,9 @@ public class GameManager : MonoBehaviour
             //{
             //    player.SetActiveHalf(player.GetActiveHalf().Except(player.GetMaskedHalf()).ToList());
             //}
-            player.UpdateActiveHalf(false);
+            player.UpdateActiveHalf(player.IsPressingButton());
+
+            
         }
     }
 
@@ -377,7 +379,6 @@ public class GameManager : MonoBehaviour
 
                         Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
                         currPlayer.SetActiveInteraction(iType);
-
 
                         foreach (Player player in settings.generalSettings.players)
                         {
