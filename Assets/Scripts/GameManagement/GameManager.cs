@@ -485,14 +485,13 @@ public class GameManager : MonoBehaviour
         ChangeTargetWords();
 
 
+        Globals.effectsAudioManager.PlayClip("Audio/wordChange");
         if (areWordsUnfinished)
         {
-            //Globals.effectsAudioManager.PlayClip("Audio/wordChangeBad");
             emoji.GetComponent<Animator>().Play("Sad");
         }
         else
         {
-            Globals.effectsAudioManager.PlayClip("Audio/wordChangeGood");
             emoji.GetComponent<Animator>().Play("Smiling");
         }
         emoji.GetComponent<Animator>().speed = 0;
