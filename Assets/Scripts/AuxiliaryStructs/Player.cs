@@ -64,10 +64,10 @@ public class Player
 
     public Player(string id, List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB, int numPossibleActionsPerLevel)
     {
-        if(this.id != "")
-        {
-            this.id = id;
-        }
+        //if(this.id != "")
+        //{
+        //    this.id = id;
+        //}
 
         this.buttonRGB = buttonRGB;
 

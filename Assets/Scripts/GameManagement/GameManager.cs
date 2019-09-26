@@ -314,9 +314,9 @@ public class GameManager : MonoBehaviour
             Player currPlayer = settings.generalSettings.players[i];
 
             string bufferedPlayerIds = "";
-            if(i < Globals.bufferedPlayerIds.Count){
+            //if(i < Globals.bufferedPlayerIds.Count){
                 bufferedPlayerIds = Globals.bufferedPlayerIds[i];
-            }
+            //}
 
             currPlayer.Init(bufferedPlayerIds, this, playerMarkerPrefab, playerMarkersContainer, playerUI, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
             currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetBackgroundColor();
@@ -421,7 +421,7 @@ public class GameManager : MonoBehaviour
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.PlayInfinitClip("Audio/backgroundLoop", "Audio/backgroundLoop");
 
-        StartCoroutine(ChangeLevel(false));
+        StartCoroutine(ChangeLevel(false, false));
 
     }
 
@@ -443,12 +443,12 @@ public class GameManager : MonoBehaviour
         
     }
 
-    private void RecordMetrics()
+    private IEnumerator RecordMetrics()
     {
         //spawn questionnaires before changing word
         foreach (Player player in settings.generalSettings.players)
         {
-            StartCoroutine(Globals.logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
+            yield return StartCoroutine(Globals.logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
                 { "gameId", Globals.gameId.ToString() },
                 { "levelId", Globals.currLevelId.ToString() },
                 { "playerId", player.GetId().ToString() },
@@ -467,14 +467,17 @@ public class GameManager : MonoBehaviour
         
     }
 
-    IEnumerator ChangeLevel(bool areWordsUnfinished)
+    IEnumerator ChangeLevel(bool recordMetrics, bool areWordsUnfinished)
     {
-        if (numLevelsLeft > 0) { //<= 0 tells the game it is an infinite game (tutorial purposes)
-            numLevelsLeft--;
+        
+
+        if (numLevelsLeft >= 0) { //<= 0 tells the game it is an infinite game (tutorial purposes)
             if (numLevelsLeft < 1) //quit on max num levels reached
             {
+                yield return RecordMetrics();
                 EndGame();
             }
+            numLevelsLeft--;
         }
 
         foreach (LetterSpawner spawner in letterSpawners)
@@ -507,6 +510,12 @@ public class GameManager : MonoBehaviour
                 //button.interactable = false;
             }
 
+        }
+
+
+        if (recordMetrics)
+        {
+            yield return RecordMetrics();
         }
 
         int i = startingLevelDelayInSeconds;
@@ -613,7 +622,6 @@ public class GameManager : MonoBehaviour
 
     public void RecordHit(char letterText, GameObject letter, Player currHitter)
     {
-
         //verify if button should be pressed
         Globals.effectsAudioManager.PlayClip("Audio/badMove");
         currHitter.DecreasePossibleActionsPerLevel();
@@ -760,8 +768,7 @@ public class GameManager : MonoBehaviour
         }
         if (!areWordsUnfinished || arePlayersWithoutActions)
         {
-            RecordMetrics();
-            StartCoroutine(ChangeLevel(areWordsUnfinished));
+            StartCoroutine(ChangeLevel(true, areWordsUnfinished));
         }
         
     }
