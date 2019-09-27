@@ -470,25 +470,34 @@ public class GameManager : MonoBehaviour
     IEnumerator ChangeLevel(bool recordMetrics, bool areWordsUnfinished)
     {
         
-
         if (numLevelsLeft >= 0) { //<= 0 tells the game it is an infinite game (tutorial purposes)
             if (numLevelsLeft < 1) //quit on max num levels reached
             {
                 yield return RecordMetrics();
                 EndGame();
+                yield return null;
             }
             numLevelsLeft--;
         }
 
         foreach (LetterSpawner spawner in letterSpawners)
         {
-            spawner.UpdateCurrStarredWord("");
             spawner.StopSpawning();
+        }
+        Globals.effectsAudioManager.PlayClip("Audio/wordChange");
+
+        if (recordMetrics)
+        {
+            yield return RecordMetrics();
+        }
+
+        foreach (LetterSpawner spawner in letterSpawners)
+        {
+            spawner.UpdateCurrStarredWord("");
         }
         ChangeTargetWords();
 
 
-        Globals.effectsAudioManager.PlayClip("Audio/wordChange");
         if (areWordsUnfinished)
         {
             emoji.GetComponent<Animator>().Play("Sad");
@@ -513,10 +522,6 @@ public class GameManager : MonoBehaviour
         }
 
 
-        if (recordMetrics)
-        {
-            yield return RecordMetrics();
-        }
 
         int i = startingLevelDelayInSeconds;
         countdownText.text = i.ToString();
