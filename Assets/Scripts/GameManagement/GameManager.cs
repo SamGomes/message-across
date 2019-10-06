@@ -259,6 +259,7 @@ public class GameManager : MonoBehaviour
 
         string scoreConfigPath = Application.streamingAssetsPath + "/"+ scoreSystemName + ".cfg";
         string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
+//        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfigTest.cfg";
         string generalConfigText = "";
         string scoreConfigText = "";
         string exercisesConfigText = "";
@@ -589,7 +590,7 @@ public class GameManager : MonoBehaviour
         string currTargetWord = player.GetCurrExercise().targetWord;
 
         //check the utility of word
-        bool usefulForMe = (currWordState.Length <= currTargetWord.Length && !currWordState.Contains(letterText) && currTargetWord.Contains(letterText));
+        bool usefulForMe = (currWordState.Length <= currTargetWord.Length && currTargetWord.Contains(letterText));
 
 
         if (execute && usefulForMe)
