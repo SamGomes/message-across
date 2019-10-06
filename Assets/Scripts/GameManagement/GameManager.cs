@@ -260,6 +260,8 @@ public class GameManager : MonoBehaviour
         string scoreConfigPath = Application.streamingAssetsPath + "/"+ scoreSystemName + ".cfg";
         string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
 //        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfigTest.cfg";
+//        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfigTalkNPlay.cfg";
+
         string generalConfigText = "";
         string scoreConfigText = "";
         string exercisesConfigText = "";
@@ -555,10 +557,10 @@ public class GameManager : MonoBehaviour
     private void ChangeTargetWords()
     {
         List<Exercise> selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups.exerciseGroups[exerciseGroupIndex++ % settings.exercisesGroups.exerciseGroups.Count].exercises);
-        //if (selectedExerciseGroup.Count <= 0)
-        //{
-        //    selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups.exerciseGroups[exerciseGroupIndex++ % settings.exercisesGroups.exerciseGroups.Count].exercises);
-        //}
+        if (selectedExerciseGroup.Count <= 0)
+        {
+            Debug.Log("No exercises available");
+        }
 
         int random = UnityEngine.Random.Range(0, selectedExerciseGroup.Count);
         Exercise newExercise = selectedExerciseGroup[random];
