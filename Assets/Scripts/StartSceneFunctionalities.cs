@@ -100,7 +100,7 @@ public static class Globals
         Globals.effectsAudioManager = new AudioManager(false);
         Globals.trackEffectsAudioManager = new AudioManager(false);
 
-        Globals.logManager = new MongoDBLogManager();
+        Globals.logManager = new DebugLogManager();
         if(Globals.bufferedPlayerIds == null)
         {
             Globals.bufferedPlayerIds = new List<string>();

@@ -511,17 +511,12 @@ public class GameManager : MonoBehaviour
 
         foreach (Player player in settings.generalSettings.players)
         {
-            player.SetNumPossibleActions(0);
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
             {
                 button.GetComponent<Image>().color = Color.red;
-                player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
-                //button.interactable = false;
             }
-
         }
-
 
 
         int i = startingLevelDelayInSeconds;
@@ -547,7 +542,6 @@ public class GameManager : MonoBehaviour
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
             {
                 button.GetComponent<Image>().color = player.GetButtonColor();
-                button.onClick.Invoke();
             }
             player.ResetNumPossibleActions();
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
@@ -629,7 +623,6 @@ public class GameManager : MonoBehaviour
     public void RecordHit(char letterText, GameObject letter, Player currHitter)
     {
         //verify if button should be pressed
-        Globals.effectsAudioManager.PlayClip("Audio/badMove");
         currHitter.DecreasePossibleActionsPerLevel();
 
 
@@ -688,6 +681,10 @@ public class GameManager : MonoBehaviour
         {
             Globals.effectsAudioManager.PlayClip("Audio/snap");
             emoji.GetComponent<Animator>().Play("Nice");
+        }
+        else
+        {
+            Globals.effectsAudioManager.PlayClip("Audio/badMove");
         }
 
         float otherPlayersCompletionMean = 0;
