@@ -422,7 +422,7 @@ public class GameManager : MonoBehaviour
         Shuffle<ExercisesListWrapper>(settings.exercisesGroups.exerciseGroups);
 
         Globals.backgroundAudioManager.StopCurrentClip();
-        Globals.backgroundAudioManager.PlayInfinitClip("Audio/backgroundLoop", "Audio/backgroundLoop");
+        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
         StartCoroutine(ChangeLevel(false, false));
 
@@ -622,16 +622,28 @@ public class GameManager : MonoBehaviour
         UnityEngine.Object.Destroy(letter);
     }
 
-    public void RecordHit(char letterText, GameObject letter, Player currHitter)
+    public void RecordHit(GameObject letter, Player currHitter)
     {
+        
+        Letter theActualLetter = letter.gameObject.GetComponent<Letter>();
+        if (theActualLetter.IsLocked())
+        {
+            return;
+        }
+        theActualLetter.Lock();
+        char letterText = theActualLetter.letterText;
+        letter.transform.localScale *= 1.2f;
+        
+        
         //verify if button should be pressed
         currHitter.DecreasePossibleActionsPerLevel();
 
-
+        
+        
+        //diferent rewards in different utility conditions
         bool usefulForMe = false;
         bool usefulForOther = false;
         
-        //diferent rewards in different utility conditions
         Globals.KeyInteractionType playerIT = currHitter.GetActiveInteraction();
         List<ScoreValue> scores = new List<ScoreValue>();
         switch (playerIT)

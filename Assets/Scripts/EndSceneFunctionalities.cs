@@ -24,6 +24,6 @@ public class EndSceneFunctionalities : MonoBehaviour
         });
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.GetSource().pitch = 1.1f;
-        Globals.backgroundAudioManager.PlayInfinitClip("Audio/backgroundLoop", "Audio/backgroundLoop");
+        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
     }
 }
