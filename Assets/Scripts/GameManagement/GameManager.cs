@@ -313,7 +313,6 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < settings.generalSettings.players.Count; i++)
         {
             GameObject playerUI = playerUIs[i];
-
             Player currPlayer = settings.generalSettings.players[i];
 
             string bufferedPlayerIds = "";
@@ -425,7 +424,6 @@ public class GameManager : MonoBehaviour
         Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
         StartCoroutine(ChangeLevel(false, false));
-
     }
 
     // Use this for initialization
