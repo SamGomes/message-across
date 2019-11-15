@@ -1,7 +1,3 @@
-# install.packages("rgdal", repo="http://cran.uk.r-project.org")
-# install.packages("pgirmess", repo="http://cran.uk.r-project.org")
-# install.packages("e1071", repo="http://cran.uk.r-project.org")
-
 suppressMessages(library(ez))
 suppressMessages(library(ggplot2))
 suppressMessages(library(multcomp))
@@ -11,12 +7,6 @@ suppressMessages(library(pgirmess))
 suppressMessages(library(reshape))
 suppressMessages(library(WRS))
 suppressMessages(library(e1071))
-
-# ip <- as.data.frame(installed.packages()[,c(1,3:4)])
-# rownames(ip) <- NULL
-# ip <- ip[is.na(ip$Priority),1:2,drop=FALSE]
-# print(ip, row.names=FALSE)
-
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
 myData$preferredVersion <- unclass(myData$preferredVersion)
@@ -34,21 +24,6 @@ processGameVar <- function(yVarPre, yVarPos, xlabel, ylabel){
 
   keeps <- c("playerId", varsToProcess)
   keepsData <- myData[, (names(myData) %in% keeps)]
-  # longData <- melt(keepsData, id="playerId", measured=varsToProcess)
-
-  # names(longData)<-c("playerId", "scoreSystem", "yVar")
-  # longData$scoreSystem <- factor(longData$scoreSystem, labels=c("A","B","C","D"))
-  # longData <- longData[order(longData$playerId),]
-
-  # plot <- suppressMessages(ggplot(longData, aes(longData$scoreSystem, longData$yVar)))
-  # plot <- plot + geom_boxplot()
-  # plot <- plot + labs(x="scoreSystem",y=yVarPre) 
-  # suppressMessages(ggsave(sprintf("plots/%s.png",yVarPre)))
-
-  #print(paste("Analysing for the dependent variable: ",yVarPre,"...", sep=""))
-  # in case it was parametric
-  # newModel <- ezANOVA(data=longData, dv=.(yVar), wid=.(playerId), within=.(scoreSystem), detailed = TRUE)
-  # print(newModel)
 
   # in case it is not parametric
   keeps <- c(varsToProcess)
@@ -109,16 +84,8 @@ processGameVar <- function(varToTestText){
   # print("#################HERE###################")
 
   for (xText in personalityVariables){
-      # print(paste("dependentVar: ",x,sep=""))
-
-      # test <- (cor.test(eval(substitute(myData[[varX]], list(varX = x))), myData[[varToTest]], method=c("spearman")))
-      # if(test$p.value <= 0.05){
-      #   print(test)
-      # }
-
       x <- myData[[xText]]
       out <- shapiro.test(x)
-      #print(out)
       capture.output(out, file = sprintf("results/normality/personality/shapiroTest %s.messageAcrossData", xText))
 
 
@@ -127,7 +94,6 @@ processGameVar <- function(varToTestText){
         #print(test)
         capture.output(out, file = sprintf("results/mainEffects/personality/%s/spearmanPersonalityResults %s.messageAcrossData",varToTestText, xText))
       # }
-
     }
 }
 
