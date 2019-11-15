@@ -1,0 +1,6 @@
+
+	Shapiro-Wilk normality test
+
+data:  varToTest
+W = 0.72364, p-value = 7.774e-10
+

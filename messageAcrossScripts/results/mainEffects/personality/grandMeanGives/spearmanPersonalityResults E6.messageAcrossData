@@ -1,0 +1,10 @@
+
+	Spearman's rank correlation rho
+
+data:  x and varToTest
+S = 43802, p-value = 0.4941
+alternative hypothesis: true rho is not equal to 0
+sample estimates:
+       rho 
+0.08564362 
+

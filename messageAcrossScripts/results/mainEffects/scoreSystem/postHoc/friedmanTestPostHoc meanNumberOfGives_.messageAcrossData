@@ -1,0 +1,10 @@
+Multiple comparisons between groups after Friedman test 
+p.value: 0.05 
+Comparisons
+    obs.dif critical.dif difference
+1-2     5.5     39.13168      FALSE
+1-3    59.5     39.13168       TRUE
+1-4   150.0     39.13168       TRUE
+2-3    65.0     39.13168       TRUE
+2-4   155.5     39.13168       TRUE
+3-4    90.5     39.13168       TRUE

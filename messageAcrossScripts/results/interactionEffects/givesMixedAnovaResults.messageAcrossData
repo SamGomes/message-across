@@ -1,0 +1,342 @@
+[[1]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+N1               1    0.0    0.01   0.021  0.884    
+ScoreSystem      3  413.8  137.94 567.739 <2e-16 ***
+N1:ScoreSystem   3    0.5    0.18   0.734  0.533    
+Residuals      256   62.2    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[2]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+N2               1    0.6    0.64   2.691  0.102    
+ScoreSystem      3  413.8  137.94 581.182 <2e-16 ***
+N2:ScoreSystem   3    1.3    0.45   1.882  0.133    
+Residuals      256   60.8    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[3]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+N3               1    1.1    1.12   4.671 0.0316 *  
+ScoreSystem      3  413.8  137.94 574.106 <2e-16 ***
+N3:ScoreSystem   3    0.1    0.04   0.149 0.9303    
+Residuals      256   61.5    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[4]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+N4               1    0.1    0.06   0.258  0.612    
+ScoreSystem      3  413.8  137.94 564.747 <2e-16 ***
+N4:ScoreSystem   3    0.1    0.05   0.201  0.895    
+Residuals      256   62.5    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[5]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+N5               1    0.1    0.08   0.320  0.572    
+ScoreSystem      3  413.8  137.94 570.784 <2e-16 ***
+N5:ScoreSystem   3    0.8    0.26   1.096  0.351    
+Residuals      256   61.9    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[6]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+N6               1    0.2    0.21   0.883  0.348    
+ScoreSystem      3  413.8  137.94 569.199 <2e-16 ***
+N6:ScoreSystem   3    0.5    0.16   0.668  0.573    
+Residuals      256   62.0    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[7]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+E1               1    0.6    0.57   2.400  0.123    
+ScoreSystem      3  413.8  137.94 576.516 <2e-16 ***
+E1:ScoreSystem   3    0.9    0.30   1.271  0.285    
+Residuals      256   61.3    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[8]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+E2               1    0.1    0.08   0.339  0.561    
+ScoreSystem      3  413.8  137.94 568.288 <2e-16 ***
+E2:ScoreSystem   3    0.5    0.17   0.711  0.546    
+Residuals      256   62.1    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[9]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+E3               1    0.0    0.02   0.088  0.767    
+ScoreSystem      3  413.8  137.94 563.109 <2e-16 ***
+E3:ScoreSystem   3    0.0    0.00   0.009  0.999    
+Residuals      256   62.7    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[10]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+E4               1    0.2    0.18   0.731  0.393    
+ScoreSystem      3  413.8  137.94 569.341 <2e-16 ***
+E4:ScoreSystem   3    0.5    0.18   0.740  0.529    
+Residuals      256   62.0    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[11]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+E5               1    0.0    0.01   0.036  0.849    
+ScoreSystem      3  413.8  137.94 563.926 <2e-16 ***
+E5:ScoreSystem   3    0.1    0.04   0.151  0.929    
+Residuals      256   62.6    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[12]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+E6               1    0.0    0.00   0.003  0.960    
+ScoreSystem      3  413.8  137.94 569.370 <2e-16 ***
+E6:ScoreSystem   3    0.7    0.24   0.987  0.399    
+Residuals      256   62.0    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[13]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+O1               1    0.1    0.10   0.429 0.5132    
+ScoreSystem      3  413.8  137.94 583.080 <2e-16 ***
+O1:ScoreSystem   3    2.1    0.69   2.924 0.0345 *  
+Residuals      256   60.6    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[14]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+O2               1    0.1    0.10   0.411  0.522    
+ScoreSystem      3  413.8  137.94 571.460 <2e-16 ***
+O2:ScoreSystem   3    0.8    0.28   1.168  0.322    
+Residuals      256   61.8    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[15]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+O3               1    0.2    0.23   0.962 0.3276    
+ScoreSystem      3  413.8  137.94 580.858 <2e-16 ***
+O3:ScoreSystem   3    1.7    0.57   2.409 0.0675 .  
+Residuals      256   60.8    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[16]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+O4               1    1.1    1.07   4.546 0.0339 *  
+ScoreSystem      3  413.8  137.94 585.255 <2e-16 ***
+O4:ScoreSystem   3    1.3    0.44   1.881 0.1332    
+Residuals      256   60.3    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[17]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+O5               1    0.1    0.11   0.452  0.502    
+ScoreSystem      3  413.8  137.94 569.496 <2e-16 ***
+O5:ScoreSystem   3    0.6    0.21   0.857  0.464    
+Residuals      256   62.0    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[18]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+O6               1    0.5    0.49   2.013  0.157    
+ScoreSystem      3  413.8  137.94 568.544 <2e-16 ***
+O6:ScoreSystem   3    0.1    0.05   0.192  0.902    
+Residuals      256   62.1    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[19]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+A1               1    0.0    0.04   0.176 0.6752    
+ScoreSystem      3  413.8  137.94 588.165 <2e-16 ***
+A1:ScoreSystem   3    2.7    0.89   3.779 0.0111 *  
+Residuals      256   60.0    0.23                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[20]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+A2               1    0.4    0.37   1.526  0.218    
+ScoreSystem      3  413.8  137.94 566.665 <2e-16 ***
+A2:ScoreSystem   3    0.1    0.02   0.069  0.976    
+Residuals      256   62.3    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[21]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+A3               1    0.8    0.83   3.433 0.0651 .  
+ScoreSystem      3  413.8  137.94 570.660 <2e-16 ***
+A3:ScoreSystem   3    0.0    0.01   0.039 0.9896    
+Residuals      256   61.9    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[22]]
+                Df Sum Sq Mean Sq F value  Pr(>F)    
+A4               1    0.6    0.56   2.427 0.12047    
+ScoreSystem      3  413.8  137.94 598.288 < 2e-16 ***
+A4:ScoreSystem   3    3.2    1.05   4.563 0.00392 ** 
+Residuals      256   59.0    0.23                    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[23]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+A5               1    0.0    0.02   0.065  0.799    
+ScoreSystem      3  413.8  137.94 563.498 <2e-16 ***
+A5:ScoreSystem   3    0.1    0.02   0.076  0.973    
+Residuals      256   62.7    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[24]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+A6               1    0.5    0.47   1.980  0.161    
+ScoreSystem      3  413.8  137.94 578.031 <2e-16 ***
+A6:ScoreSystem   3    1.2    0.39   1.641  0.180    
+Residuals      256   61.1    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[25]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+C1               1    0.0    0.02   0.079  0.779    
+ScoreSystem      3  413.8  137.94 575.345 <2e-16 ***
+C1:ScoreSystem   3    1.3    0.45   1.868  0.135    
+Residuals      256   61.4    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[26]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+C2               1    0.7    0.74   3.117 0.0787 .  
+ScoreSystem      3  413.8  137.94 582.339 <2e-16 ***
+C2:ScoreSystem   3    1.4    0.45   1.915 0.1275    
+Residuals      256   60.6    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[27]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+C3               1    0.2    0.19   0.768  0.382    
+ScoreSystem      3  413.8  137.94 568.494 <2e-16 ***
+C3:ScoreSystem   3    0.4    0.15   0.599  0.616    
+Residuals      256   62.1    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[28]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+C4               1    0.1    0.11   0.449  0.503    
+ScoreSystem      3  413.8  137.94 566.715 <2e-16 ***
+C4:ScoreSystem   3    0.3    0.11   0.436  0.728    
+Residuals      256   62.3    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[29]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+C5               1    0.4    0.45   1.848  0.175    
+ScoreSystem      3  413.8  137.94 569.352 <2e-16 ***
+C5:ScoreSystem   3    0.3    0.09   0.369  0.775    
+Residuals      256   62.0    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[30]]
+                Df Sum Sq Mean Sq F value Pr(>F)    
+C6               1    0.0    0.01   0.054 0.8156    
+ScoreSystem      3  413.8  137.94 582.853 <2e-16 ***
+C6:ScoreSystem   3    2.1    0.71   3.014 0.0306 *  
+Residuals      256   60.6    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[31]]
+               Df Sum Sq Mean Sq F value Pr(>F)    
+N               1    0.0    0.03   0.138  0.711    
+ScoreSystem     3  413.8  137.94 568.169 <2e-16 ***
+N:ScoreSystem   3    0.6    0.18   0.760  0.518    
+Residuals     256   62.2    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[32]]
+               Df Sum Sq Mean Sq F value Pr(>F)    
+E               1    0.1    0.10   0.423  0.516    
+ScoreSystem     3  413.8  137.94 563.893 <2e-16 ***
+E:ScoreSystem   3    0.0    0.00   0.017  0.997    
+Residuals     256   62.6    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[33]]
+               Df Sum Sq Mean Sq F value Pr(>F)    
+O               1    0.1    0.08   0.325 0.5691    
+ScoreSystem     3  413.8  137.94 581.055 <2e-16 ***
+O:ScoreSystem   3    1.9    0.63   2.651 0.0493 *  
+Residuals     256   60.8    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[34]]
+               Df Sum Sq Mean Sq F value Pr(>F)    
+A               1    0.0    0.00   0.013  0.908    
+ScoreSystem     3  413.8  137.94 573.070 <2e-16 ***
+A:ScoreSystem   3    1.1    0.37   1.544  0.203    
+Residuals     256   61.6    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[35]]
+               Df Sum Sq Mean Sq F value Pr(>F)    
+C               1    0.2    0.15   0.636  0.426    
+ScoreSystem     3  413.8  137.94 573.209 <2e-16 ***
+C:ScoreSystem   3    1.0    0.33   1.358  0.256    
+Residuals     256   61.6    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[36]]
+                      Df Sum Sq Mean Sq F value Pr(>F)    
+Internal               1    0.2    0.16   0.652  0.420    
+ScoreSystem            3  413.8  137.94 566.266 <2e-16 ***
+Internal:ScoreSystem   3    0.2    0.07   0.300  0.825    
+Residuals            256   62.4    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[37]]
+                            Df Sum Sq Mean Sq F value Pr(>F)    
+PowerfulOthers               1    0.1    0.06   0.247  0.619    
+ScoreSystem                  3  413.8  137.94 566.700 <2e-16 ***
+PowerfulOthers:ScoreSystem   3    0.4    0.12   0.501  0.682    
+Residuals                  256   62.3    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+[[38]]
+                    Df Sum Sq Mean Sq F value Pr(>F)    
+Chance               1    0.9    0.91   3.790 0.0527 .  
+ScoreSystem          3  413.8  137.94 572.850 <2e-16 ***
+Chance:ScoreSystem   3    0.2    0.06   0.252 0.8597    
+Residuals          256   61.6    0.24                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
