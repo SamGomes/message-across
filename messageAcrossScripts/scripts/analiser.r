@@ -37,29 +37,29 @@ processGameVar <- function(yVarPre, yVarPos, xlabel, ylabel){
   
   out <- shapiro.test(a)
   #print(out)
-  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest %s_a.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest_%s_a.messageAcrossData",yVarPre))
  
 
   out <- shapiro.test(b)
   #print(out)
-  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest %s_b.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest_%s_b.messageAcrossData",yVarPre))
 
   out <- shapiro.test(c)
   #print(out)
-  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest %s_c.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest_%s_c.messageAcrossData",yVarPre))
 
   out <- shapiro.test(d)
   #print(out)
-  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest %s_d.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest_%s_d.messageAcrossData",yVarPre))
 
 
   out <- friedman.test(as.matrix(keepsData))
   #print(out)
-  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/friedmanTest %s.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/friedmanTest_%s.messageAcrossData",yVarPre))
 
   out <- friedmanmc(as.matrix(keepsData))
   #print(out)
-  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/postHoc/friedmanTestPostHoc %s.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/postHoc/friedmanTestPostHoc_%s.messageAcrossData",yVarPre))
 }
 
 processGameVar("meanNumberOfGives_","")
@@ -79,20 +79,20 @@ processGameVar <- function(varToTestText){
   varToTest <- myData[[varToTestText]]
   out <- shapiro.test(varToTest)
   #print(out)
-  capture.output(out, file = sprintf("results/normality/derivedMeasures/shapiroTest %s.messageAcrossData", varToTestText))
+  capture.output(out, file = sprintf("results/normality/derivedMeasures/shapiroTest_%s.messageAcrossData", varToTestText))
 
   # print("#################HERE###################")
 
   for (xText in personalityVariables){
       x <- myData[[xText]]
       out <- shapiro.test(x)
-      capture.output(out, file = sprintf("results/normality/personality/shapiroTest %s.messageAcrossData", xText))
-
+      capture.output(out, file = sprintf("results/normality/personality/shapiroTest_%s.messageAcrossData", xText))
+      #print(sprintf("%s-> Median(%f);Mean(%f)", xText, median(x), mean(x)))
 
       out <- (cor.test(x, varToTest, method=c("spearman"), exact=F))
       # if(test$p.value <= 0.05){
         #print(test)
-        capture.output(out, file = sprintf("results/mainEffects/personality/%s/spearmanPersonalityResults %s.messageAcrossData",varToTestText, xText))
+        capture.output(out, file = sprintf("results/mainEffects/personality/%s/spearmanPersonalityResults_%s.messageAcrossData",varToTestText, xText))
       # }
     }
 }

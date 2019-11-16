@@ -5,7 +5,6 @@ find . -name "*.messageAcrossData" -exec rm -f {} \;
 rm -f "output/meltedData.csv"
 find . -name "*.png" -exec rm -f {} \;
 
-
 echo "Preparing data..."
 python3 -W ignore ./scripts/melter.py
 
