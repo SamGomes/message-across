@@ -1,6 +1,0 @@
-
-	Friedman rank sum test
-
-data:  as.matrix(keepsData)
-Friedman chi-squared = 50.518, df = 3, p-value = 6.196e-11
-

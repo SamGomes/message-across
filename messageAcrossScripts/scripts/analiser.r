@@ -1,12 +1,21 @@
+# install.packages("rgdal", repo="http://cran.uk.r-project.org")
+# install.packages("pgirmess", repo="http://cran.uk.r-project.org")
+# install.packages("rstatix", repo="http://cran.uk.r-project.org")
+
 suppressMessages(library(ez))
-suppressMessages(library(ggplot2))
-suppressMessages(library(multcomp))
-suppressMessages(library(nlme))
-suppressMessages(library(pastecs))
+suppressMessages(library(rstatix))
 suppressMessages(library(pgirmess))
-suppressMessages(library(reshape))
+suppressMessages(library(reshape2))
+suppressMessages(library(multcomp))
 suppressMessages(library(WRS))
 suppressMessages(library(e1071))
+
+
+# ip <- as.data.frame(installed.packages()[,c(1,3:4)])
+# rownames(ip) <- NULL
+# ip <- ip[is.na(ip$Priority),1:2,drop=FALSE]
+# print(ip, row.names=FALSE)
+
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
 myData$preferredVersion <- unclass(myData$preferredVersion)
@@ -24,10 +33,25 @@ processGameVar <- function(yVarPre, yVarPos, xlabel, ylabel){
 
   keeps <- c("playerId", varsToProcess)
   keepsData <- myData[, (names(myData) %in% keeps)]
+  longData <- melt(keepsData, id.vars=c("playerId"))
+
+  # names(longData)<-c("playerId", "scoreSystem", "yVar")
+  # longData$scoreSystem <- factor(longData$scoreSystem, labels=c("A","B","C","D"))
+  # longData <- longData[order(longData$playerId),]
+
+  # plot <- suppressMessages(ggplot(longData, aes(longData$scoreSystem, longData$yVar)))
+  # plot <- plot + geom_boxplot()
+  # plot <- plot + labs(x="scoreSystem",y=yVarPre) 
+  # suppressMessages(ggsave(sprintf("plots/%s.png",yVarPre)))
+
+  #print(paste("Analysing for the dependent variable: ",yVarPre,"...", sep=""))
+  # in case it was parametric
+  # newModel <- ezANOVA(data=longData, dv=.(yVar), wid=.(playerId), within=.(scoreSystem), detailed = TRUE)
+  # print(newModel)
 
   # in case it is not parametric
-  keeps <- c(varsToProcess)
-  keepsData <- myData[, (names(myData) %in% keeps)]
+  # keeps <- c(varsToProcess)
+  # keepsData <- myData[, (names(myData) %in% keeps)]
   dietMyData <- na.omit(keepsData)
 
   a <- dietMyData[[a]]
@@ -35,34 +59,37 @@ processGameVar <- function(yVarPre, yVarPos, xlabel, ylabel){
   c <- dietMyData[[c]]
   d <- dietMyData[[d]]
   
+  
   out <- shapiro.test(a)
   #print(out)
-  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest_%s_a.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest %s_a.messageAcrossData",yVarPre))
  
-
   out <- shapiro.test(b)
   #print(out)
-  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest_%s_b.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest %s_b.messageAcrossData",yVarPre))
 
   out <- shapiro.test(c)
   #print(out)
-  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest_%s_c.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest %s_c.messageAcrossData",yVarPre))
 
   out <- shapiro.test(d)
   #print(out)
-  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest_%s_d.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/normality/scoreSystem/shapiroTest %s_d.messageAcrossData",yVarPre))
 
 
-  out <- friedman.test(as.matrix(keepsData))
+  out <- friedman.test(longData$value, longData$variable, longData$playerId)
   #print(out)
-  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/friedmanTest_%s.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/friedmanTest %s.messageAcrossData",yVarPre))
 
-  out <- friedmanmc(as.matrix(keepsData))
+  out <- friedman_effsize(longData, value ~ variable | playerId)
   #print(out)
-  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/postHoc/friedmanTestPostHoc_%s.messageAcrossData",yVarPre))
+  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/effSize/friedmanEffSize %s.messageAcrossData",yVarPre))
+
+  out <- friedmanmc(longData$value, longData$variable, longData$playerId)
+  #print(out)
+  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/postHoc/friedmanTestPostHoc %s.messageAcrossData",yVarPre))
 }
-
-processGameVar("meanNumberOfGives_","")
+# processGameVar("meanNumberOfGives_","")
 processGameVar("meanNumberOfTakes_","")
 processGameVar("whoFocus_","")
 processGameVar("whatFocus_","")
@@ -79,30 +106,41 @@ processGameVar <- function(varToTestText){
   varToTest <- myData[[varToTestText]]
   out <- shapiro.test(varToTest)
   #print(out)
-  capture.output(out, file = sprintf("results/normality/derivedMeasures/shapiroTest_%s.messageAcrossData", varToTestText))
+  capture.output(out, file = sprintf("results/normality/derivedMeasures/shapiroTest %s.messageAcrossData", varToTestText))
 
   # print("#################HERE###################")
 
   for (xText in personalityVariables){
+      # print(paste("dependentVar: ",x,sep=""))
+
+      # test <- (cor.test(eval(substitute(myData[[varX]], list(varX = x))), myData[[varToTest]], method=c("spearman")))
+      # if(test$p.value <= 0.05){
+      #   print(test)
+      # }
+
       x <- myData[[xText]]
       out <- shapiro.test(x)
-      capture.output(out, file = sprintf("results/normality/personality/shapiroTest_%s.messageAcrossData", xText))
-      #print(sprintf("%s-> Median(%f);Mean(%f)", xText, median(x), mean(x)))
+      #print(out)
+      capture.output(out, file = sprintf("results/normality/personality/shapiroTest %s.messageAcrossData", xText))
+
 
       out <- (cor.test(x, varToTest, method=c("spearman"), exact=F))
       # if(test$p.value <= 0.05){
         #print(test)
-        capture.output(out, file = sprintf("results/mainEffects/personality/%s/spearmanPersonalityResults_%s.messageAcrossData",varToTestText, xText))
+        capture.output(out, file = sprintf("results/mainEffects/personality/%s/spearmanPersonalityResults %s.messageAcrossData",varToTestText, xText))
       # }
+
     }
 }
 
+
 processGameVar("meanWhoFocus")
 processGameVar("meanWhatFocus")
-processGameVar("grandMeanGives")
+# processGameVar("grandMeanGives")
 processGameVar("grandMeanTakes")
 processGameVar("ratioTakesGives")
 processGameVar("preferredVersion")
+
 
 print("Computing interaction effects...")
 
