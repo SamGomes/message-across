@@ -26,7 +26,7 @@ processBoxPlot <- function(yVarPre, yVarPos, yLabel, plotName, labels, breaks){
 
   hist <- ggplot(longData, aes(longData$scoreSystem, longData$yVar)) + theme(axis.text=element_text(size=18), axis.title=element_text(size=18,face="bold"))
   hist <- hist + geom_boxplot(fill='#c4d4ff', color="black")
-  if( labels!=-1 & breaks!=-1){
+  if( labels!=-1 && breaks!=-1){
     hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
   }
   hist <- hist + labs(x="Score Attribution System",y=yLabel) 
