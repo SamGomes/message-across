@@ -21,7 +21,7 @@ processBoxPlot <- function(yVarPre, yVarPos, yLabel, plotName, labels, breaks){
   longData <- melt(data, id="playerId", measured=varsToProcess)
 
   names(longData)<-c("playerId", "scoreSystem", "yVar")
-  longData$scoreSystem <- factor(longData$scoreSystem, labels=c("Comp","Ind","M_Help","P_Alt"))
+  longData$scoreSystem <- factor(longData$scoreSystem, labels=c("Comp","Ind","M.Help","E.Altr"))
   longData <- longData[order(longData$playerId),]
 
   hist <- ggplot(longData, aes(longData$scoreSystem, longData$yVar)) + theme(axis.text=element_text(size=18), axis.title=element_text(size=18,face="bold"))
