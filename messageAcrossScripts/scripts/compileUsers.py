@@ -13,7 +13,8 @@ fourParts = open("./output/compiledUsersFourParts.csv", 'w')
 fname = "./input/messageAcrossData.csv"
 
 data_df = pd.read_csv('./input/messageAcrossData.csv', delimiter=',')
-#print(data_df.head())
+
+#print(data_df.columns)
 
 personality_df = data_df[['playerId',   'N1', 'N2', 'N3', 'N4', 'N5', 'N6',
                                         'E1', 'E2', 'E3', 'E4', 'E5', 'E6',
@@ -21,7 +22,8 @@ personality_df = data_df[['playerId',   'N1', 'N2', 'N3', 'N4', 'N5', 'N6',
                                         'O1', 'O2', 'O3', 'O4', 'O5', 'O6',
                                         'C1', 'C2', 'C3', 'C4', 'C5', 'C6',
                                         'N', 'E', 'O', 'A', 'C',
-                                        'Internal', 'PowerfulOthers', 'Chance']]
+                                        'Internal', 'PowerfulOthers', 'Chance',
+                                        'gender', 'age']]
 #print(personality_df.head())
 
 with open('./input/messageAcrossData.csv','r') as f:
