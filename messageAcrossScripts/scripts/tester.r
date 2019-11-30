@@ -9,82 +9,35 @@ suppressMessages(library(WRS))
 suppressMessages(library(e1071))
 suppressMessages(library(afex))
 suppressMessages(library(emmeans))
+suppressMessages(library(rcompanion))
+suppressMessages(library(psych))
 
-myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
-myData$preferredVersion <- unclass(myData$preferredVersion)
+myData <- read.csv(file="input/dataFourCategories.csv", header=TRUE, sep=",")
+#myData$preferredVersion <- unclass(myData$preferredVersion)
 
-personalityVariables <- names(myData)[20:57]
+personalityVariables <- names(myData)[2:39]
 
-print("Computing interaction effects...")
+# result <- kruskal.test(preferredVersion ~ A4, data = myData)
+# print(result)
+# posthoc <- pairwise.wilcox.test(myData$preferredVersion, myData$A4, p.adj = "none", exact=FALSE)
+# print(posthoc)
 
-meltedData <- read.csv(file="output/meltedData.csv", header=TRUE, sep=",")
+# print(wilcox.test(preferredVersion ~ A4, data = myData))
 
-# Compute the analysis of variance
-#   aov(eval(substitute(gives ~ personality * ScoreSystem, list(personality = as.name(x)))), data = meltedData)
+# result <- fisher.test(x = myData$preferredVersion, y = myData$A4)
+# print(result)
 
-#Below is an example using our “Mixed_Data” dataset.
-# After the aov_car command, we enter the formula for our ANOVA model.
-# In this case, we are looking at DV by (“~”) Btw_Cond and Within_Cond.
-# Also we know that we must specify the error term we wish to use.
-# In this example, the error term is represented by subject error divided by the within-subjects error (Within_Cond).
-# IMPORTANTLY: If you have any between subjects variables, they do not need to be included in the error term. 
+# invisible(lapply(personalityVariables, function(x) {
+# 	print(x)
+#     result <- fisher.test(x = myData$preferredVersion, eval(substitute(myData$personality, list(personality = as.name(x)))))
+#     if(result <= 0.05){
+# 		print(result)
+# 		Matrix <- table(myData[, c(x, "preferredVersion")])
+# 		print(Matrix)
+# 		PT = pairwiseNominalIndependence(Matrix, fisher = TRUE, gtest  = FALSE, chisq  = FALSE, digits = 3)
+# 		print(PT)
+# 		#print(cldList(comparison = PT$Comparison, p.value = PT$p.adj.Fisher, threshold  = 0.05))
+#     }
+#   }))
 
-# Mixed.aov.1<-lapply(personalityVariables, function(x) {
-#   aov_car(eval(substitute(gives ~ personality * ScoreSystem + Error(playerId/ScoreSystem), list(personality = as.name(x)))), data=meltedData)
-#   }
-# )
-
-# res.aov <- lapply(personalityVariables, function(x) {
-#   aov(eval(substitute(gives ~ personality * ScoreSystem, list(personality = as.name(x)))), data = meltedData)
-#   }
-# )
-# text <- lapply(res.aov, summary)
-
-Mixed.aov.1<-aov_car(gives ~ C*ScoreSystem + Error(playerId/ScoreSystem), data=meltedData)
-
-knitr::kable(nice(Mixed.aov.1))
-
-print("#####################################################")
-
-Old.aov.1<-aov(gives ~ C*ScoreSystem, data=meltedData)
-
-print(summary(Old.aov.1))
-
-print("#####################################################")
-
-Bew.aov.1<-aov(gives ~ C*ScoreSystem + Error(playerId/ScoreSystem), data=meltedData)
-
-print(summary(Bew.aov.1))
-
-print("#####################################################")
-
-New.aov.1<-aov(gives ~ C*ScoreSystem + Error(playerId/(C*ScoreSystem)), data=meltedData)
-
-print(summary(New.aov.1))
-#print(Mixed.aov.1)
-# print(text)
-
-# datafilename="http://personality-project.org/R/datasets/R.appendix2.data"
-# data.ex2=read.table(datafilename,header=T)   #read the data into a table
-# data.ex2                                      #show the data
-# aov.ex2 = aov(Alertness~Gender*Dosage,data=data.ex2)         #do the analysis of variance
-# summary(aov.ex2)                                    #show the summary table
-# print(model.tables(aov.ex2,"means"),digits=3)      
-# 	#report the means and the number of subjects/cell
-# boxplot(Alertness~Dosage*Gender,data=data.ex2) 
-# 	#graphical summary of means of the 4 cells
-# attach(data.ex2)
-# interaction.plot(Dosage,Gender,Alertness)  #another way to graph the means 
-# detach(data.ex2)
-
-# Post-hoc
-
-Mixed_Fitted_StudyMethod<-emmeans(Mixed.aov.1, ~ScoreSystem)
-print(Mixed_Fitted_StudyMethod)
-
-Mixed_Fitted_Personality<-emmeans(Mixed.aov.1, ~C)
-print(Mixed_Fitted_Personality)
-
-Mixed_Fitted_Interaction<-emmeans(Mixed.aov.1, ~ScoreSystem|C)
-print(Mixed_Fitted_Interaction)
-print(pairs(Mixed_Fitted_Interaction))
+print(describeBy(myData, myData$O4))

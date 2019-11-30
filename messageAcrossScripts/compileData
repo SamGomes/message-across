@@ -10,14 +10,14 @@ python3 -W ignore ./scripts/melter.py
 python3 -W ignore ./scripts/compileUsers.py
 python3 -W ignore ./scripts/melterCategorical.py
 
-echo "Creating plots..."
-Rscript ./scripts/plotsGenerator.r
-
 echo "Analysing data by integers..."
 Rscript ./scripts/analiser.r
 
 echo "Analysing data by categories..."
 Rscript ./scripts/analiserCategorical.r
+
+echo "Creating plots..."
+Rscript ./scripts/plotsGenerator.r
 
 # echo "Testing data..."
 # Rscript ./scripts/tester.r

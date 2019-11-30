@@ -18,24 +18,25 @@ processMainEffectCategory <- function(filename, n){
   data$preferredVersion <- unclass(data$preferredVersion)
   personalityVariables <- names(data)[2:39]
 
-  invisible(lapply(personalityVariables, function(x) {
-    result <- kruskal.test(eval(substitute(grandMeanGives ~ personality, list(personality = as.name(x)))), data = data)
-    filename = sprintf("./results/mainEffects/personality/categories/%s/grandMeanGives/%s.messageAcrossData", n, x)
-    write.table(data.frame(unlist(result)), file=filename, row.names=TRUE, col.names=TRUE)
-    if(result[3] <= 0.05){
-      posthoc<-suppressMessages(pairwise.wilcox.test(data$grandMeanGives, eval(substitute(data$personality, list(personality = as.name(x)))), p.adjust.method = "BH", exact=FALSE))
-      write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/grandMeanGives/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
-      #print(posthoc)
-    }
-  }))
+  # invisible(lapply(personalityVariables, function(x) {
+  #   result <- kruskal.test(eval(substitute(grandMeanGives ~ personality, list(personality = as.name(x)))), data = data)
+  #   filename = sprintf("./results/mainEffects/personality/categories/%s/grandMeanGives/%s.messageAcrossData", n, x)
+  #   write.table(data.frame(unlist(result)), file=filename, row.names=TRUE, col.names=TRUE)
+  #   if(result[3] <= 0.05){
+  #     posthoc<-suppressMessages(pairwise.wilcox.test(data$grandMeanGives, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "bonf", exact=FALSE))
+  #     write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/grandMeanGives/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
+  #     print(posthoc)
+  #   }
+  # }))
 
   invisible(lapply(personalityVariables, function(x) {
     result <- kruskal.test(eval(substitute(grandMeanTakes ~ personality, list(personality = as.name(x)))), data = data)
     filename = sprintf("./results/mainEffects/personality/categories/%s/grandMeanTakes/%s.messageAcrossData", n, x)
     write.table(data.frame(unlist(result)), file=filename, row.names=TRUE, col.names=TRUE)
     if(result[3] <= 0.05){
-      posthoc<-suppressMessages(pairwise.wilcox.test(data$grandMeanTakes, eval(substitute(data$personality, list(personality = as.name(x)))), p.adjust.method = "BH", exact=FALSE))
+      posthoc<-suppressMessages(pairwise.wilcox.test(data$grandMeanTakes, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "none", exact=FALSE))
       write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/grandMeanTakes/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
+      #print(posthoc)
     }
   }))
 
@@ -44,8 +45,9 @@ processMainEffectCategory <- function(filename, n){
     filename = sprintf("./results/mainEffects/personality/categories/%s/meanWhoFocus/%s.messageAcrossData", n, x)
     write.table(data.frame(unlist(result)), file=filename, row.names=TRUE, col.names=TRUE)
     if(result[3] <= 0.05){
-      posthoc<-suppressMessages(pairwise.wilcox.test(data$meanWhoFocus, eval(substitute(data$personality, list(personality = as.name(x)))), p.adjust.method = "BH", exact=FALSE))
+      posthoc<-suppressMessages(pairwise.wilcox.test(data$meanWhoFocus, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "none", exact=FALSE))
       write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/meanWhoFocus/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
+      #print(posthoc)
     }
   }))
 
@@ -54,8 +56,9 @@ processMainEffectCategory <- function(filename, n){
     filename = sprintf("./results/mainEffects/personality/categories/%s/meanWhatFocus/%s.messageAcrossData", n, x)
     write.table(data.frame(unlist(result)), file=filename, row.names=TRUE, col.names=TRUE)
     if(result[3] <= 0.05){
-      posthoc<-suppressMessages(pairwise.wilcox.test(data$meanWhatFocus, eval(substitute(data$personality, list(personality = as.name(x)))), p.adjust.method = "BH", exact=FALSE))
+      posthoc<-suppressMessages(pairwise.wilcox.test(data$meanWhatFocus, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "none", exact=FALSE))
       write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/meanWhatFocus/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
+      #print(posthoc)
     }
   }))
 
@@ -64,7 +67,7 @@ processMainEffectCategory <- function(filename, n){
     filename = sprintf("./results/mainEffects/personality/categories/%s/preferredVersion/%s.messageAcrossData", n, x)
     write.table(data.frame(unlist(result)), file=filename, row.names=TRUE, col.names=TRUE)
     if(result[3] <= 0.05){
-      posthoc<-suppressMessages(pairwise.wilcox.test(data$preferredVersion, eval(substitute(data$personality, list(personality = as.name(x)))), p.adjust.method = "BH", exact=FALSE))
+      posthoc<-suppressMessages(pairwise.wilcox.test(data$preferredVersion, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "none", exact=FALSE))
       write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/preferredVersion/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
       #print(posthoc)
     }
@@ -144,17 +147,17 @@ processInteractionCategory <- function(filename, n){
 }
 
 print("Computing main effects...")
-print("Computing for two groups [High, Low]...")
-processMainEffectCategory("input/dataTwoCategories.csv", "two")
-print("Computing for three groups [High, Medium, Low]...")
-processMainEffectCategory("input/dataThreeCategories.csv", "three")
+# print("Computing for two groups [High, Low]...")
+# processMainEffectCategory("input/dataTwoCategories.csv", "two")
+# print("Computing for three groups [High, Medium, Low]...")
+# processMainEffectCategory("input/dataThreeCategories.csv", "three")
 print("Computing for four groups [High, Medium_High, Medium_Low, Low]...")
 processMainEffectCategory("input/dataFourCategories.csv", "four")
 
 print("Computing interaction effects...")
-print("Computing for two groups [High, Low]...")
-processInteractionCategory("output/meltedDataTwoCategories.csv", "two")
-print("Computing for three groups [High, Medium, Low]...")
-processInteractionCategory("output/meltedDataThreeCategories.csv", "three")
+# print("Computing for two groups [High, Low]...")
+# processInteractionCategory("output/meltedDataTwoCategories.csv", "two")
+# print("Computing for three groups [High, Medium, Low]...")
+# processInteractionCategory("output/meltedDataThreeCategories.csv", "three")
 print("Computing for four groups [High, Medium_High, Medium_Low, Low]...")
 processInteractionCategory("output/meltedDataFourCategories.csv", "four")
