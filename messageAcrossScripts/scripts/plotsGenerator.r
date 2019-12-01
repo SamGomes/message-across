@@ -79,6 +79,46 @@ suppressMessages(ggsave(sprintf("plots/personality/%s.png", "Dimensions")))
 
 #interactionVariables <- (myData %>% select(playerId, A1, grandMeanGives))
 
+mainBoxplotFacets <- function(source, type, yVar){
+  meltedData <- read.csv(file=source, header=TRUE, sep=",")
+  personalityVariables <- (meltedData %>% select( N1, N2, N3, N4, N5, N6,
+                                                  E1, E2, E3, E4, E5, E6,
+                                                  A1, A2, A3, A4, A5, A6,
+                                                  O1, O2, O3, O4, O5, O6,
+                                                  C1, C2, C3, C4, C5, C6,
+                                                  N, E, O, A, C,
+                                                  Internal, PowerfulOthers, Chance))
+
+  personalityNames <- names(meltedData)
+
+  i<-1
+  for (xText in personalityVariables){
+      i<-i+1
+      qplot(x = meltedData[[yVar]], y = xText, data = meltedData, na.rm=TRUE) + geom_smooth(method = "lm") + geom_point(color = "grey", alpha = .7) + xlab(yVar) + ylab(personalityNames[i])
+      suppressMessages(ggsave(sprintf("plots/mainEffects/facets/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar)))
+  }
+}
+
+mainBoxplotJoin <- function(source, type, yVar){
+  meltedData <- read.csv(file=source, header=TRUE, sep=",")
+  personalityVariables <- (meltedData %>% select( N1, N2, N3, N4, N5, N6,
+                                                  E1, E2, E3, E4, E5, E6,
+                                                  A1, A2, A3, A4, A5, A6,
+                                                  O1, O2, O3, O4, O5, O6,
+                                                  C1, C2, C3, C4, C5, C6,
+                                                  N, E, O, A, C,
+                                                  Internal, PowerfulOthers, Chance))
+
+  personalityNames <- names(meltedData)
+
+  i<-1
+  for (xText in personalityVariables){
+      i<-i+1
+      qplot(x = meltedData[[yVar]], y = xText, data = meltedData, na.rm=TRUE) + geom_smooth(method = "lm") + geom_point(color = "grey", alpha = .7) + xlab(yVar) + ylab(personalityNames[i])
+      suppressMessages(ggsave(sprintf("plots/mainEffects/join/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar)))
+  }
+}
+
 interactionBoxplotFacets <- function(source, type, yVar){
   meltedData <- read.csv(file=source, header=TRUE, sep=",")
   personalityVariables <- (meltedData %>% select( N1, N2, N3, N4, N5, N6,
@@ -94,7 +134,7 @@ interactionBoxplotFacets <- function(source, type, yVar){
 	i<-1
 	for (xText in personalityVariables){
   		i<-i+1
-  		qplot(x = meltedData[[yVar]], y = xText, data = meltedData, facets = ~ScoreSystem, color = ScoreSystem, na.rm=TRUE) + geom_smooth(method = "lm") + geom_point(color = "grey", alpha = .7)
+  		qplot(x = meltedData[[yVar]], y = xText, data = meltedData, facets = ~ScoreSystem, color = ScoreSystem, na.rm=TRUE) + geom_smooth(method = "lm") + geom_point(color = "grey", alpha = .7) + xlab(yVar) + ylab(personalityNames[i])
   		suppressMessages(ggsave(sprintf("plots/interactionEffects/facets/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar)))
 	}
 }
@@ -113,7 +153,7 @@ interactionBoxplotJoin <- function(source, type, yVar){
 	i<-1
 	for (xText in personalityVariables){
   		i<-i+1
-  		qplot(x = meltedData[[yVar]], y = xText, data = meltedData, color = ScoreSystem, na.rm=TRUE) + geom_smooth(method = "lm") + geom_point(color = "grey", alpha = .7)
+  		qplot(x = meltedData[[yVar]], y = xText, data = meltedData, color = ScoreSystem, na.rm=TRUE) + geom_smooth(method = "lm") + geom_point(color = "grey", alpha = .7) + xlab(yVar) + ylab(personalityNames[i])
   		suppressMessages(ggsave(sprintf("plots/interactionEffects/join/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar)))
 	}
 }
@@ -121,38 +161,66 @@ interactionBoxplotJoin <- function(source, type, yVar){
 oldw <- getOption("warn")
 options(warn = -1)
 
+print("Plotting main effects in facets...")
+#mainBoxplotFacets("output/meltedDataFourCategories.csv", "four", "gives")
+mainBoxplotFacets("input/dataFourCategories.csv", "four", "grandMeanTakes")
+mainBoxplotFacets("input/dataFourCategories.csv", "four", "meanWhatFocus")
+mainBoxplotFacets("input/dataFourCategories.csv", "four", "meanWhoFocus")
+#mainBoxplotFacets("input/dataFourCategories.csv", "four", "preferredVersion")
+
+myData <- read.csv(file="input/dataFourCategories.csv", header=TRUE, sep=",")
+
+ggplot(myData, aes(N3, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge")
+suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/N3_Version.png"))
+
+ggplot(myData, aes(N4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge")
+suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/N4_Version.png"))
+
+ggplot(myData, aes(E4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge")
+suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/E4_Version.png"))
+
+ggplot(myData, aes(C2, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge")
+suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/C2_Version.png"))
+
+print("Plotting main effects in joint boxplots...")
+#mainBoxplotJoin("output/meltedDataFourCategories.csv", "four", "gives")
+mainBoxplotJoin("input/dataFourCategories.csv", "four", "grandMeanTakes")
+mainBoxplotJoin("input/dataFourCategories.csv", "four", "meanWhatFocus")
+mainBoxplotJoin("input/dataFourCategories.csv", "four", "meanWhoFocus")
+#mainBoxplotJoin("input/dataFourCategories.csv", "four", "preferredVersion")
+
 print("Plotting interactions in facets...")
-interactionBoxplotFacets("output/meltedData.csv", "integer", "gives")
-interactionBoxplotFacets("output/meltedData.csv", "integer", "takes")
-interactionBoxplotFacets("output/meltedData.csv", "integer", "what")
-interactionBoxplotFacets("output/meltedData.csv", "integer", "who")
-interactionBoxplotFacets("output/meltedDataTwoCategories.csv", "two", "gives")
-interactionBoxplotFacets("output/meltedDataTwoCategories.csv", "two", "takes")
-interactionBoxplotFacets("output/meltedDataTwoCategories.csv", "two", "what")
-interactionBoxplotFacets("output/meltedDataTwoCategories.csv", "two", "who")
-interactionBoxplotFacets("output/meltedDataThreeCategories.csv", "three", "gives")
-interactionBoxplotFacets("output/meltedDataThreeCategories.csv", "three", "takes")
-interactionBoxplotFacets("output/meltedDataThreeCategories.csv", "three", "what")
-interactionBoxplotFacets("output/meltedDataThreeCategories.csv", "three", "who")
-interactionBoxplotFacets("output/meltedDataFourCategories.csv", "four", "gives")
+# interactionBoxplotFacets("output/meltedData.csv", "integer", "gives")
+# interactionBoxplotFacets("output/meltedData.csv", "integer", "takes")
+# interactionBoxplotFacets("output/meltedData.csv", "integer", "what")
+# interactionBoxplotFacets("output/meltedData.csv", "integer", "who")
+# interactionBoxplotFacets("output/meltedDataTwoCategories.csv", "two", "gives")
+# interactionBoxplotFacets("output/meltedDataTwoCategories.csv", "two", "takes")
+# interactionBoxplotFacets("output/meltedDataTwoCategories.csv", "two", "what")
+# interactionBoxplotFacets("output/meltedDataTwoCategories.csv", "two", "who")
+# interactionBoxplotFacets("output/meltedDataThreeCategories.csv", "three", "gives")
+# interactionBoxplotFacets("output/meltedDataThreeCategories.csv", "three", "takes")
+# interactionBoxplotFacets("output/meltedDataThreeCategories.csv", "three", "what")
+# interactionBoxplotFacets("output/meltedDataThreeCategories.csv", "three", "who")
+#interactionBoxplotFacets("output/meltedDataFourCategories.csv", "four", "gives")
 interactionBoxplotFacets("output/meltedDataFourCategories.csv", "four", "takes")
 interactionBoxplotFacets("output/meltedDataFourCategories.csv", "four", "what")
 interactionBoxplotFacets("output/meltedDataFourCategories.csv", "four", "who")
 
 print("Plotting interactions in joint boxplots...")
-interactionBoxplotJoin("output/meltedData.csv", "integer", "gives")
-interactionBoxplotJoin("output/meltedData.csv", "integer", "takes")
-interactionBoxplotJoin("output/meltedData.csv", "integer", "what")
-interactionBoxplotJoin("output/meltedData.csv", "integer", "who")
-interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "gives")
-interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "takes")
-interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "what")
-interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "who")
-interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "gives")
-interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "takes")
-interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "what")
-interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "who")
-interactionBoxplotJoin("output/meltedDataFourCategories.csv", "four", "gives")
+# interactionBoxplotJoin("output/meltedData.csv", "integer", "gives")
+# interactionBoxplotJoin("output/meltedData.csv", "integer", "takes")
+# interactionBoxplotJoin("output/meltedData.csv", "integer", "what")
+# interactionBoxplotJoin("output/meltedData.csv", "integer", "who")
+# interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "gives")
+# interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "takes")
+# interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "what")
+# interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "who")
+# interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "gives")
+# interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "takes")
+# interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "what")
+# interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "who")
+# interactionBoxplotJoin("output/meltedDataFourCategories.csv", "four", "gives")
 interactionBoxplotJoin("output/meltedDataFourCategories.csv", "four", "takes")
 interactionBoxplotJoin("output/meltedDataFourCategories.csv", "four", "what")
 interactionBoxplotJoin("output/meltedDataFourCategories.csv", "four", "who")
