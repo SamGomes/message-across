@@ -82,9 +82,7 @@ processGameVar <- function(varToTestText){
   out <- shapiro.test(varToTest)
   #print(out)
   capture.output(out, file = sprintf("results/normality/derivedMeasures/shapiroTest_%s.messageAcrossData", varToTestText))
-
   # print("#################HERE###################")
-
   for (xText in personalityVariables){
       x <- myData[[xText]]
       out <- shapiro.test(x)
