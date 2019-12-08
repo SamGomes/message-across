@@ -11,6 +11,8 @@ suppressMessages(library(sjmisc))
 
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
+plot <- ggplot(myData, aes(myData$preferredVersion)) + geom_bar(fill='#c4d4ff', color="black") + labs(x="Preferred Version",y="Frequencies") + theme(axis.text=element_text(size=18), axis.title=element_text(size=18,face="bold")) +  scale_x_discrete(labels = as.character(c("Comp","Ind","M.Help","E.Altr"))) + geom_text(stat='count', aes(label=..count..), vjust=-1)
+suppressMessages(ggsave(sprintf("plots/gameVariables/preferredVersion.png")))
 
 print("Plotting game variables...")
 processBoxPlot <- function(yVarPre, yVarPos, yLabel, plotName, labels, breaks){
@@ -30,7 +32,7 @@ processBoxPlot <- function(yVarPre, yVarPos, yLabel, plotName, labels, breaks){
   if( labels!=-1 && breaks!=-1){
     hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
   }
-  hist <- hist + labs(x="Score Attribution System",y=yLabel) 
+  hist <- hist + labs(x="Score Attribution System", y=yLabel) 
   suppressMessages(ggsave(sprintf("plots/%s.png",plotName)))
 }
 processBoxPlot("meanNumberOfGives_", "", "Mean Number of Gives", "meanNumberOfGives", -1, -1)
