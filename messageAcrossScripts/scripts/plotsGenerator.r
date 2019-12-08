@@ -12,7 +12,7 @@ suppressMessages(library(sjmisc))
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
 plot <- ggplot(myData, aes(myData$preferredVersion)) + geom_bar(fill='#c4d4ff', color="black") + labs(x="Preferred Version",y="Frequencies") + theme(axis.text=element_text(size=18), axis.title=element_text(size=18,face="bold")) +  scale_x_discrete(labels = as.character(c("Comp","Ind","M.Help","E.Altr"))) + geom_text(stat='count', aes(label=..count..), vjust=-1)
-suppressMessages(ggsave(sprintf("plots/gameVariables/preferredVersion.png")))
+suppressMessages(ggsave(sprintf("plots/mainEffects/PreferredVersion.png")))
 
 print("Plotting game variables...")
 processBoxPlot <- function(yVarPre, yVarPos, yLabel, plotName, labels, breaks){
