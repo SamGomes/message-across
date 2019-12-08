@@ -18,8 +18,8 @@ data_df = pd.read_csv('./input/messageAcrossData.csv', delimiter=',')
 
 personality_df = data_df[['playerId',   'N1', 'N2', 'N3', 'N4', 'N5', 'N6',
                                         'E1', 'E2', 'E3', 'E4', 'E5', 'E6',
-                                        'A1', 'A2', 'A3', 'A4', 'A5', 'A6',
                                         'O1', 'O2', 'O3', 'O4', 'O5', 'O6',
+                                        'A1', 'A2', 'A3', 'A4', 'A5', 'A6',
                                         'C1', 'C2', 'C3', 'C4', 'C5', 'C6',
                                         'N', 'E', 'O', 'A', 'C',
                                         'Internal', 'PowerfulOthers', 'Chance',
@@ -29,8 +29,8 @@ personality_df = data_df[['playerId',   'N1', 'N2', 'N3', 'N4', 'N5', 'N6',
 with open('./input/messageAcrossData.csv','r') as f:
     headerVars = ['playerId',           'N1', 'N2', 'N3', 'N4', 'N5', 'N6',
                                         'E1', 'E2', 'E3', 'E4', 'E5', 'E6',
-                                        'A1', 'A2', 'A3', 'A4', 'A5', 'A6',
                                         'O1', 'O2', 'O3', 'O4', 'O5', 'O6',
+                                        'A1', 'A2', 'A3', 'A4', 'A5', 'A6',
                                         'C1', 'C2', 'C3', 'C4', 'C5', 'C6',
                                         'N', 'E', 'O', 'A', 'C',
                                         'Internal', 'PowerfulOthers', 'Chance']

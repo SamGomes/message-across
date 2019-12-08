@@ -71,77 +71,79 @@ processGameVar("whatFocus_","")
 processGameVar("score_","_7")
 
 
-print("Computing main effects based on personality...")
-personalityVariables <- names(myData)[20:57]
+# print("Computing main effects based on personality...")
+# personalityVariables <- names(myData)[20:57]
 
 
-processGameVar <- function(varToTestText){
-  # print(paste("varToTest: ",varToTest,sep=""))
+# processGameVar <- function(varToTestText){
+#   # print(paste("varToTest: ",varToTest,sep=""))
 
-  varToTest <- myData[[varToTestText]]
-  out <- shapiro.test(varToTest)
-  #print(out)
-  capture.output(out, file = sprintf("results/normality/derivedMeasures/shapiroTest_%s.messageAcrossData", varToTestText))
-  # print("#################HERE###################")
-  for (xText in personalityVariables){
-      x <- myData[[xText]]
-      out <- shapiro.test(x)
-      capture.output(out, file = sprintf("results/normality/personality/shapiroTest_%s.messageAcrossData", xText))
-      #print(sprintf("%s-> Median(%f);Mean(%f)", xText, median(x), mean(x)))
+#   varToTest <- myData[[varToTestText]]
+#   out <- shapiro.test(varToTest)
+#   #print(out)
+#   capture.output(out, file = sprintf("results/normality/derivedMeasures/shapiroTest_%s.messageAcrossData", varToTestText))
 
-      out <- (cor.test(x, varToTest, method=c("spearman"), exact=F))
-      # if(test$p.value <= 0.05){
-        #print(test)
-        capture.output(out, file = sprintf("results/mainEffects/personality/%s/spearmanPersonalityResults_%s.messageAcrossData",varToTestText, xText))
-      # }
-    }
-}
+#   # print("#################HERE###################")
 
-processGameVar("meanWhoFocus")
-processGameVar("meanWhatFocus")
-#processGameVar("grandMeanGives")
-processGameVar("grandMeanTakes")
-#processGameVar("ratioTakesGives")
-processGameVar("preferredVersion")
+#   for (xText in personalityVariables){
+#       x <- myData[[xText]]
+#       out <- shapiro.test(x)
+#       capture.output(out, file = sprintf("results/normality/personality/shapiroTest_%s.messageAcrossData", xText))
+#       #print(sprintf("%s-> Median(%f);Mean(%f)", xText, median(x), mean(x)))
 
-# print("Computing interaction effects...")
+#       out <- (cor.test(x, varToTest, method=c("spearman"), exact=F))
+#       # if(test$p.value <= 0.05){
+#         #print(test)
+#         capture.output(out, file = sprintf("results/mainEffects/personality/%s/spearmanPersonalityResults_%s.messageAcrossData",varToTestText, xText))
+#       # }
+#     }
+# }
 
-meltedData <- read.csv(file="output/meltedData.csv", header=TRUE, sep=",")
+# processGameVar("meanWhoFocus")
+# processGameVar("meanWhatFocus")
+# #processGameVar("grandMeanGives")
+# processGameVar("grandMeanTakes")
+# #processGameVar("ratioTakesGives")
+# processGameVar("preferredVersion")
 
-# Compute the analysis of variance
-res.aov <- lapply(personalityVariables, function(x) {
-  aov(eval(substitute(gives ~ personality * ScoreSystem, list(personality = as.name(x)))), data = meltedData)
-  }
-)
-text <- lapply(res.aov, summary)
-#print(text)
-capture.output(text, file = "results/interactionEffects/givesMixedAnovaResults.messageAcrossData")
+# # print("Computing interaction effects...")
 
-# Compute the analysis of variance
-res.aov <- lapply(personalityVariables, function(x) {
-  aov(eval(substitute(takes ~ personality * ScoreSystem, list(personality = as.name(x)))), data = meltedData)
-  }
-)
-text <- lapply(res.aov, summary)
-#print(text)
-capture.output(text, file = "results/interactionEffects/takesMixedAnovaResults.messageAcrossData")
+# meltedData <- read.csv(file="output/meltedData.csv", header=TRUE, sep=",")
 
+# # Compute the analysis of variance
+# res.aov <- lapply(personalityVariables, function(x) {
+#   aov(eval(substitute(gives ~ personality * ScoreSystem, list(personality = as.name(x)))), data = meltedData)
+#   }
+# )
+# text <- lapply(res.aov, summary)
+# #print(text)
+# capture.output(text, file = "results/interactionEffects/givesMixedAnovaResults.messageAcrossData")
 
-# Compute the analysis of variance
-res.aov <- lapply(personalityVariables, function(x) {
-  aov(eval(substitute(who ~ personality * ScoreSystem, list(personality = as.name(x)))), data = meltedData)
-  }
-)
-text <- lapply(res.aov, summary)
-#print(text)
-capture.output(text, file = "results/interactionEffects/whoMixedAnovaResults.messageAcrossData")
+# # Compute the analysis of variance
+# res.aov <- lapply(personalityVariables, function(x) {
+#   aov(eval(substitute(takes ~ personality * ScoreSystem, list(personality = as.name(x)))), data = meltedData)
+#   }
+# )
+# text <- lapply(res.aov, summary)
+# #print(text)
+# capture.output(text, file = "results/interactionEffects/takesMixedAnovaResults.messageAcrossData")
 
 
-# Compute the analysis of variance
-res.aov <- lapply(personalityVariables, function(x) {
-  aov(eval(substitute(what ~ personality * ScoreSystem, list(personality = as.name(x)))), data = meltedData)
-  }
-)
-text <- lapply(res.aov, summary)
-#print(text)
-capture.output(text, file = "results/interactionEffects/whatMixedAnovaResults.messageAcrossData")
+# # Compute the analysis of variance
+# res.aov <- lapply(personalityVariables, function(x) {
+#   aov(eval(substitute(who ~ personality * ScoreSystem, list(personality = as.name(x)))), data = meltedData)
+#   }
+# )
+# text <- lapply(res.aov, summary)
+# #print(text)
+# capture.output(text, file = "results/interactionEffects/whoMixedAnovaResults.messageAcrossData")
+
+
+# # Compute the analysis of variance
+# res.aov <- lapply(personalityVariables, function(x) {
+#   aov(eval(substitute(what ~ personality * ScoreSystem, list(personality = as.name(x)))), data = meltedData)
+#   }
+# )
+# text <- lapply(res.aov, summary)
+# #print(text)
+# capture.output(text, file = "results/interactionEffects/whatMixedAnovaResults.messageAcrossData")
