@@ -11,9 +11,11 @@ suppressMessages(library(afex))
 suppressMessages(library(emmeans))
 suppressMessages(library(rcompanion))
 suppressMessages(library(psych))
+suppressMessages(library(tidyverse))
 
-myData <- read.csv(file="input/dataFourCategories.csv", header=TRUE, sep=",")
-#myData <- read.csv(file="output/meltedDataFourCategories.csv", header=TRUE, sep=",")
+#myData <- read.csv(file="input/dataThreeCategories.csv", header=TRUE, sep=",")
+#myData <- read.csv(file="output/meltedDataThreeCategories.csv", header=TRUE, sep=",")
+myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
 #myData$preferredVersion <- unclass(myData$preferredVersion)
 
 personalityVariables <- names(myData)[2:39]
@@ -28,40 +30,25 @@ personalityVariables <- names(myData)[2:39]
 # result <- fisher.test(x = myData$preferredVersion, y = myData$A4)
 # print(result)
 
-invisible(lapply(personalityVariables, function(x) {
-	print(x)
-    result <- fisher.test(x = myData$preferredVersion, eval(substitute(myData$personality, list(personality = as.name(x)))))
-    if(result <= 0.05){
-		print(result)
-		Matrix <- table(myData[, c(x, "preferredVersion")])
-		print(Matrix)
-		PT = pairwiseNominalIndependence(Matrix, fisher = TRUE, gtest  = FALSE, chisq  = FALSE, digits = 3)
-		print(PT)
-		#print(cldList(comparison = PT$Comparison, p.value = PT$p.adj.Fisher, threshold  = 0.05))
-    }
-  }))
+# invisible(lapply(personalityVariables, function(x) {
+# 	print(x)
+#     result <- fisher.test(x = myData$preferredVersion, eval(substitute(myData$personality, list(personality = as.name(x)))))
+#     if(result <= 0.05){
+# 		print(result)
+# 		Matrix <- table(myData[, c(x, "preferredVersion")])
+# 		print(Matrix)
+# 		PT = pairwiseNominalIndependence(Matrix, fisher = TRUE, gtest  = FALSE, chisq  = FALSE, digits = 3)
+# 		print(PT)
+# 		#print(cldList(comparison = PT$Comparison, p.value = PT$p.adj.Fisher, threshold  = 0.05))
+#     }
+#   }))
 
-# png('myPlot.png')
-# myData$A6 <- factor(myData$A6 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
-# interaction.plot(	x.factor     = myData$ScoreSystem,
-# 	                trace.factor = myData$A6,
-# 	                response     = myData$takes,
-# 	                fun = mean,
-# 	                type="b",
-# 	                col=c("blue4", "red4", "green4", "pink2"),  ### Colors for levels of trace var.
-# 	                pch=c(19, 17, 15, 21),             ### Symbols for levels of trace var.
-# 	                fixed=TRUE,                    ### Order by factor order in data
-# 	                ylab = sprintf("mean of takes"),
-# 	                xlab = "Score System",
-# 	                xpd=TRUE,
-# 	                lwd = 3,
-# 	                legend=FALSE,
-# 	                lty=1,
-# 	                yaxt = "n")
-# axis(2, at=seq(0, 4, by = .25), labels=seq(0, 4, by = .25), las = 1)
-# legend("topright", legend=c("High", "Medium_High", "Medium_Low", "Low"),
-#        col=c("blue4", "red4", "green4", "pink2"), lty=1, pch=c(19, 17, 15, 21), cex=1,
-#        title="Personality Group", text.font=1)
-# dev.off()
+#png('myPlot.png')
+personalityVariables <- (myData %>% select(playerId, N, E, O, A, C))
+dat2 <- data.frame(x= c("1", "2", "3", "4", "5"), y = c(100, 120, 140, 120, 100))
+plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Traits",y="Value") + geom_segment(data = dat2, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 3)
+suppressMessages(ggsave(sprintf("%s.png", "Traits")))
+#dev.off()
 
 # print(describe.by(myData,myData$O6))
+

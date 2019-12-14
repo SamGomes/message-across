@@ -25,7 +25,7 @@ processMainEffectCategory <- function(filename, n){
     if(result[3] <= 0.05){
       posthoc<-suppressMessages(pairwise.wilcox.test(data$grandMeanTakes, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "none", exact=FALSE))
       write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/grandMeanTakes/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
-      #print(posthoc)
+      print(posthoc)
     }
   }))
 
@@ -36,7 +36,7 @@ processMainEffectCategory <- function(filename, n){
     if(result[3] <= 0.05){
       posthoc<-suppressMessages(pairwise.wilcox.test(data$meanWhoFocus, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "none", exact=FALSE))
       write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/meanWhoFocus/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
-      #print(posthoc)
+      print(posthoc)
     }
   }))
 
@@ -47,7 +47,7 @@ processMainEffectCategory <- function(filename, n){
     if(result[3] <= 0.05){
       posthoc<-suppressMessages(pairwise.wilcox.test(data$meanWhatFocus, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "none", exact=FALSE))
       write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/meanWhatFocus/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
-      #print(posthoc)
+      print(posthoc)
     }
   }))
 }
@@ -103,15 +103,15 @@ processInteractionCategory <- function(filename, n){
 print("Computing main effects...")
 # print("Computing for two groups [High, Low]...")
 # processMainEffectCategory("input/dataTwoCategories.csv", "two")
-# print("Computing for three groups [High, Medium, Low]...")
-# processMainEffectCategory("input/dataThreeCategories.csv", "three")
-print("Computing for four groups [High, Medium_High, Medium_Low, Low]...")
-processMainEffectCategory("input/dataFourCategories.csv", "four")
+print("Computing for three groups [High, Medium, Low]...")
+processMainEffectCategory("input/dataThreeCategories.csv", "three")
+# print("Computing for four groups [High, Medium_High, Medium_Low, Low]...")
+# processMainEffectCategory("input/dataFourCategories.csv", "four")
 
 print("Computing interaction effects...")
 # print("Computing for two groups [High, Low]...")
 # processInteractionCategory("output/meltedDataTwoCategories.csv", "two")
-# print("Computing for three groups [High, Medium, Low]...")
-# processInteractionCategory("output/meltedDataThreeCategories.csv", "three")
-print("Computing for four groups [High, Medium_High, Medium_Low, Low]...")
-processInteractionCategory("output/meltedDataFourCategories.csv", "four")
+print("Computing for three groups [High, Medium, Low]...")
+processInteractionCategory("output/meltedDataThreeCategories.csv", "three")
+# print("Computing for four groups [High, Medium_High, Medium_Low, Low]...")
+# processInteractionCategory("output/meltedDataFourCategories.csv", "four")

@@ -31,7 +31,7 @@ processBoxPlot <- function(yVarPre, yVarPos, yLabel, plotName, labels, breaks){
     hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
   }
   hist <- hist + labs(x="Score Attribution System",y=yLabel) 
-  suppressMessages(ggsave(sprintf("plots/%s.png",plotName)))
+  suppressMessages(ggsave(sprintf("plots/mainEffects/%s.png",plotName)))
 }
 processBoxPlot("meanNumberOfGives_", "", "Mean Number of Gives", "meanNumberOfGives", -1, -1)
 processBoxPlot("meanNumberOfTakes_", "", "Mean Number of Takes", "meanNumberOfTakes", -1, -1)
@@ -48,7 +48,7 @@ suppressMessages(ggsave(sprintf("plots/gameVariables/%s.png", "Actions")))
 print("Plotting personality variables...")
 
 personalityVariables <- (myData %>% select(playerId, N, E, O, A, C))
-plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Traits",y="Value")
+plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Traits",y="Value") + abline(h = 100, col = "green")
 suppressMessages(ggsave(sprintf("plots/personality/%s.png", "Traits")))
 
 personalityVariables <- (myData %>% select(playerId, N1, N2, N3, N4, N5, N6))
@@ -134,14 +134,14 @@ interactionJoin <- function(source, type, yVar){
 	for (xText in personalityVariables){
   		i<-i+1
   		png(sprintf("plots/interactionEffects/join/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar))
-      xText <- factor(xText , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+      xText <- factor(xText , levels=c("High", "Medium", "Low"))
       interaction.plot( x.factor     = meltedData$ScoreSystem,
                         trace.factor = xText,
                         response     = meltedData[[yVar]],
                         fun = mean,
                         type="b",
-                        col=c("blue4", "red4", "green4", "pink2"),  ### Colors for levels of trace var.
-                        pch=c(19, 17, 15, 21),             ### Symbols for levels of trace var.
+                        col=c("blue4", "red4", "green4"),  ### Colors for levels of trace var.
+                        pch=c(19, 17, 15),             ### Symbols for levels of trace var.
                         fixed=TRUE,                    ### Order by factor order in data
                         ylab = sprintf("mean of %s", yVar),
                         xlab = "Score System",
@@ -157,13 +157,13 @@ interactionJoin <- function(source, type, yVar){
         axis(2, at=seq(0, 7, by = .25), labels=seq(0, 7, by = .25), las = 2)
       }
       if(yVar == "who"){
-        legend("topleft", legend=c("High", "Medium_High", "Medium_Low", "Low"),
-             col=c("blue4", "red4", "green4", "pink2"), lty=1, pch=c(19, 17, 15, 21), cex=1,
+        legend("topleft", legend=c("High", "Medium", "Low"),
+             col=c("blue4", "red4", "green4"), lty=1, pch=c(19, 17, 15, 21), cex=1,
              title="Personality Group", text.font=1)
       }
       else{
-        legend("topright", legend=c("High", "Medium_High", "Medium_Low", "Low"),
-             col=c("blue4", "red4", "green4", "pink2"), lty=1, pch=c(19, 17, 15, 21), cex=1,
+        legend("topright", legend=c("High", "Medium", "Low"),
+             col=c("blue4", "red4", "green4"), lty=1, pch=c(19, 17, 15, 21), cex=1,
              title="Personality Group", text.font=1)
       }
       dev.off()
@@ -173,32 +173,32 @@ interactionJoin <- function(source, type, yVar){
 oldw <- getOption("warn")
 options(warn = -1)
 
-print("Plotting main effects in facets...")
+# print("Plotting main effects in facets...")
 
-myData <- read.csv(file="input/dataFourCategories.csv", header=TRUE, sep=",")
+# myData <- read.csv(file="input/dataFourCategories.csv", header=TRUE, sep=",")
 
-myData$N3 <- factor(myData$N3 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
-ggplot(myData, aes(N3, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("N3") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
-suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainN3.png"))
+# myData$N3 <- factor(myData$N3 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+# ggplot(myData, aes(N3, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("N3") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
+# suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainN3.png"))
 
-myData$N4 <- factor(myData$N4 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
-ggplot(myData, aes(N4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("N4") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
-suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainN4.png"))
+# myData$N4 <- factor(myData$N4 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+# ggplot(myData, aes(N4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("N4") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
+# suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainN4.png"))
 
-myData$E4 <- factor(myData$E4 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
-ggplot(myData, aes(E4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("E4") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
-suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainE4.png"))
+# myData$E4 <- factor(myData$E4 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+# ggplot(myData, aes(E4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("E4") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
+# suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainE4.png"))
 
-myData$A4 <- factor(myData$A4 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
-ggplot(myData, aes(A4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("A4") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
-suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainA4.png"))
+# myData$A4 <- factor(myData$A4 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+# ggplot(myData, aes(A4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("A4") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
+# suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainA4.png"))
 
-myData$C2 <- factor(myData$C2 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
-ggplot(myData, aes(C2, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("C2") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
-suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainC2.png"))
+# myData$C2 <- factor(myData$C2 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+# ggplot(myData, aes(C2, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("C2") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
+# suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainC2.png"))
 
 #print("Plotting main effects in joint boxplots...")
-#mainBoxplotJoin("input/dataFourCategories.csv", "four", "grandMeanTakes")
+# mainBoxplotJoin("input/dataFourCategories.csv", "four", "grandMeanTakes")
 # mainBoxplotJoin("input/dataFourCategories.csv", "four", "meanWhatFocus")
 # mainBoxplotJoin("input/dataFourCategories.csv", "four", "meanWhoFocus")
 
@@ -223,12 +223,12 @@ print("Plotting interactions in joint plots...")
 # interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "takes")
 # interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "what")
 # interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "who")
-# interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "takes")
-# interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "what")
-# interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "who")
-interactionJoin("output/meltedDataFourCategories.csv", "four", "takes")
-interactionJoin("output/meltedDataFourCategories.csv", "four", "what")
-interactionJoin("output/meltedDataFourCategories.csv", "four", "who")
+interactionJoin("output/meltedDataThreeCategories.csv", "three", "takes")
+interactionJoin("output/meltedDataThreeCategories.csv", "three", "what")
+interactionJoin("output/meltedDataThreeCategories.csv", "three", "who")
+# interactionJoin("output/meltedDataFourCategories.csv", "four", "takes")
+# interactionJoin("output/meltedDataFourCategories.csv", "four", "what")
+# interactionJoin("output/meltedDataFourCategories.csv", "four", "who")
 
 options(warn = oldw)
 
