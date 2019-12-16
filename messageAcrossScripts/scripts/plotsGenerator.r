@@ -11,8 +11,14 @@ suppressMessages(library(sjmisc))
 
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
-plot <- ggplot(myData, aes(myData$preferredVersion)) + geom_bar(fill='#c4d4ff', color="black") + labs(x="Preferred Version",y="Frequencies") + theme(axis.text=element_text(size=18), axis.title=element_text(size=18,face="bold")) +  scale_x_discrete(labels = as.character(c("Comp","Ind","M.Help","E.Altr"))) + geom_text(stat='count', aes(label=..count..), vjust=-1)
-suppressMessages(ggsave(sprintf("plots/mainEffects/PreferredVersion.png")))
+plot <- ggplot(myData, aes(fill=myData$preferredVersion, y=((..count..)/sum(..count..)*100), x=1)) 
+plot <- plot + geom_bar(color="black") + labs(x="", fill="Preferred Version", y="Frequency (%)") 
+plot <- plot + scale_x_discrete(breaks=c(0))
+plot <- plot + scale_fill_discrete(labels = as.character(c("Comp","Ind","M.Help","E.Altr")))
+plot <- plot + theme(axis.text=element_text(size=18), axis.title=element_text(size=18,face="bold")) 
+plot <- plot + geom_text(stat='count', size=8, aes(label=..count.., x=1, y=(..count../sum(..count..))*100), position = position_stack(vjust=0.5)) + coord_flip()
+suppressMessages(ggsave(sprintf("plots/mainEffects/preferredVersion.png"), width = 8, height = 4))
+
 
 print("Plotting game variables...")
 processBoxPlot <- function(yVarPre, yVarPos, yLabel, plotName, labels, breaks){
@@ -32,8 +38,8 @@ processBoxPlot <- function(yVarPre, yVarPos, yLabel, plotName, labels, breaks){
   if( labels!=-1 && breaks!=-1){
     hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
   }
-  hist <- hist + labs(x="Score Attribution System",y=yLabel) 
-  suppressMessages(ggsave(sprintf("plots/mainEffects/%s.png",plotName)))
+  hist <- hist + labs(x="Score Attribution System", y=yLabel) 
+  suppressMessages(ggsave(sprintf("plots/%s.png",plotName)))
 }
 processBoxPlot("meanNumberOfGives_", "", "Mean Number of Gives", "meanNumberOfGives", -1, -1)
 processBoxPlot("meanNumberOfTakes_", "", "Mean Number of Takes", "meanNumberOfTakes", -1, -1)
@@ -50,45 +56,31 @@ suppressMessages(ggsave(sprintf("plots/gameVariables/%s.png", "Actions")))
 print("Plotting personality variables...")
 
 personalityVariables <- (myData %>% select(playerId, N, E, O, A, C))
-data25th <- data.frame(x= c("1", "2", "3", "4", "5"), y = c(79, 95, 95, 112, 123))
-data75th <- data.frame(x= c("1", "2", "3", "4", "5"), y = c(106, 118, 119, 137, 143))
-plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Traits",y="Value") + geom_segment(data = data25th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2) + geom_segment(data = data75th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2)
+plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Traits",y="Value")
 suppressMessages(ggsave(sprintf("plots/personality/%s.png", "Traits")))
 
 personalityVariables <- (myData %>% select(playerId, N1, N2, N3, N4, N5, N6))
-data25th <- data.frame(x= c("1", "2", "3", "4", "5", "6"), y = c(15, 11, 13, 13, 12, 9))
-data75th <- data.frame(x= c("1", "2", "3", "4", "5", "6"), y = c(22, 17, 20, 19, 18, 15))
-plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Facets of Neuroticism",y="Value") + geom_segment(data = data25th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2) + geom_segment(data = data75th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2)
+plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Facets from Neuroticism",y="Value") + coord_cartesian(ylim = c(0, 36))
 suppressMessages(ggsave(sprintf("plots/personality/%s.png", "Facets_N")))
 
 personalityVariables <- (myData %>% select(playerId, E1, E2, E3, E4, E5, E6))
-data25th <- data.frame(x= c("1", "2", "3", "4", "5", "6"), y = c(19, 14, 11, 15, 15, 16))
-data75th <- data.frame(x= c("1", "2", "3", "4", "5", "6"), y = c(25, 20, 18, 19, 21, 21))
-plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Facets of Extraversion",y="Value") + geom_segment(data = data25th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2) + geom_segment(data = data75th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2)
+plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Facets from Extraversion",y="Value") + coord_cartesian(ylim = c(0, 36))
 suppressMessages(ggsave(sprintf("plots/personality/%s.png", "Facets_E")))
 
 personalityVariables <- (myData %>% select(playerId, O1, O2, O3, O4, O5, O6))
-data25th <- data.frame(x= c("1", "2", "3", "4", "5", "6"), y = c(13, 16, 17, 14, 14, 15))
-data75th <- data.frame(x= c("1", "2", "3", "4", "5", "6"), y = c(20, 23, 22, 19, 21, 20))
-plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Facets of Openness to Experience",y="Value") + geom_segment(data = data25th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2) + geom_segment(data = data75th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2)
+plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Facets from Openness to Experience",y="Value") + coord_cartesian(ylim = c(0, 36))
 suppressMessages(ggsave(sprintf("plots/personality/%s.png", "Facets_O")))
 
 personalityVariables <- (myData %>% select(playerId, A1, A2, A3, A4, A5, A6))
-data25th <- data.frame(x= c("1", "2", "3", "4", "5", "6"), y = c(16, 16, 20, 17, 18, 19))
-data75th <- data.frame(x= c("1", "2", "3", "4", "5", "6"), y = c(22, 25, 25, 25, 24, 24))
-plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Facets of Agreeableness",y="Value") + geom_segment(data = data25th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2) + geom_segment(data = data75th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2)
+plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Facets from Agreeableness",y="Value") + coord_cartesian(ylim = c(0, 36))
 suppressMessages(ggsave(sprintf("plots/personality/%s.png", "Facets_A")))
 
 personalityVariables <- (myData %>% select(playerId, C1, C2, C3, C4, C5, C6))
-data25th <- data.frame(x= c("1", "2", "3", "4", "5", "6"), y = c(19, 17, 22, 18, 17, 21))
-data75th <- data.frame(x= c("1", "2", "3", "4", "5", "6"), y = c(23, 23, 27, 23, 23, 24))
-plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Facets of Conscientiousness",y="Value") + geom_segment(data = data25th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2) + geom_segment(data = data75th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2)
+plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Facets from Conscientiousness",y="Value") + coord_cartesian(ylim = c(0, 36))
 suppressMessages(ggsave(sprintf("plots/personality/%s.png", "Facets_C")))
 
 personalityVariables <- (myData %>% select(playerId, Internal, PowerfulOthers, Chance))
-data25th <- data.frame(x= c("1", "2", "3"), y = c(12, 12, 12))
-data75th <- data.frame(x= c("1", "2", "3"), y = c(36, 36, 36))
-plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Dimensions from Locus of Control",y="Value") + coord_cartesian(ylim = c(0, 48))  + geom_segment(data = data25th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2) + geom_segment(data = data75th, color = "red", aes(x = as.numeric(x) - 0.3, y = y, xend = as.numeric(x) + 0.3, yend = y), size = 2)
+plot <- ggplot(melt(personalityVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Dimensions from Locus of Control",y="Value") + coord_cartesian(ylim = c(0, 48))
 suppressMessages(ggsave(sprintf("plots/personality/%s.png", "Dimensions")))
 
 ### Interaction Variables
@@ -150,14 +142,14 @@ interactionJoin <- function(source, type, yVar){
 	for (xText in personalityVariables){
   		i<-i+1
   		png(sprintf("plots/interactionEffects/join/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar))
-      xText <- factor(xText , levels=c("High", "Medium", "Low"))
+      xText <- factor(xText , levels=c("High", "Medium_High", "Medium_Low", "Low"))
       interaction.plot( x.factor     = meltedData$ScoreSystem,
                         trace.factor = xText,
                         response     = meltedData[[yVar]],
                         fun = mean,
                         type="b",
-                        col=c("blue4", "red4", "green4"),  ### Colors for levels of trace var.
-                        pch=c(19, 17, 15),             ### Symbols for levels of trace var.
+                        col=c("blue4", "red4", "green4", "pink2"),  ### Colors for levels of trace var.
+                        pch=c(19, 17, 15, 21),             ### Symbols for levels of trace var.
                         fixed=TRUE,                    ### Order by factor order in data
                         ylab = sprintf("mean of %s", yVar),
                         xlab = "Score System",
@@ -173,13 +165,13 @@ interactionJoin <- function(source, type, yVar){
         axis(2, at=seq(0, 7, by = .25), labels=seq(0, 7, by = .25), las = 2)
       }
       if(yVar == "who"){
-        legend("topleft", legend=c("High", "Medium", "Low"),
-             col=c("blue4", "red4", "green4"), lty=1, pch=c(19, 17, 15, 21), cex=1,
+        legend("topleft", legend=c("High", "Medium_High", "Medium_Low", "Low"),
+             col=c("blue4", "red4", "green4", "pink2"), lty=1, pch=c(19, 17, 15, 21), cex=1,
              title="Personality Group", text.font=1)
       }
       else{
-        legend("topright", legend=c("High", "Medium", "Low"),
-             col=c("blue4", "red4", "green4"), lty=1, pch=c(19, 17, 15, 21), cex=1,
+        legend("topright", legend=c("High", "Medium_High", "Medium_Low", "Low"),
+             col=c("blue4", "red4", "green4", "pink2"), lty=1, pch=c(19, 17, 15, 21), cex=1,
              title="Personality Group", text.font=1)
       }
       dev.off()
@@ -189,26 +181,32 @@ interactionJoin <- function(source, type, yVar){
 oldw <- getOption("warn")
 options(warn = -1)
 
-# print("Plotting main effects in facets...")
+print("Plotting main effects in facets...")
 
-myData <- read.csv(file="input/dataThreeCategories.csv", header=TRUE, sep=",")
+myData <- read.csv(file="input/dataFourCategories.csv", header=TRUE, sep=",")
 
-myData$preferredVersion <- factor(myData$preferredVersion, levels=c("D", "C", "B", "A"))
+myData$N3 <- factor(myData$N3 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+ggplot(myData, aes(N3, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("N3") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
+suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainN3.png"))
 
-myData$N3 <- factor(myData$N3 , levels=c("Low", "Medium", "High"))
-ggplot(myData,aes(x=factor(N3),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white") + xlab("N3") + ylab("percentage") + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3","#e7298a"), labels=c("D", "C", "B", "A"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip()
-suppressMessages(ggsave("plots/personality/mainN3.png"))
+myData$N4 <- factor(myData$N4 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+ggplot(myData, aes(N4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("N4") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
+suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainN4.png"))
 
-myData$C2 <- factor(myData$C2 , levels=c("Low", "Medium", "High"))
-ggplot(myData,aes(x=factor(C2),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white") + xlab("C2") + ylab("percentage") + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3","#e7298a"), labels=c("D", "C", "B", "A"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip()
-suppressMessages(ggsave("plots/personality/mainC2.png"))
+myData$E4 <- factor(myData$E4 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+ggplot(myData, aes(E4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("E4") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
+suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainE4.png"))
 
-myData$C <- factor(myData$C , levels=c("Low", "Medium", "High"))
-ggplot(myData,aes(x=factor(C),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white") + xlab("C") + ylab("percentage") + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3","#e7298a"), labels=c("D", "C", "B", "A"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip()
-suppressMessages(ggsave("plots/personality/mainC.png"))
+myData$A4 <- factor(myData$A4 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+ggplot(myData, aes(A4, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("A4") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
+suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainA4.png"))
+
+myData$C2 <- factor(myData$C2 , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+ggplot(myData, aes(C2, ..count..)) + geom_bar(aes(fill = preferredVersion), position = "dodge") + xlab("C2") + scale_fill_manual(values=c("blue4", "red4", "green4", "pink2"))
+suppressMessages(ggsave("plots/mainEffects/join/preferredVersion/mainC2.png"))
 
 #print("Plotting main effects in joint boxplots...")
-# mainBoxplotJoin("input/dataFourCategories.csv", "four", "grandMeanTakes")
+#mainBoxplotJoin("input/dataFourCategories.csv", "four", "grandMeanTakes")
 # mainBoxplotJoin("input/dataFourCategories.csv", "four", "meanWhatFocus")
 # mainBoxplotJoin("input/dataFourCategories.csv", "four", "meanWhoFocus")
 
@@ -233,12 +231,12 @@ print("Plotting interactions in joint plots...")
 # interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "takes")
 # interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "what")
 # interactionBoxplotJoin("output/meltedDataTwoCategories.csv", "two", "who")
-interactionJoin("output/meltedDataThreeCategories.csv", "three", "takes")
-interactionJoin("output/meltedDataThreeCategories.csv", "three", "what")
-interactionJoin("output/meltedDataThreeCategories.csv", "three", "who")
-# interactionJoin("output/meltedDataFourCategories.csv", "four", "takes")
-# interactionJoin("output/meltedDataFourCategories.csv", "four", "what")
-# interactionJoin("output/meltedDataFourCategories.csv", "four", "who")
+# interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "takes")
+# interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "what")
+# interactionBoxplotJoin("output/meltedDataThreeCategories.csv", "three", "who")
+interactionJoin("output/meltedDataFourCategories.csv", "four", "takes")
+interactionJoin("output/meltedDataFourCategories.csv", "four", "what")
+interactionJoin("output/meltedDataFourCategories.csv", "four", "who")
 
 options(warn = oldw)
 
