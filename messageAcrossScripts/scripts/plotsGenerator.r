@@ -12,16 +12,16 @@ suppressMessages(library(sjmisc))
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
 plot <- ggplot(myData, aes(fill=myData$preferredVersion, y=((..count..)/sum(..count..)*100), x=1)) 
-plot <- plot + geom_bar(color="black") + labs(x="", fill="Preferred Version", y="Frequency (%)") 
-plot <- plot + scale_x_discrete(breaks=c(0))
+plot <- plot + geom_bar(color="black") + labs(x="", fill="Preferred Version", y="") 
+plot <- plot + scale_x_discrete(breaks=c(0)) + scale_y_discrete(breaks=c(0))
 plot <- plot + scale_fill_discrete(labels = as.character(c("Comp","Ind","M.Help","E.Altr")))
-plot <- plot + theme(axis.text=element_text(size=18), axis.title=element_text(size=18,face="bold")) 
+plot <- plot + theme(axis.text=element_text(size=18), axis.title=element_text(size=18,face="bold"),panel.background = element_blank()) 
 plot <- plot + geom_text(stat='count', size=8, aes(label=..count.., x=1, y=(..count../sum(..count..))*100), position = position_stack(vjust=0.5)) + coord_flip()
 suppressMessages(ggsave(sprintf("plots/mainEffects/preferredVersion.png"), width = 8, height = 4))
 
 
 print("Plotting game variables...")
-processBoxPlot <- function(yVarPre, yVarPos, yLabel, plotName, labels, breaks){
+processBoxPlot <- function(myData, yVarPre, yVarPos, yLabel, plotName, labels, breaks){
 
   varsToProcess = c(sprintf("%sA%s",yVarPre,yVarPos),sprintf("%sB%s",yVarPre,yVarPos),sprintf("%sC%s",yVarPre,yVarPos),sprintf("%sD%s",yVarPre,yVarPos))
 
@@ -41,11 +41,31 @@ processBoxPlot <- function(yVarPre, yVarPos, yLabel, plotName, labels, breaks){
   hist <- hist + labs(x="Score Attribution System", y=yLabel) 
   suppressMessages(ggsave(sprintf("plots/%s.png",plotName)))
 }
-processBoxPlot("meanNumberOfGives_", "", "Mean Number of Gives", "meanNumberOfGives", -1, -1)
-processBoxPlot("meanNumberOfTakes_", "", "Mean Number of Takes", "meanNumberOfTakes", -1, -1)
-processBoxPlot("whoFocus_", "", "Interaction Focus", "interactionFocus", c("Me 1","2", "3", "4", "5", "6", "The    \n Other 7\n  Player  "), c(1,2,3,4,5,6,7))
-processBoxPlot("whatFocus_", "", "Interaction Intention", "interactionIntention", c("Help 1","2", "3", "4", "5", "6", "Complicate 7"), c(1,2,3,4,5,6,7))
-processBoxPlot("score_", "_7", "Final Score", "finalScore", -1, -1)
+processBoxPlot(myData, "meanNumberOfGives_", "", "Mean Number of Gives", "meanNumberOfGives", -1, -1)
+processBoxPlot(myData, "meanNumberOfTakes_", "", "Mean Number of Takes", "meanNumberOfTakes", -1, -1)
+processBoxPlot(myData, "whoFocus_", "", "Interaction Focus", "interactionFocus", c("Me 1","2", "3", "4", "5", "6", "The    \n Other 7\n  Player  "), c(1,2,3,4,5,6,7))
+processBoxPlot(myData, "whatFocus_", "", "Interaction Intention", "interactionIntention", c("Help 1","2", "3", "4", "5", "6", "Complicate 7"), c(1,2,3,4,5,6,7))
+
+
+varsToProcess = c("score_A_7","score_B_7","score_C_7","score_D_7")
+keeps <- c("playerId", varsToProcess)
+data <- myData[, (names(myData) %in% keeps)]
+data$playerId <- factor(data$playerId, levels = c("121","122","125","126","84","118","9","111","124","110","136","127","62","119","100","102","82","135","3","78","31","109","33","117","67","103","91","112","70","17","88","47","130","123","113","114","83","133","48","34","107","132","24","134","18","120","46","143","146","147","150","151","129","153","154","155","148","149","144","145","116","158","160","159","69","76","156","157","141","142","161","162","87","166","168","167","164","165"))
+data <- data[order(data$playerId),]
+scoreData = data.frame(matrix(ncol = 0, nrow = 33))
+
+j <- 1
+for(i in  seq(from=1, to=dim(data)[1], by=2)) {
+  scoreData$playerId[j] <- data$playerId[i] #assume the id of the group is the first id of the players
+  scoreData$score_A[j] <- abs(data$score_A_7[i]-data$score_A_7[i+1])
+  scoreData$score_B[j] <- abs(data$score_B_7[i]-data$score_B_7[i+1])
+  scoreData$score_C[j] <- abs(data$score_C_7[i]-data$score_C_7[i+1])
+  scoreData$score_D[j] <- abs(data$score_D_7[i]-data$score_D_7[i+1])
+  j <- j+1
+}
+
+processBoxPlot(scoreData, "score_", "", "Final Score Diff.", "scoreDiffs", -1, -1)
+
 
 actionsVariables <- (myData %>% select(playerId, grandMeanTakes, grandMeanGives, ratioTakesGives))
 plot <- ggplot(melt(actionsVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Actions",y="Value")
