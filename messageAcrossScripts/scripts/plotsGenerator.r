@@ -12,10 +12,10 @@ suppressMessages(library(sjmisc))
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
 plot <- ggplot(myData, aes(fill=myData$preferredVersion, y=((..count..)/sum(..count..)*100), x=1)) 
-plot <- plot + geom_bar(color="black") + labs(x="", fill="Preferred Version", y="") 
+plot <- plot + geom_bar() + labs(x="", fill="Preferred Version", y="") 
 plot <- plot + scale_x_discrete(breaks=c(0)) + scale_y_discrete(breaks=c(0))
 plot <- plot + scale_fill_discrete(labels = as.character(c("Comp","Ind","M.Help","E.Altr")))
-plot <- plot + theme(axis.text=element_text(size=18), axis.title=element_text(size=18,face="bold"),panel.background = element_blank()) 
+plot <- plot + theme(legend.title=element_text(size=20), legend.text=element_text(size=18),axis.text=element_text(size=18), axis.title=element_text(size=24,face="bold"),panel.background = element_blank()) 
 plot <- plot + geom_text(stat='count', size=8, aes(label=..count.., x=1, y=(..count../sum(..count..))*100), position = position_stack(vjust=0.5)) + coord_flip()
 suppressMessages(ggsave(sprintf("plots/mainEffects/preferredVersion.png"), width = 8, height = 4))
 
@@ -33,18 +33,51 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, yLabel, plotName, labels, b
   longData$scoreSystem <- factor(longData$scoreSystem, labels=c("Comp","Ind","M.Help","E.Altr"))
   longData <- longData[order(longData$playerId),]
 
-  hist <- ggplot(longData, aes(longData$scoreSystem, longData$yVar)) + theme(axis.text=element_text(size=18), axis.title=element_text(size=18,face="bold"))
-  hist <- hist + geom_boxplot(fill='#c4d4ff', color="black")
+  hist <- ggplot(longData, aes(longData$scoreSystem, longData$yVar, fill=longData$scoreSystem)) + theme(legend.position="none", axis.text=element_text(size=18), axis.title=element_text(size=18, face="bold"))
+  hist <- hist + geom_boxplot()
+  # hist <- hist + scale_fill_manual()
   if( labels!=-1 && breaks!=-1){
     hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
   }
   hist <- hist + labs(x="Score Attribution System", y=yLabel) 
   suppressMessages(ggsave(sprintf("plots/%s.png",plotName)))
 }
-processBoxPlot(myData, "meanNumberOfGives_", "", "Mean Number of Gives", "meanNumberOfGives", -1, -1)
-processBoxPlot(myData, "meanNumberOfTakes_", "", "Mean Number of Takes", "meanNumberOfTakes", -1, -1)
-processBoxPlot(myData, "whoFocus_", "", "Interaction Focus", "interactionFocus", c("Me 1","2", "3", "4", "5", "6", "The    \n Other 7\n  Player  "), c(1,2,3,4,5,6,7))
-processBoxPlot(myData, "whatFocus_", "", "Interaction Intention", "interactionIntention", c("Help 1","2", "3", "4", "5", "6", "Complicate 7"), c(1,2,3,4,5,6,7))
+processBoxPlot(myData, "meanNumberOfGives_", "", "Mean number of gives", "meanNumberOfGives", -1, -1)
+processBoxPlot(myData, "meanNumberOfTakes_", "", "Mean number of takes", "meanNumberOfTakes", -1, -1)
+processBoxPlot(myData, "whoFocus_", "", "Interaction focus", "interactionFocus", c("Me 1","2", "3", "4", "5", "6", "The    \n Other 7\n  Player  "), c(1,2,3,4,5,6,7))
+processBoxPlot(myData, "whatFocus_", "", "Interaction intention", "interactionIntention", c("Help   \n other 1\n player  ","2", "3", "4", "5", "6", "Complicate   \n other 7\n player  "), c(1,2,3,4,5,6,7))
+
+
+
+yVarPre="whoFocus_"
+yVarPos=""
+varsToProcess = c(sprintf("%sA%s",yVarPre,yVarPos),sprintf("%sB%s",yVarPre,yVarPos),sprintf("%sC%s",yVarPre,yVarPos),sprintf("%sD%s",yVarPre,yVarPos))
+
+keeps <- c("playerId", varsToProcess)
+data <- myData[, (names(myData) %in% keeps)]
+longData1 <- melt(data, id="playerId", measured=varsToProcess)
+colnames(longData1)[colnames(longData1)=="variable"] <- "version"
+colnames(longData1)[colnames(longData1)=="value"] <- "focus"
+longData1$version <- factor(longData1$version, labels=c("Comp","Ind","M.Help","E.Altr"))
+
+yVarPre="whatFocus_"
+yVarPos=""
+varsToProcess = c(sprintf("%sA%s",yVarPre,yVarPos),sprintf("%sB%s",yVarPre,yVarPos),sprintf("%sC%s",yVarPre,yVarPos),sprintf("%sD%s",yVarPre,yVarPos))
+
+keeps <- c("playerId", varsToProcess)
+data <- myData[, (names(myData) %in% keeps)]
+longData2 <- melt(data, id="playerId", measured=varsToProcess)
+colnames(longData2)[colnames(longData2)=="variable"] <- "version"
+colnames(longData2)[colnames(longData2)=="value"] <- "intention"
+longData2$version <- factor(longData2$version, labels=c("Comp","Ind","M.Help","E.Altr"))
+
+longData = merge(longData1,longData2, by = c("playerId","version"))
+plot <- ggplot(longData, aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version, alpha=0.05)) 
+plot <- plot + geom_point(shape=16) + facet_wrap(longData$version ~ .) + theme(legend.position="none")
+plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("Me 1","2", "3", "4", "5", "6", "7\nThe \n Other \n  Player  ")), breaks = c(1,2,3,4,5,6,7))
+# plot <- plot + scale_y_continuous(longData$intention, labels = as.character(c("Help   \n other 1\n player  ","2", "3", "4", "5", "6", "Complicate   \n other 7\n player  ")), breaks = c(1,2,3,4,5,6,7)) 
+plot <- plot + scale_y_continuous(longData$intention, name="Intention", labels = as.character(c("Help 1","2", "3", "4", "5", "6", "Complicate 7")), breaks = c(1,2,3,4,5,6,7)) 
+suppressMessages(ggsave(sprintf("plots/mainEffects/focusAndIntention.png"), width = 8, height = 4))
 
 
 varsToProcess = c("score_A_7","score_B_7","score_C_7","score_D_7")
