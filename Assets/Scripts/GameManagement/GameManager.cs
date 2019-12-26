@@ -259,6 +259,9 @@ public class GameManager : MonoBehaviour
 
         string scoreConfigPath = Application.streamingAssetsPath + "/"+ scoreSystemName + ".cfg";
         string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
+//        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfigTest.cfg";
+//        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfigTalkNPlay.cfg";
+
         string generalConfigText = "";
         string scoreConfigText = "";
         string exercisesConfigText = "";
@@ -310,7 +313,6 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < settings.generalSettings.players.Count; i++)
         {
             GameObject playerUI = playerUIs[i];
-
             Player currPlayer = settings.generalSettings.players[i];
 
             string bufferedPlayerIds = "";
@@ -419,10 +421,9 @@ public class GameManager : MonoBehaviour
         Shuffle<ExercisesListWrapper>(settings.exercisesGroups.exerciseGroups);
 
         Globals.backgroundAudioManager.StopCurrentClip();
-        Globals.backgroundAudioManager.PlayInfinitClip("Audio/backgroundLoop", "Audio/backgroundLoop");
+        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
         StartCoroutine(ChangeLevel(false, false));
-
     }
 
     // Use this for initialization
@@ -510,17 +511,12 @@ public class GameManager : MonoBehaviour
 
         foreach (Player player in settings.generalSettings.players)
         {
-            player.SetNumPossibleActions(0);
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
             {
                 button.GetComponent<Image>().color = Color.red;
-                player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
-                //button.interactable = false;
             }
-
         }
-
 
 
         int i = startingLevelDelayInSeconds;
@@ -546,7 +542,6 @@ public class GameManager : MonoBehaviour
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
             {
                 button.GetComponent<Image>().color = player.GetButtonColor();
-                button.onClick.Invoke();
             }
             player.ResetNumPossibleActions();
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
@@ -560,10 +555,10 @@ public class GameManager : MonoBehaviour
     private void ChangeTargetWords()
     {
         List<Exercise> selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups.exerciseGroups[exerciseGroupIndex++ % settings.exercisesGroups.exerciseGroups.Count].exercises);
-        //if (selectedExerciseGroup.Count <= 0)
-        //{
-        //    selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups.exerciseGroups[exerciseGroupIndex++ % settings.exercisesGroups.exerciseGroups.Count].exercises);
-        //}
+        if (selectedExerciseGroup.Count <= 0)
+        {
+            Debug.Log("No exercises available");
+        }
 
         int random = UnityEngine.Random.Range(0, selectedExerciseGroup.Count);
         Exercise newExercise = selectedExerciseGroup[random];
@@ -589,7 +584,7 @@ public class GameManager : MonoBehaviour
         string currTargetWord = player.GetCurrExercise().targetWord;
 
         //check the utility of word
-        bool usefulForMe = (currWordState.Length <= currTargetWord.Length && !currWordState.Contains(letterText) && currTargetWord.Contains(letterText));
+        bool usefulForMe = (currWordState.Length <= currTargetWord.Length && currTargetWord.Contains(letterText));
 
 
         if (execute && usefulForMe)
@@ -625,17 +620,28 @@ public class GameManager : MonoBehaviour
         UnityEngine.Object.Destroy(letter);
     }
 
-    public void RecordHit(char letterText, GameObject letter, Player currHitter)
+    public void RecordHit(GameObject letter, Player currHitter)
     {
+        
+        Letter theActualLetter = letter.gameObject.GetComponent<Letter>();
+        if (theActualLetter.IsLocked())
+        {
+            return;
+        }
+        theActualLetter.Lock();
+        char letterText = theActualLetter.letterText;
+        letter.transform.localScale *= 1.2f;
+        
+        
         //verify if button should be pressed
-        Globals.effectsAudioManager.PlayClip("Audio/badMove");
         currHitter.DecreasePossibleActionsPerLevel();
 
-
+        
+        
+        //diferent rewards in different utility conditions
         bool usefulForMe = false;
         bool usefulForOther = false;
         
-        //diferent rewards in different utility conditions
         Globals.KeyInteractionType playerIT = currHitter.GetActiveInteraction();
         List<ScoreValue> scores = new List<ScoreValue>();
         switch (playerIT)
@@ -687,6 +693,10 @@ public class GameManager : MonoBehaviour
         {
             Globals.effectsAudioManager.PlayClip("Audio/snap");
             emoji.GetComponent<Animator>().Play("Nice");
+        }
+        else
+        {
+            Globals.effectsAudioManager.PlayClip("Audio/badMove");
         }
 
         float otherPlayersCompletionMean = 0;
