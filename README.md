@@ -1,6 +1,6 @@
 # Message Across
 
-<img src="https://github.com/SamGomes/message-across/raw/master/docs/resources/images/logo.png" width="300">
+<img src="./ReadmeImages/logo.png" width="300">
 
 Message Across is a simple multiplayer game which focuses on word matching.
 In the course of the game, the players try to complete words as they advance through the levels. Each level presents two words on the top of the screen, one for each player.
