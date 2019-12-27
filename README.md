@@ -19,7 +19,7 @@ The current scores and number of available actions are displayed in the game int
 The words presented to players, as well as the score system of the game is fully parameterizable. In particular, the score attributed to a player after performing an action depends on the action itself (*give* or *take*), whether the letter is useful for the player who performed the action or the other player, and whether the player who performed the action had lower, equal or higher score than the other player. Other aspects of the game, such as the players' colors or number of possible actions per level can also be changed dynamically.
 
 
-# Executing the game
+## Executing the game
 
 To execute the game (in Windows), only two steps are required:
 - Download the latest version of Message Across through git pages of this repository: https://samgomes.github.io/message-across/
@@ -27,7 +27,7 @@ To execute the game (in Windows), only two steps are required:
 
 For other platforms, the code can be also downloaded and re-built.
 
-# Additional material
+## Additional material
 This program is part of a research project, and its iterations will be used as supplementary material for the several submissions.
 As such, the R material which was used to perform statistical analysis in the game logs is also included.
 
