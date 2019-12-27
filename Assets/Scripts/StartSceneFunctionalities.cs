@@ -107,7 +107,7 @@ public static class Globals
             Globals.bufferedPlayerIds = new List<string>();
         }
 
-        Globals.backgroundMusicPath = "Audio/backgroundLoop2";
+        Globals.backgroundMusicPath = "Audio/backgroundLoop";
     }
 }
 

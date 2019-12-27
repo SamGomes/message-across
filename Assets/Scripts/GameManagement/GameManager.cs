@@ -316,9 +316,13 @@ public class GameManager : MonoBehaviour
             Player currPlayer = settings.generalSettings.players[i];
 
             string bufferedPlayerIds = "";
-            //if(i < Globals.bufferedPlayerIds.Count){
+            if(i < Globals.bufferedPlayerIds.Count){
                 bufferedPlayerIds = Globals.bufferedPlayerIds[i];
-            //}
+            }
+            else
+            {
+                bufferedPlayerIds = "NO_NAME_" + i;
+            }
 
             currPlayer.Init(bufferedPlayerIds, this, playerMarkerPrefab, playerMarkersContainer, playerUI, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
             currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetBackgroundColor();
