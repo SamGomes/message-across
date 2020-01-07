@@ -8,13 +8,14 @@ suppressMessages(library(WRS))
 suppressMessages(library(tidyverse))
 suppressMessages(library(sjPlot))
 suppressMessages(library(sjmisc))
+suppressMessages(library(ggsci))
 
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
 plot <- ggplot(myData, aes(fill=myData$preferredVersion, y=((..count..)/sum(..count..)*100), x=1)) 
 plot <- plot + geom_bar() + labs(x="", fill="Preferred Version", y="") 
 plot <- plot + scale_x_discrete(breaks=c(0)) + scale_y_discrete(breaks=c(0))
-plot <- plot + scale_fill_discrete(labels = as.character(c("Comp","Ind","M.Help","E.Altr")))
+plot <- plot + scale_fill_npg(labels = as.character(c("Comp","Ind","M.Help","E.Altr")))
 plot <- plot + theme(legend.title=element_text(size=20), legend.text=element_text(size=18),axis.text=element_text(size=18), axis.title=element_text(size=24,face="bold"),panel.background = element_blank()) 
 plot <- plot + geom_text(stat='count', size=8, aes(label=..count.., x=1, y=(..count../sum(..count..))*100), position = position_stack(vjust=0.5)) + coord_flip()
 suppressMessages(ggsave(sprintf("plots/mainEffects/preferredVersion.png"), width = 8, height = 4))
@@ -39,13 +40,13 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, yLabel, plotName, labels, b
   if( labels!=-1 && breaks!=-1){
     hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
   }
-  hist <- hist + labs(x="Score Attribution System", y=yLabel) 
+  hist <- hist + labs(x="Score Attribution System", y=yLabel)  + scale_fill_npg()
   suppressMessages(ggsave(sprintf("plots/%s.png",plotName)))
 }
 processBoxPlot(myData, "meanNumberOfGives_", "", "Mean number of gives", "meanNumberOfGives", -1, -1)
 processBoxPlot(myData, "meanNumberOfTakes_", "", "Mean number of takes", "meanNumberOfTakes", -1, -1)
-processBoxPlot(myData, "whoFocus_", "", "Interaction focus", "interactionFocus", c("Me 1","2", "3", "4", "5", "6", "The    \n Other 7\n  Player  "), c(1,2,3,4,5,6,7))
-processBoxPlot(myData, "whatFocus_", "", "Interaction intention", "interactionIntention", c("Help   \n other 1\n player  ","2", "3", "4", "5", "6", "Complicate   \n other 7\n player  "), c(1,2,3,4,5,6,7))
+processBoxPlot(myData, "whoFocus_", "", "Interaction focus", "interactionFocus", c("Me 1","2", "3", "Neutral 4", "5", "6", "The    \n Other 7\n  Player  "), c(1,2,3,4,5,6,7))
+processBoxPlot(myData, "whatFocus_", "", "Interaction intention", "interactionIntention", c("Help   \n other 1\n player  ","2", "3", "Neutral 4", "5", "6", "Complicate   \n other 7\n player  "), c(1,2,3,4,5,6,7))
 
 
 
@@ -71,12 +72,24 @@ colnames(longData2)[colnames(longData2)=="variable"] <- "version"
 colnames(longData2)[colnames(longData2)=="value"] <- "intention"
 longData2$version <- factor(longData2$version, labels=c("Comp","Ind","M.Help","E.Altr"))
 
+
+# focus and intention
 longData = merge(longData1,longData2, by = c("playerId","version"))
-plot <- ggplot(longData, aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version, alpha=0.05)) 
-plot <- plot + geom_point(shape=16) + facet_wrap(longData$version ~ .) + theme(legend.position="none")
-plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("Me 1","2", "3", "4", "5", "6", "7\nThe \n Other \n  Player  ")), breaks = c(1,2,3,4,5,6,7))
-# plot <- plot + scale_y_continuous(longData$intention, labels = as.character(c("Help   \n other 1\n player  ","2", "3", "4", "5", "6", "Complicate   \n other 7\n player  ")), breaks = c(1,2,3,4,5,6,7)) 
-plot <- plot + scale_y_continuous(longData$intention, name="Intention", labels = as.character(c("Help 1","2", "3", "4", "5", "6", "Complicate 7")), breaks = c(1,2,3,4,5,6,7)) 
+plot <- ggplot(longData) 
+
+# draw grid lines
+plot <- plot + geom_hline(aes(yintercept = 3), color="gray", linetype="dashed")
+plot <- plot + geom_hline(aes(yintercept = 5), color="gray", linetype="dashed")
+plot <- plot + geom_vline(aes(xintercept = 3), color="gray", linetype="dashed")
+plot <- plot + geom_vline(aes(xintercept = 5), color="gray", linetype="dashed")
+plot <- plot + geom_hline(aes(yintercept=mean(longData$version ~ longData$focus), color="red"))
+plot <- plot + geom_hline(aes(yintercept=mean(longData$version ~ longData$intention), color="red"))
+
+plot <- plot + geom_count(show.legend=F)  + facet_wrap(longData$version ~ .)
+plot <- plot + aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version) + scale_color_npg()
+plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("Me 1","2", "3", "Neutral 4", "5", "6", "7\nThe \n Other \n  Player  ")), breaks = c(1,2,3,4,5,6,7))
+plot <- plot + scale_y_continuous(longData$intention, name="Intention", labels = as.character(c("Help 1","2", "3", "4\nNeutral", "5", "6", "Complicate 7")), breaks = c(1,2,3,4,5,6,7)) 
+
 suppressMessages(ggsave(sprintf("plots/mainEffects/focusAndIntention.png"), width = 8, height = 4))
 
 
@@ -102,6 +115,7 @@ processBoxPlot(scoreData, "score_", "", "Final Score Diff.", "scoreDiffs", -1, -
 
 actionsVariables <- (myData %>% select(playerId, grandMeanTakes, grandMeanGives, ratioTakesGives))
 plot <- ggplot(melt(actionsVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Actions",y="Value")
+plot <- plot
 suppressMessages(ggsave(sprintf("plots/gameVariables/%s.png", "Actions")))
 
 ### Personality Variables
@@ -172,12 +186,12 @@ interactionBoxplotFacets <- function(source, type, yVar){
 
   personalityNames <- names(meltedData)
 
-	i<-1
-	for (xText in personalityVariables){
-  		i<-i+1
-  		qplot(x = meltedData[[yVar]], y = xText, data = meltedData, facets = ~ScoreSystem, color = ScoreSystem, na.rm=TRUE) + geom_smooth(method = "lm") + geom_point(color = "grey", alpha = .7) + xlab(yVar) + ylab(personalityNames[i])
-  		suppressMessages(ggsave(sprintf("plots/interactionEffects/facets/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar)))
-	}
+  i<-1
+  for (xText in personalityVariables){
+      i<-i+1
+      qplot(x = meltedData[[yVar]], y = xText, data = meltedData, facets = ~ScoreSystem, color = ScoreSystem, na.rm=TRUE) + geom_smooth(method = "lm") + geom_point(color = "grey", alpha = .7) + xlab(yVar) + ylab(personalityNames[i])
+      suppressMessages(ggsave(sprintf("plots/interactionEffects/facets/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar)))
+  }
 }
 
 interactionJoin <- function(source, type, yVar){
@@ -191,10 +205,10 @@ interactionJoin <- function(source, type, yVar){
                                                   Internal, PowerfulOthers, Chance))
 
   personalityNames <- names(meltedData)
-	i<-1
-	for (xText in personalityVariables){
-  		i<-i+1
-  		png(sprintf("plots/interactionEffects/join/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar))
+  i<-1
+  for (xText in personalityVariables){
+      i<-i+1
+      png(sprintf("plots/interactionEffects/join/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar))
       xText <- factor(xText , levels=c("High", "Medium_High", "Medium_Low", "Low"))
       interaction.plot( x.factor     = meltedData$ScoreSystem,
                         trace.factor = xText,
@@ -228,7 +242,7 @@ interactionJoin <- function(source, type, yVar){
              title="Personality Group", text.font=1)
       }
       dev.off()
-	 }
+   }
 }
 
 oldw <- getOption("warn")
