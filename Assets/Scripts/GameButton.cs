@@ -60,17 +60,9 @@ public class GameButton : MonoBehaviour {
         if (this.isClicked && this.currCollidingLetterCollider!=null)
         {
             GameObject currCollidingLetterObject = currCollidingLetterCollider.gameObject;
-            currCollidingLetterObject.transform.localScale *= 1.2f;
-
-            Letter theActualLetter = currCollidingLetterCollider.gameObject.GetComponent<Letter>();
-            if (!theActualLetter.IsLocked())
-            {
-                gameManager.RecordHit(theActualLetter.letterText, currCollidingLetterObject, owner);
-            }
-            else
-            {
-                theActualLetter.Lock();
-            }
+            
+            gameManager.RecordHit(currCollidingLetterObject, owner);
+            
             this.currCollidingLetterCollider = null;
         }
     }

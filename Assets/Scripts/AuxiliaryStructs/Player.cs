@@ -64,18 +64,13 @@ public class Player
 
     public Player(string id, List<KeyCode> myKeys, List<string> myButtons, List<float> buttonRGB, int numPossibleActionsPerLevel)
     {
-        //if(this.id != "")
-        //{
-        //    this.id = id;
-        //}
-
         this.buttonRGB = buttonRGB;
 
         this.myKeys = myKeys;
         this.myButtons = myButtons;
 
         this.numPossibleActionsPerLevel = numPossibleActionsPerLevel;
-        this.currNumPossibleActionsPerLevel = numPossibleActionsPerLevel;
+        this.currNumPossibleActionsPerLevel = 0;
     }
 
     public void Init(string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
@@ -127,7 +122,8 @@ public class Player
         
         this.score = -1;
 
-        ResetNumPossibleActions();
+        SetNumPossibleActions(0);
+//        ResetNumPossibleActions();
 
         this.gameButton = marker.GetComponentInChildren<GameButton>();
         this.gameButton.SetOwner(this);
@@ -184,7 +180,7 @@ public class Player
 
         //Update UI
         TextMesh[] playerDisplayTexts = wordPanel.GetComponentsInChildren<TextMesh>();
-        playerDisplayTexts[0].text = currExercise.targetWord;
+        playerDisplayTexts[0].text = currExercise.displayMessage;
         playerDisplayTexts[1].text = currWordState;
     }
     public void SetCurrWordState(string newCurrWordState)

@@ -64,7 +64,8 @@ public static class Globals
 
     public static List<string> bufferedPlayerIds;
 
-
+    public static string backgroundMusicPath;
+    
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
     {
         Vector3 sourcePos = source.transform.position;
@@ -100,11 +101,13 @@ public static class Globals
         Globals.effectsAudioManager = new AudioManager(false);
         Globals.trackEffectsAudioManager = new AudioManager(false);
 
-        Globals.logManager = new MongoDBLogManager();
+        Globals.logManager = new DebugLogManager();
         if(Globals.bufferedPlayerIds == null)
         {
             Globals.bufferedPlayerIds = new List<string>();
         }
+
+        Globals.backgroundMusicPath = "Audio/backgroundLoop";
     }
 }
 
@@ -124,6 +127,6 @@ public class StartSceneFunctionalities : MonoBehaviour
 
         Globals.InitGlobals();
         Globals.backgroundAudioManager.StopCurrentClip();
-        Globals.backgroundAudioManager.PlayInfinitClip("Audio/backgroundLoop", "Audio/backgroundLoop");
+        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
     }
 }
