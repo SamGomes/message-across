@@ -22,4 +22,6 @@ Rscript ./scripts/plotsGenerator.r
 # echo "Testing data..."
 # Rscript ./scripts/tester.r
 
+rm "Rplots.pdf"
+
 echo "Done"
