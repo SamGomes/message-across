@@ -4,5 +4,6 @@ echo "Removing old data..."
 find . -name "*.messageAcrossData" -exec rm -f {} \;
 rm -f "output/*.csv"
 find . -name "*.png" -exec rm -f {} \;
+rm "Rplots.pdf"
 
 echo "Done"
