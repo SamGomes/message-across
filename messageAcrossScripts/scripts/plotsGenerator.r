@@ -74,21 +74,31 @@ longData2$version <- factor(longData2$version, labels=c("Comp","Ind","M.Help","E
 
 
 # focus and intention
-longData = merge(longData1,longData2, by = c("playerId","version"))
+longData = merge(longData1, longData2, by = c("playerId","version"))
+longDataSplitted <- split(longData,longData$version)
+longDataMean = data.frame(matrix(ncol = 0, nrow = 4))
+j = 1
+for(i in  c("Comp","Ind","M.Help","E.Altr")) {
+  longDataMean$version[j] <- i
+  longDataMean$focus[j] <- mean(longDataSplitted[[i]]$focus)
+  longDataMean$intention[j] <- mean(longDataSplitted[[i]]$intention)
+  j <- j+1
+}
+
 plot <- ggplot(longData) 
+plot <- plot + geom_count(show.legend=F)  + facet_wrap(version ~ .)
 
 # draw grid lines
 plot <- plot + geom_hline(aes(yintercept = 3), color="gray", linetype="dashed")
 plot <- plot + geom_hline(aes(yintercept = 5), color="gray", linetype="dashed")
 plot <- plot + geom_vline(aes(xintercept = 3), color="gray", linetype="dashed")
 plot <- plot + geom_vline(aes(xintercept = 5), color="gray", linetype="dashed")
-plot <- plot + geom_hline(aes(yintercept=mean(longData$version ~ longData$focus), color="red"))
-plot <- plot + geom_hline(aes(yintercept=mean(longData$version ~ longData$intention), color="red"))
+plot <- plot + geom_hline(data= longDataMean, aes(yintercept = intention), color="red")
+plot <- plot + geom_vline(data= longDataMean, aes(xintercept = focus), color="red")
 
-plot <- plot + geom_count(show.legend=F)  + facet_wrap(longData$version ~ .)
 plot <- plot + aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version) + scale_color_npg()
-plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("Me 1","2", "3", "Neutral 4", "5", "6", "7\nThe \n Other \n  Player  ")), breaks = c(1,2,3,4,5,6,7))
-plot <- plot + scale_y_continuous(longData$intention, name="Intention", labels = as.character(c("Help 1","2", "3", "4\nNeutral", "5", "6", "Complicate 7")), breaks = c(1,2,3,4,5,6,7)) 
+plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("Me 1","2", "3", "4\nNeutral", "5", "6", "7\nThe \n Other \n  Player  ")), breaks = c(1,2,3,4,5,6,7))
+plot <- plot + scale_y_continuous(longData$intention, name="Intention", labels = as.character(c("Help 1","2", "3", "Neutral 4", "5", "6", "Complicate 7")), breaks = c(1,2,3,4,5,6,7)) 
 
 suppressMessages(ggsave(sprintf("plots/mainEffects/focusAndIntention.png"), width = 8, height = 4))
 
