@@ -272,16 +272,20 @@ options(warn = -1)
 
 print("Plotting main effects in facets...")
 
+myData <- read.csv(file="input/dataThreeCategories.csv", header=TRUE, sep=",")
+
+myData$preferredVersion <- factor(myData$preferredVersion, levels=rev(levels(myData$preferredVersion)))
+
 myData$N3 <- factor(myData$N3 , levels=c("Low", "Medium", "High"))
-ggplot(myData,aes(x=factor(N3),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Depression") + ylab("percentage") + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3","#e7298a"), labels=c("Extreme Altruism", "Mutual Help", "Individualism", "Competitiveness"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
+ggplot(myData, aes(x=factor(N3),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Depression") + ylab("percentage") + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f", "#4a0701"), labels=c("Extreme Altruism", "Mutual Help", "Individualism", "Competitiveness"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
 suppressMessages(ggsave("plots/mainEffects/preferredVersion/versionN3.png", height = 5, width = 10))
 
 myData$C2 <- factor(myData$C2 , levels=c("Low", "Medium", "High"))
-ggplot(myData,aes(x=factor(C2),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Orderliness") + ylab("percentage") + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3","#e7298a"), labels=c("Extreme Altruism", "Mutual Help", "Individualism", "Competitiveness"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
+ggplot(myData, aes(x=factor(C2),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Orderliness") + ylab("percentage") + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f", "#4a0701"), labels=c("Extreme Altruism", "Mutual Help", "Individualism", "Competitiveness"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
 suppressMessages(ggsave("plots/mainEffects/preferredVersion/versionC2.png", height = 5, width = 10))
 
 myData$C <- factor(myData$C , levels=c("Low", "Medium", "High"))
-ggplot(myData,aes(x=factor(C),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Conscientiousness") + ylab("percentage") + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3","#e7298a"), labels=c("Extreme Altruism", "Mutual Help", "Individualism", "Competitiveness"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
+ggplot(myData, aes(x=factor(C),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Conscientiousness") + ylab("percentage") + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f", "#4a0701"), labels=c("Extreme Altruism", "Mutual Help", "Individualism", "Competitiveness"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
 suppressMessages(ggsave("plots/mainEffects/preferredVersion/versionC.png", height = 5, width = 10))
 
 print("Plotting interactions in joint plots...")
@@ -294,23 +298,23 @@ levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "C"] <- "Mutual Help"
 levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "D"] <- "Extreme Altruism"
 
 myData$A1 <- factor(myData$A1 , levels=c("High", "Medium", "Low"))
-ggplot(myData, aes(x=ScoreSystem, y=takes, fill=A1)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Trust") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3"))
+ggplot(myData, aes(x=ScoreSystem, y=takes, fill=A1)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Trust") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"))
 suppressMessages(ggsave("plots/interactionEffects/takes/interactionA1.png", height = 5, width = 10))
 
 myData$A6 <- factor(myData$A6 , levels=c("High", "Medium", "Low"))
-ggplot(myData, aes(x=ScoreSystem, y=takes, fill=A6)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Sympathy") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3"))
+ggplot(myData, aes(x=ScoreSystem, y=takes, fill=A6)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Sympathy") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"))
 suppressMessages(ggsave("plots/interactionEffects/takes/interactionA6.png", height = 5, width = 10))
 
 myData$E4 <- factor(myData$E4 , levels=c("High", "Medium", "Low"))
-ggplot(myData, aes(x=ScoreSystem, y=takes, fill=E4)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Activity Level") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3"))
+ggplot(myData, aes(x=ScoreSystem, y=takes, fill=E4)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Activity Level") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"))
 suppressMessages(ggsave("plots/interactionEffects/takes/interactionE4.png", height = 5, width = 10))
 
 myData$C4 <- factor(myData$C4 , levels=c("High", "Medium", "Low"))
-ggplot(myData, aes(x=ScoreSystem, y=who, fill=C4)) + geom_boxplot() + labs(x="Reward-Based Version", y="focus", fill="Achievement-Striving") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3")) + scale_y_continuous("focus", labels = as.character(c("Me 1","2", "3", "4", "5", "6", "Other 7\n  Player  ")), breaks = c(1,2,3,4,5,6,7))
+ggplot(myData, aes(x=ScoreSystem, y=who, fill=C4)) + geom_boxplot() + labs(x="Reward-Based Version", y="focus", fill="Achievement-Striving") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f")) + scale_y_continuous("focus", labels = as.character(c("Me 1","2", "3", "4", "5", "6", "Other 7\n  Player  ")), breaks = c(1,2,3,4,5,6,7))
 suppressMessages(ggsave("plots/interactionEffects/who/interactionC4.png", height = 7, width = 14))
 
 myData$A4 <- factor(myData$A4 , levels=c("High", "Medium", "Low"))
-ggplot(myData, aes(x=ScoreSystem, y=what, fill=A4)) + geom_boxplot() + labs(x="Reward-Based Version", y="intention", fill="Cooperation") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_fill_manual(values=c("#1b9e77", "#d95f02", "#7570b3")) + scale_y_continuous("intention", labels = as.character(c("Help 1","2", "3", "4", "5", "6", "Complicate 7")), breaks = c(1,2,3,4,5,6,7))
+ggplot(myData, aes(x=ScoreSystem, y=what, fill=A4)) + geom_boxplot() + labs(x="Reward-Based Version", y="intention", fill="Cooperation") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f")) + scale_y_continuous("intention", labels = as.character(c("Help 1","2", "3", "4", "5", "6", "Complicate 7")), breaks = c(1,2,3,4,5,6,7))
 suppressMessages(ggsave("plots/interactionEffects/what/interactionA4.png", height = 7, width = 14))
 
 options(warn = oldw)
