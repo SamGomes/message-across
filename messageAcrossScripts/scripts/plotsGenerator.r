@@ -297,24 +297,40 @@ levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "B"] <- "Individualism"
 levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "C"] <- "Mutual Help"
 levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "D"] <- "Extreme Altruism"
 
-myData$A1 <- factor(myData$A1 , levels=c("High", "Medium", "Low"))
-ggplot(myData, aes(x=ScoreSystem, y=takes, fill=A1)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Trust") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"))
+myData$ScoreSystem <- factor(myData$ScoreSystem, levels=rev(levels(myData$ScoreSystem)))
+
+#myData$A1 <- factor(myData$A1 , levels=c("High", "Medium", "Low"))
+#ggplot(myData, aes(x=ScoreSystem, y=takes, fill=A1)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Trust") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"))
+
+myData$A1 <- factor(myData$A1 , levels=c("Low", "Medium", "High"))
+ggplot(myData, aes(x=ScoreSystem, y=takes, fill=A1)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Trust") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"), labels=c("Low", "Medium", "High"), guide = guide_legend(reverse = TRUE)) + coord_flip()
 suppressMessages(ggsave("plots/interactionEffects/takes/interactionA1.png", height = 5, width = 10))
 
-myData$A6 <- factor(myData$A6 , levels=c("High", "Medium", "Low"))
-ggplot(myData, aes(x=ScoreSystem, y=takes, fill=A6)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Sympathy") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"))
+#myData$A6 <- factor(myData$A6 , levels=c("High", "Medium", "Low"))
+#ggplot(myData, aes(x=ScoreSystem, y=takes, fill=A6)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Sympathy") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"))
+
+myData$A6 <- factor(myData$A6 , levels=c("Low", "Medium", "High"))
+ggplot(myData, aes(x=ScoreSystem, y=takes, fill=A6)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Sympathy") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"), labels=c("Low", "Medium", "High"), guide = guide_legend(reverse = TRUE)) + coord_flip()
 suppressMessages(ggsave("plots/interactionEffects/takes/interactionA6.png", height = 5, width = 10))
 
-myData$E4 <- factor(myData$E4 , levels=c("High", "Medium", "Low"))
-ggplot(myData, aes(x=ScoreSystem, y=takes, fill=E4)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Activity Level") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"))
+#myData$E4 <- factor(myData$E4 , levels=c("High", "Medium", "Low"))
+#ggplot(myData, aes(x=ScoreSystem, y=takes, fill=E4)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Activity Level") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"))
+
+myData$E4 <- factor(myData$E4 , levels=c("Low", "Medium", "High"))
+ggplot(myData, aes(x=ScoreSystem, y=takes, fill=E4)) + geom_boxplot() + labs(x="Reward-Based Version", y="mean number of takes", fill="Activity Level") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(0,4)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"), labels=c("Low", "Medium", "High"), guide = guide_legend(reverse = TRUE)) + coord_flip()
 suppressMessages(ggsave("plots/interactionEffects/takes/interactionE4.png", height = 5, width = 10))
 
-myData$C4 <- factor(myData$C4 , levels=c("High", "Medium", "Low"))
-ggplot(myData, aes(x=ScoreSystem, y=who, fill=C4)) + geom_boxplot() + labs(x="Reward-Based Version", y="focus", fill="Achievement-Striving") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f")) + scale_y_continuous("focus", labels = as.character(c("Me 1","2", "3", "4", "5", "6", "Other 7\n  Player  ")), breaks = c(1,2,3,4,5,6,7))
+#myData$C4 <- factor(myData$C4 , levels=c("High", "Medium", "Low"))
+#ggplot(myData, aes(x=ScoreSystem, y=who, fill=C4)) + geom_boxplot() + labs(x="Reward-Based Version", y="focus", fill="Achievement-Striving") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f")) + scale_y_continuous("focus", labels = as.character(c("Me 1","2", "3", "4", "5", "6", "Other 7\n  Player  ")), breaks = c(1,2,3,4,5,6,7)) 
+myData$C4 <- factor(myData$C4 , levels=c("Low", "Medium", "High"))
+ggplot(myData, aes(x=ScoreSystem, y=who, fill=C4)) + geom_boxplot() + labs(x="Reward-Based Version", y="focus", fill="Achievement-Striving") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"), labels=c("Low", "Medium", "High"), guide = guide_legend(reverse = TRUE)) + scale_y_continuous("focus", labels = as.character(c("1\nMe","2", "3", "4", "5", "6", "7\nThe Other Player")), breaks = c(1,2,3,4,5,6,7)) + coord_flip()
 suppressMessages(ggsave("plots/interactionEffects/who/interactionC4.png", height = 7, width = 14))
 
-myData$A4 <- factor(myData$A4 , levels=c("High", "Medium", "Low"))
-ggplot(myData, aes(x=ScoreSystem, y=what, fill=A4)) + geom_boxplot() + labs(x="Reward-Based Version", y="intention", fill="Cooperation") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f")) + scale_y_continuous("intention", labels = as.character(c("Help 1","2", "3", "4", "5", "6", "Complicate 7")), breaks = c(1,2,3,4,5,6,7))
+#myData$A4 <- factor(myData$A4 , levels=c("High", "Medium", "Low"))
+#ggplot(myData, aes(x=ScoreSystem, y=what, fill=A4)) + geom_boxplot() + labs(x="Reward-Based Version", y="intention", fill="Cooperation") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f")) + scale_y_continuous("intention", labels = as.character(c("Help 1","2", "3", "4", "5", "6", "Complicate 7")), breaks = c(1,2,3,4,5,6,7))
+
+myData$A4 <- factor(myData$A4 , levels=c("Low", "Medium", "High"))
+ggplot(myData, aes(x=ScoreSystem, y=what, fill=A4)) + geom_boxplot() + labs(x="Reward-Based Version", y="intention", fill="Cooperation") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f"), labels=c("Low", "Medium", "High"), guide = guide_legend(reverse = TRUE)) + scale_y_continuous("intention", labels = as.character(c("1\nHelp","2", "3", "4", "5", "6", "7\nComplicate")), breaks = c(1,2,3,4,5,6,7)) + coord_flip()
 suppressMessages(ggsave("plots/interactionEffects/what/interactionA4.png", height = 7, width = 14))
 
 options(warn = oldw)
