@@ -291,23 +291,23 @@ def processYoungFemale(array):
     else:
         result[C6] = "Low"
     #Internal
-    if int(array[Int]) >= 36.75:
+    if int(array[Int]) >= 36:
         result[Int] = "High"
-    elif int(array[Int]) >= 29:
+    elif int(array[Int]) >= 12:
         result[Int] = "Medium"
     else:
         result[Int] = "Low"
     #Powerful Others
-    if int(array[Pow]) >= 20.75:
+    if int(array[Pow]) >= 36:
         result[Pow] = "High"
     elif int(array[Pow]) >= 12:
         result[Pow] = "Medium"
     else:
         result[Pow] = "Low"
     #Chance
-    if int(array[Cha]) >= 21.75:
+    if int(array[Cha]) >= 36:
         result[Cha] = "High"
-    elif int(array[Cha]) >= 14:
+    elif int(array[Cha]) >= 12:
         result[Cha] = "Medium"
     else:
         result[Cha] = "Low"
@@ -561,23 +561,23 @@ def processAdultFemale(array):
     else:
         result[C6] = "Low"
     #Internal
-    if int(array[Int]) >= 36.75:
+    if int(array[Int]) >= 36:
         result[Int] = "High"
-    elif int(array[Int]) >= 29:
+    elif int(array[Int]) >= 12:
         result[Int] = "Medium"
     else:
         result[Int] = "Low"
     #Powerful Others
-    if int(array[Pow]) >= 20.75:
+    if int(array[Pow]) >= 36:
         result[Pow] = "High"
     elif int(array[Pow]) >= 12:
         result[Pow] = "Medium"
     else:
         result[Pow] = "Low"
     #Chance
-    if int(array[Cha]) >= 21.75:
+    if int(array[Cha]) >= 36:
         result[Cha] = "High"
-    elif int(array[Cha]) >= 14:
+    elif int(array[Cha]) >= 12:
         result[Cha] = "Medium"
     else:
         result[Cha] = "Low"
@@ -831,23 +831,23 @@ def processYoungMale(array):
     else:
         result[C6] = "Low"
     #Internal
-    if int(array[Int]) >= 36.75:
+    if int(array[Int]) >= 36:
         result[Int] = "High"
-    elif int(array[Int]) >= 29:
+    elif int(array[Int]) >= 12:
         result[Int] = "Medium"
     else:
         result[Int] = "Low"
     #Powerful Others
-    if int(array[Pow]) >= 20.75:
+    if int(array[Pow]) >= 36:
         result[Pow] = "High"
     elif int(array[Pow]) >= 12:
         result[Pow] = "Medium"
     else:
         result[Pow] = "Low"
     #Chance
-    if int(array[Cha]) >= 21.75:
+    if int(array[Cha]) >= 36:
         result[Cha] = "High"
-    elif int(array[Cha]) >= 14:
+    elif int(array[Cha]) >= 12:
         result[Cha] = "Medium"
     else:
         result[Cha] = "Low"
@@ -1101,23 +1101,23 @@ def processAdultMale(array):
     else:
         result[C6] = "Low"
     #Internal
-    if int(array[Int]) >= 36.75:
+    if int(array[Int]) >= 36:
         result[Int] = "High"
-    elif int(array[Int]) >= 29:
+    elif int(array[Int]) >= 12:
         result[Int] = "Medium"
     else:
         result[Int] = "Low"
     #Powerful Others
-    if int(array[Pow]) >= 20.75:
+    if int(array[Pow]) >= 36:
         result[Pow] = "High"
     elif int(array[Pow]) >= 12:
         result[Pow] = "Medium"
     else:
         result[Pow] = "Low"
     #Chance
-    if int(array[Cha]) >= 21.75:
+    if int(array[Cha]) >= 36:
         result[Cha] = "High"
-    elif int(array[Cha]) >= 14:
+    elif int(array[Cha]) >= 12:
         result[Cha] = "Medium"
     else:
         result[Cha] = "Low"
