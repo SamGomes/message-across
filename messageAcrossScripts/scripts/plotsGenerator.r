@@ -1,3 +1,22 @@
+# if(!require('pacman'))install.packages('pacman',repos = "http://cran.us.r-project.org")
+# pacman::p_load(ez,ggplot2,multcomp,nlme,pastecs,reshape,WRS,tidyverse,sjPlot,sjmisc,ggsci)
+
+# install.packages('stringi',repos = "http://cran.us.r-project.org")
+# install.packages('ez',repos = "http://cran.us.r-project.org")
+# install.packages('ggplot2',repos = "http://cran.us.r-project.org")
+# install.packages('multcomp',repos = "http://cran.us.r-project.org")
+# install.packages('nlme',repos = "http://cran.us.r-project.org")
+# install.packages('pastecs',repos = "http://cran.us.r-project.org")
+# install.packages('reshape',repos = "http://cran.us.r-project.org")
+# install.packages('WRS',repos = "http://cran.us.r-project.org")
+# install.packages('tidyverse',repos = "http://cran.us.r-project.org")
+# install.packages('sjPlot',repos = "http://cran.us.r-project.org")
+# install.packages('sjmisc',repos = "http://cran.us.r-project.org")
+# install.packages('dplyr',repos = "http://cran.us.r-project.org")
+# install.packages('png',repos = "http://cran.us.r-project.org")
+
+suppressMessages(library(grid))
+suppressMessages(library(png))
 suppressMessages(library(ez))
 suppressMessages(library(ggplot2))
 suppressMessages(library(multcomp))
@@ -9,6 +28,7 @@ suppressMessages(library(tidyverse))
 suppressMessages(library(sjPlot))
 suppressMessages(library(sjmisc))
 suppressMessages(library(ggsci))
+suppressMessages(library(dplyr))
 
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
@@ -16,13 +36,13 @@ myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
 plot <- ggplot(myData, aes(fill=myData$preferredVersion, y=((..count..)/sum(..count..)*100), x=1)) 
 plot <- plot + geom_bar() + labs(x="", fill="Preferred Version", y="") 
 plot <- plot + scale_x_discrete(breaks=c(0)) + scale_y_discrete(breaks=c(0))
-plot <- plot + scale_fill_npg(labels = as.character(c("Comp","Ind","M.Help","E.Altr")))
+plot <- plot + scale_fill_npg(labels = as.character(c("Comp","Self.I.","M.Help","E.Altr")))
 plot <- plot + theme(legend.title=element_text(size=20), legend.text=element_text(size=18),axis.text=element_text(size=18), axis.title=element_text(size=24,face="bold"),panel.background = element_blank()) 
 plot <- plot + geom_text(stat='count', size=8, aes(label=..count.., x=1, y=(..count../sum(..count..))*100), position = position_stack(vjust=0.5)) + coord_flip()
 suppressMessages(ggsave(sprintf("plots/mainEffects/preferredVersion.png"), width = 8, height = 4))
 
 print("Plotting game variables...")
-processBoxPlot <- function(myData, yVarPre, yVarPos, yLabel, plotName, labels, breaks){
+processBoxPlot <- function(myData, yVarPre, yVarPos, yLabel, plotName, labels, breaks, trans){
 
   varsToProcess = c(sprintf("%sA%s",yVarPre,yVarPos),sprintf("%sB%s",yVarPre,yVarPos),sprintf("%sC%s",yVarPre,yVarPos),sprintf("%sD%s",yVarPre,yVarPos))
 
@@ -31,22 +51,28 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, yLabel, plotName, labels, b
   longData <- melt(data, id="playerId", measured=varsToProcess)
 
   names(longData)<-c("playerId", "scoreSystem", "yVar")
-  longData$scoreSystem <- factor(longData$scoreSystem, labels=c("Comp","Ind","M.Help","E.Altr"))
+  longData$scoreSystem <- factor(longData$scoreSystem, labels=c("Comp","Self.I.","M.Help","E.Altr"))
   longData <- longData[order(longData$playerId),]
 
   hist <- ggplot(longData, aes(longData$scoreSystem, longData$yVar, fill=longData$scoreSystem)) + theme(legend.position="none", axis.text=element_text(size=18), axis.title=element_text(size=18, face="bold"))
   hist <- hist + geom_boxplot()
   # hist <- hist + scale_fill_manual()
   if( labels!=-1 && breaks!=-1){
-    hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
+    if(trans != -1){
+      hist <- hist +  scale_y_continuous(yLabel,labels = as.character(labels), breaks = breaks, trans = trans)
+    }else{
+      hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
+    }
   }
   hist <- hist + labs(x="Score Attribution System", y=yLabel)  + scale_fill_npg()
   suppressMessages(ggsave(sprintf("plots/%s.png",plotName)))
 }
-processBoxPlot(myData, "meanNumberOfGives_", "", "Mean number of gives", "meanNumberOfGives", -1, -1)
-processBoxPlot(myData, "meanNumberOfTakes_", "", "Mean number of takes", "meanNumberOfTakes", -1, -1)
-processBoxPlot(myData, "whoFocus_", "", "Interaction focus", "interactionFocus", c("Me 1","2", "3", "Neutral 4", "5", "6", "The    \n Other 7\n  Player  "), c(1,2,3,4,5,6,7))
-processBoxPlot(myData, "whatFocus_", "", "Interaction intention", "interactionIntention", c("Help   \n other 1\n player  ","2", "3", "Neutral 4", "5", "6", "Complicate   \n other 7\n player  "), c(1,2,3,4,5,6,7))
+processBoxPlot(myData, "meanNumberOfGives_", "", "Mean number of gives", "meanNumberOfGives", -1, -1, -1)
+processBoxPlot(myData, "meanNumberOfTakes_", "", "Mean number of takes", "meanNumberOfTakes", -1, -1, -1)
+processBoxPlot(myData, "whoFocus_", "", "Focus", "interactionFocus", c("Self 1","2", "3", "Both 4", "5", "6", "Other 7\n  Players  "), c(1,2,3,4,5,6,7), -1)
+processBoxPlot(myData, "whatFocus_", "", "Social Valence", "socialValence", c("Help 3","2", "1", "Neutral 0", "-1", "-2", "Complicate -3"), c(1,2,3,4,5,6,7), "reverse")
+
+
 
 yVarPre="whoFocus_"
 yVarPos=""
@@ -57,7 +83,7 @@ data <- myData[, (names(myData) %in% keeps)]
 longData1 <- melt(data, id="playerId", measured=varsToProcess)
 colnames(longData1)[colnames(longData1)=="variable"] <- "version"
 colnames(longData1)[colnames(longData1)=="value"] <- "focus"
-longData1$version <- factor(longData1$version, labels=c("Comp","Ind","M.Help","E.Altr"))
+longData1$version <- factor(longData1$version, labels=c("Comp","Self.I.","M.Help","E.Altr"))
 
 yVarPre="whatFocus_"
 yVarPos=""
@@ -68,15 +94,29 @@ data <- myData[, (names(myData) %in% keeps)]
 longData2 <- melt(data, id="playerId", measured=varsToProcess)
 colnames(longData2)[colnames(longData2)=="variable"] <- "version"
 colnames(longData2)[colnames(longData2)=="value"] <- "intention"
-longData2$version <- factor(longData2$version, labels=c("Comp","Ind","M.Help","E.Altr"))
+longData2$version <- factor(longData2$version, labels=c("Comp","Self.I.","M.Help","E.Altr"))
 
 
-# focus and intention
+# focus and valence
+
+# annotation_custom2 <-
+# function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf, data){ 
+#     print(data)
+#     layer(data = data, stat = "identity", position = "identity", 
+#           geom = ggplot2:::GeomCustomAnn,
+#           inherit.aes = TRUE, params = list(grob = grob, 
+#                                             xmin = xmin, xmax = xmax, 
+#                                             ymin = ymin, ymax = ymax))
+# }
+
+# plot <- plot + annotation_custom2(rasterGrob(readPNG("./perceptionSpaceComp.png")), data=longData) + geom_point()
+
+
 longData = merge(longData1, longData2, by = c("playerId","version"))
 longDataSplitted <- split(longData,longData$version)
 longDataMean = data.frame(matrix(ncol = 0, nrow = 4))
 j = 1
-for(i in  c("Comp","Ind","M.Help","E.Altr")) {
+for(i in  c("Comp","Self.I.","M.Help","E.Altr")) {
   longDataMean$version[j] <- i
   longDataMean$focus[j] <- mean(longDataSplitted[[i]]$focus)
   longDataMean$intention[j] <- mean(longDataSplitted[[i]]$intention)
@@ -84,21 +124,27 @@ for(i in  c("Comp","Ind","M.Help","E.Altr")) {
 }
 
 plot <- ggplot(longData) 
-plot <- plot + geom_count(show.legend=F)  + facet_wrap(version ~ .)
+plot <- plot + facet_wrap(~version)
 
 # draw grid lines
-plot <- plot + geom_hline(aes(yintercept = 3), color="gray", linetype="dashed")
-plot <- plot + geom_hline(aes(yintercept = 5), color="gray", linetype="dashed")
-plot <- plot + geom_vline(aes(xintercept = 3), color="gray", linetype="dashed")
-plot <- plot + geom_vline(aes(xintercept = 5), color="gray", linetype="dashed")
-plot <- plot + geom_hline(data= longDataMean, aes(yintercept = intention), color="red")
-plot <- plot + geom_vline(data= longDataMean, aes(xintercept = focus), color="red")
+plot <- plot + geom_hline(aes(yintercept = 3), color="black", linetype="dashed")
+plot <- plot + geom_hline(aes(yintercept = 5), color="black", linetype="dashed")
+plot <- plot + geom_vline(aes(xintercept = 3), color="black", linetype="dashed")
+plot <- plot + geom_vline(aes(xintercept = 5), color="black", linetype="dashed")
+# plot <- plot + geom_hline(data= longDataMean, aes(yintercept = intention), color="red")
+# plot <- plot + geom_vline(data= longDataMean, aes(xintercept = focus), color="red")
 
-plot <- plot + aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version) + scale_color_npg()
-plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("Me 1","2", "3", "4\nNeutral", "5", "6", "7\nThe \n Other \n  Player  ")), breaks = c(1,2,3,4,5,6,7))
-plot <- plot + scale_y_continuous(longData$intention, name="Intention", labels = as.character(c("Help 1","2", "3", "Neutral 4", "5", "6", "Complicate 7")), breaks = c(1,2,3,4,5,6,7)) 
 
-suppressMessages(ggsave(sprintf("plots/mainEffects/focusAndIntention.png"), width = 8, height = 4))
+mypng <- readPNG("./perceptionSpaceSelf.png")
+# plot <- plot + annotation_custom(rasterGrob(mypng), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) + geom_point()
+
+plot <- plot + geom_count(show.legend=F)
+plot <- plot + aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version) + scale_color_npg(guide=FALSE)
+plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("Self 1","2", "3", "4\nBoth", "5", "6", "7\nOther \n  Players  ")), breaks = c(1,2,3,4,5,6,7))
+plot <- plot + scale_y_continuous(longData$intention, name="Social Valence", labels = as.character(c("Help 3","2", "1", "Neutral 0", "-1", "-2", "Complicate -3")), breaks = c(1,2,3,4,5,6,7), trans = "reverse")
+
+
+suppressMessages(ggsave(sprintf("plots/mainEffects/focusAndValence.png"), width = 8, height = 4))
 
 
 varsToProcess = c("score_A_7","score_B_7","score_C_7","score_D_7")
@@ -118,12 +164,13 @@ for(i in  seq(from=1, to=dim(data)[1], by=2)) {
   j <- j+1
 }
 
-processBoxPlot(scoreData, "score_", "", "Final Score Diff.", "scoreDiffs", -1, -1)
+processBoxPlot(scoreData, "score_", "", "Final score diff.", "scoreDiffs", -1, -1)
 
 actionsVariables <- (myData %>% select(playerId, grandMeanTakes, grandMeanGives, ratioTakesGives))
 plot <- ggplot(melt(actionsVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Actions",y="Value")
 plot <- plot
 suppressMessages(ggsave(sprintf("plots/gameVariables/%s.png", "Actions")))
+
 
 ### Personality Variables
 
