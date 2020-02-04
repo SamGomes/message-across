@@ -21,36 +21,36 @@ processMainEffectCategory <- function(filename, n){
   invisible(lapply(personalityVariables, function(x) {
     result <- kruskal.test(eval(substitute(grandMeanTakes ~ personality, list(personality = as.name(x)))), data = data)
     filename = sprintf("./results/mainEffects/personality/categories/%s/grandMeanTakes/%s.messageAcrossData", n, x)
-    print(result)
+    #print(result)
     write.table(data.frame(unlist(result)), file=filename, row.names=TRUE, col.names=TRUE)
     if(result[3] <= 0.05){
       posthoc<-suppressMessages(pairwise.wilcox.test(data$grandMeanTakes, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "bonferroni", exact=FALSE))
       write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/grandMeanTakes/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
-      print(posthoc)
+      #print(posthoc)
     }
   }))
 
   invisible(lapply(personalityVariables, function(x) {
     result <- kruskal.test(eval(substitute(meanWhoFocus ~ personality, list(personality = as.name(x)))), data = data)
     filename = sprintf("./results/mainEffects/personality/categories/%s/meanWhoFocus/%s.messageAcrossData", n, x)
-    print(result)
+    #print(result)
     write.table(data.frame(unlist(result)), file=filename, row.names=TRUE, col.names=TRUE)
     if(result[3] <= 0.05){
       posthoc<-suppressMessages(pairwise.wilcox.test(data$meanWhoFocus, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "bonferroni", exact=FALSE))
       write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/meanWhoFocus/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
-      print(posthoc)
+      #print(posthoc)
     }
   }))
 
   invisible(lapply(personalityVariables, function(x) {
     result <- kruskal.test(eval(substitute(meanWhatFocus ~ personality, list(personality = as.name(x)))), data = data)
     filename = sprintf("./results/mainEffects/personality/categories/%s/meanWhatFocus/%s.messageAcrossData", n, x)
-    print(result)
+    #print(result)
     write.table(data.frame(unlist(result)), file=filename, row.names=TRUE, col.names=TRUE)
     if(result[3] <= 0.05){
       posthoc<-suppressMessages(pairwise.wilcox.test(data$meanWhatFocus, eval(substitute(data$personality, list(personality = as.name(x)))), p.adj = "bonferroni", exact=FALSE))
       write.table(data.frame(unlist(posthoc)), file=sprintf("./results/mainEffects/personality/categories/%s/meanWhatFocus/Post_%s.messageAcrossData", n, x), row.names=TRUE, col.names=TRUE)
-      print(posthoc)
+      #print(posthoc)
     }
   }))
 }

@@ -60,7 +60,7 @@ processGameVar <- function(myData, yVarPre, yVarPos, xlabel, ylabel){
   capture.output(out, file = sprintf("results/mainEffects/scoreSystem/effSize/friedmanEffSize %s.messageAcrossData",yVarPre))
 
   # out <- friedmanmc(longData$value, longData$variable, longData$playerId)
-  out <- pairwise.wilcox.test(longData$value, longData$variable, paired= TRUE, p.adj = "bonferroni", exact=FALSE)
+  out <- pairwise.wilcox.test(longData$value, longData$variable, paired= TRUE, p.adj = "none", exact=FALSE)
   #print(out)
   capture.output(out, file = sprintf("results/mainEffects/scoreSystem/postHoc/friedmanTestPostHoc %s.messageAcrossData",yVarPre))
 }
