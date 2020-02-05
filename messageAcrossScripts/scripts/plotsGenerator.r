@@ -42,17 +42,22 @@ plot <- plot + geom_text(stat='count', size=8, aes(label=..count.., x=1, y=(..co
 suppressMessages(ggsave(sprintf("plots/mainEffects/preferredVersion.png"), width = 8, height = 4))
 
 print("Plotting game variables...")
-processBoxPlot <- function(myData, yVarPre, yVarPos, yLabel, plotName, labels, breaks, trans){
+processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel, plotName, labels, breaks, trans){
 
   varsToProcess = c(sprintf("%sA%s",yVarPre,yVarPos),sprintf("%sB%s",yVarPre,yVarPos),sprintf("%sC%s",yVarPre,yVarPos),sprintf("%sD%s",yVarPre,yVarPos))
 
   keeps <- c("playerId", varsToProcess)
   data <- myData[, (names(myData) %in% keeps)]
+
   longData <- melt(data, id="playerId", measured=varsToProcess)
 
   names(longData)<-c("playerId", "scoreSystem", "yVar")
   longData$scoreSystem <- factor(longData$scoreSystem, labels=c("Comp","Self.I.","M.Help","E.Altr"))
   longData <- longData[order(longData$playerId),]
+
+
+  longData <- longData[(longData$scoreSystem %in% behaviorsToProcess),]
+  # print(longData)
 
   hist <- ggplot(longData, aes(longData$scoreSystem, longData$yVar, fill=longData$scoreSystem)) + theme(legend.position="none", axis.text=element_text(size=18), axis.title=element_text(size=18, face="bold"))
   hist <- hist + geom_boxplot()
@@ -67,11 +72,10 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, yLabel, plotName, labels, b
   hist <- hist + labs(x="Score Attribution System", y=yLabel)  + scale_fill_npg()
   suppressMessages(ggsave(sprintf("plots/%s.png",plotName)))
 }
-processBoxPlot(myData, "meanNumberOfGives_", "", "Mean number of gives", "meanNumberOfGives", -1, -1, -1)
-processBoxPlot(myData, "meanNumberOfTakes_", "", "Mean number of takes", "meanNumberOfTakes", -1, -1, -1)
-processBoxPlot(myData, "whoFocus_", "", "Focus", "interactionFocus", c("Self 1","2", "3", "Both 4", "5", "6", "Other 7\n  Players  "), c(1,2,3,4,5,6,7), -1)
-processBoxPlot(myData, "whatFocus_", "", "Social Valence", "socialValence", c("Help 3","2", "1", "Neutral 0", "-1", "-2", "Complicate -3"), c(1,2,3,4,5,6,7), "reverse")
-
+processBoxPlot(myData, "meanNumberOfGives_", "", c("Comp","Self.I.","M.Help","E.Altr"), "Mean number of gives", "meanNumberOfGives", -1, -1, -1)
+processBoxPlot(myData, "meanNumberOfTakes_", "", c("Comp","Self.I.","M.Help","E.Altr"), "Mean number of takes", "meanNumberOfTakes", -1, -1, -1)
+processBoxPlot(myData, "whoFocus_", "", c("Self.I.","E.Altr"), "Focus", "interactionFocus", c("Self 1","2", "3", "Both 4", "5", "6", "Other 7\n  Players  "), c(1,2,3,4,5,6,7), -1)
+processBoxPlot(myData, "whatFocus_", "", c("Comp", "M.Help"), "Social Valence", "socialValence", c("Help 3","2", "1", "Neutral 0", "-1", "-2", "Complicate -3"), c(1,2,3,4,5,6,7), "reverse")
 
 
 yVarPre="whoFocus_"
@@ -135,7 +139,7 @@ plot <- plot + geom_vline(aes(xintercept = 5), color="black", linetype="dashed")
 # plot <- plot + geom_vline(data= longDataMean, aes(xintercept = focus), color="red")
 
 
-mypng <- readPNG("./perceptionSpaceSelf.png")
+# mypng <- readPNG("./perceptionSpaceSelf.png")
 # plot <- plot + annotation_custom(rasterGrob(mypng), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) + geom_point()
 
 plot <- plot + geom_count(show.legend=F)
@@ -164,7 +168,7 @@ for(i in  seq(from=1, to=dim(data)[1], by=2)) {
   j <- j+1
 }
 
-processBoxPlot(scoreData, "score_", "", "Final score diff.", "scoreDiffs", -1, -1)
+processBoxPlot(scoreData, "score_", "", c("Comp","Self.I.","M.Help","E.Altr"), "Final score diff.", "scoreDiffs", -1, -1)
 
 actionsVariables <- (myData %>% select(playerId, grandMeanTakes, grandMeanGives, ratioTakesGives))
 plot <- ggplot(melt(actionsVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Actions",y="Value")
