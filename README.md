@@ -36,3 +36,10 @@ As such, the R material which was used to perform statistical analysis in the ga
 - Tomás Alves - [@SirMastermind](https://github.com/SirMastermind)
 
 *Note: This repository was originally created for a modified version of an earlier game called CrossAnt, as the project structure served as a base for the development of MessageAcross. Indeed, the development of such version is still present in the project log. However, all of the code was redone and Assets rebuilt, which, in reality, eliminated the relation between the two games. The mensioned modification of CrossAnt was migrated [here](https://github.com/SamGomes/interaction-mechanics-cross-ant).*
+
+
+
+## License
+The current and previous versions of the code are licensed according to Attribution 4.0 International (CC BY 4.0).  
+ 
+ <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />
