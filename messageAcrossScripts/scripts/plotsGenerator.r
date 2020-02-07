@@ -16,7 +16,7 @@
 # install.packages('png',repos = "http://cran.us.r-project.org")
 
 suppressMessages(library(grid))
-suppressMessages(library(png))
+#suppressMessages(library(png))
 suppressMessages(library(ez))
 suppressMessages(library(ggplot2))
 suppressMessages(library(multcomp))
@@ -267,56 +267,56 @@ interactionBoxplotFacets <- function(source, type, yVar){
   }
 }
 
-interactionJoin <- function(source, type, yVar){
-  meltedData <- read.csv(file=source, header=TRUE, sep=",")
-  personalityVariables <- (meltedData %>% select( N1, N2, N3, N4, N5, N6,
-                                                  E1, E2, E3, E4, E5, E6,
-                                                  O1, O2, O3, O4, O5, O6,
-                                                  A1, A2, A3, A4, A5, A6,
-                                                  C1, C2, C3, C4, C5, C6,
-                                                  N, E, O, A, C,
-                                                  Internal, PowerfulOthers, Chance))
+# interactionJoin <- function(source, type, yVar){
+#   meltedData <- read.csv(file=source, header=TRUE, sep=",")
+#   personalityVariables <- (meltedData %>% select( N1, N2, N3, N4, N5, N6,
+#                                                   E1, E2, E3, E4, E5, E6,
+#                                                   O1, O2, O3, O4, O5, O6,
+#                                                   A1, A2, A3, A4, A5, A6,
+#                                                   C1, C2, C3, C4, C5, C6,
+#                                                   N, E, O, A, C,
+#                                                   Internal, PowerfulOthers, Chance))
 
-  personalityNames <- names(meltedData)
-  i<-1
-  for (xText in personalityVariables){
-      i<-i+1
-      png(sprintf("plots/interactionEffects/join/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar))
-      xText <- factor(xText , levels=c("High", "Medium_High", "Medium_Low", "Low"))
-      interaction.plot( x.factor     = meltedData$ScoreSystem,
-                        trace.factor = xText,
-                        response     = meltedData[[yVar]],
-                        fun = mean,
-                        type="b",
-                        col=c("blue4", "red4", "green4", "pink2"),  ### Colors for levels of trace var.
-                        pch=c(19, 17, 15, 21),             ### Symbols for levels of trace var.
-                        fixed=TRUE,                    ### Order by factor order in data
-                        ylab = sprintf("mean of %s", yVar),
-                        xlab = "Score System",
-                        xpd=TRUE,
-                        lwd = 3,
-                        legend=FALSE,
-                        lty=1,
-                        yaxt = "n")
-      if(yVar == "takes"){
-        axis(2, at=seq(0, 4, by = .25), labels=seq(0, 4, by = .25), las = 2)
-      }
-      else{
-        axis(2, at=seq(0, 7, by = .25), labels=seq(0, 7, by = .25), las = 2)
-      }
-      if(yVar == "who"){
-        legend("topleft", legend=c("High", "Medium_High", "Medium_Low", "Low"),
-             col=c("blue4", "red4", "green4", "pink2"), lty=1, pch=c(19, 17, 15, 21), cex=1,
-             title="Personality Group", text.font=1)
-      }
-      else{
-        legend("topright", legend=c("High", "Medium_High", "Medium_Low", "Low"),
-             col=c("blue4", "red4", "green4", "pink2"), lty=1, pch=c(19, 17, 15, 21), cex=1,
-             title="Personality Group", text.font=1)
-      }
-      dev.off()
-   }
-}
+#   personalityNames <- names(meltedData)
+#   i<-1
+#   for (xText in personalityVariables){
+#       i<-i+1
+#       png(sprintf("plots/interactionEffects/join/%s/%s_%s_%s.png", yVar, type, personalityNames[i], yVar))
+#       xText <- factor(xText , levels=c("High", "Medium_High", "Medium_Low", "Low"))
+#       interaction.plot( x.factor     = meltedData$ScoreSystem,
+#                         trace.factor = xText,
+#                         response     = meltedData[[yVar]],
+#                         fun = mean,
+#                         type="b",
+#                         col=c("blue4", "red4", "green4", "pink2"),  ### Colors for levels of trace var.
+#                         pch=c(19, 17, 15, 21),             ### Symbols for levels of trace var.
+#                         fixed=TRUE,                    ### Order by factor order in data
+#                         ylab = sprintf("mean of %s", yVar),
+#                         xlab = "Score System",
+#                         xpd=TRUE,
+#                         lwd = 3,
+#                         legend=FALSE,
+#                         lty=1,
+#                         yaxt = "n")
+#       if(yVar == "takes"){
+#         axis(2, at=seq(0, 4, by = .25), labels=seq(0, 4, by = .25), las = 2)
+#       }
+#       else{
+#         axis(2, at=seq(0, 7, by = .25), labels=seq(0, 7, by = .25), las = 2)
+#       }
+#       if(yVar == "who"){
+#         legend("topleft", legend=c("High", "Medium_High", "Medium_Low", "Low"),
+#              col=c("blue4", "red4", "green4", "pink2"), lty=1, pch=c(19, 17, 15, 21), cex=1,
+#              title="Personality Group", text.font=1)
+#       }
+#       else{
+#         legend("topright", legend=c("High", "Medium_High", "Medium_Low", "Low"),
+#              col=c("blue4", "red4", "green4", "pink2"), lty=1, pch=c(19, 17, 15, 21), cex=1,
+#              title="Personality Group", text.font=1)
+#       }
+#       dev.off()
+#    }
+# }
 
 oldw <- getOption("warn")
 options(warn = -1)
@@ -328,23 +328,23 @@ myData <- read.csv(file="input/dataThreeCategories.csv", header=TRUE, sep=",")
 myData$preferredVersion <- factor(myData$preferredVersion, levels=rev(levels(myData$preferredVersion)))
 
 myData$N3 <- factor(myData$N3 , levels=c("Low", "Medium", "High"))
-ggplot(myData, aes(x=factor(N3),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Depression") + ylab("percentage") + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f", "#4a0701"), labels=c("Extreme Altruism", "Mutual Help", "Individualism", "Competitiveness"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
+ggplot(myData, aes(x=factor(N3),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Depression") + ylab("percentage") + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f", "#4a0701"), labels=c("Extreme Altruism", "Mutual Help", "Self-Improvement", "Competition"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
 suppressMessages(ggsave("plots/mainEffects/preferredVersion/versionN3.png", height = 5, width = 10))
 
 myData$C2 <- factor(myData$C2 , levels=c("Low", "Medium", "High"))
-ggplot(myData, aes(x=factor(C2),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Orderliness") + ylab("percentage") + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f", "#4a0701"), labels=c("Extreme Altruism", "Mutual Help", "Individualism", "Competitiveness"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
+ggplot(myData, aes(x=factor(C2),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Orderliness") + ylab("percentage") + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f", "#4a0701"), labels=c("Extreme Altruism", "Mutual Help", "Self-Improvement", "Competition"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
 suppressMessages(ggsave("plots/mainEffects/preferredVersion/versionC2.png", height = 5, width = 10))
 
 myData$C <- factor(myData$C , levels=c("Low", "Medium", "High"))
-ggplot(myData, aes(x=factor(C),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Conscientiousness") + ylab("percentage") + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f", "#4a0701"), labels=c("Extreme Altruism", "Mutual Help", "Individualism", "Competitiveness"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
+ggplot(myData, aes(x=factor(C),fill=preferredVersion)) + geom_bar(position="fill") + geom_text(aes(label=..count..), stat='count', position=position_fill(vjust=0.5), color = "white", size = 10) + xlab("Conscientiousness") + ylab("percentage") + scale_fill_manual(values=c("#fdcc8a", "#fc8d59", "#d7301f", "#4a0701"), labels=c("Extreme Altruism", "Mutual Help", "Self-Improvement", "Competition"), guide = guide_legend(reverse = TRUE)) + labs(fill = "Version") + coord_flip() + theme(text = element_text(size=20))
 suppressMessages(ggsave("plots/mainEffects/preferredVersion/versionC.png", height = 5, width = 10))
 
 print("Plotting interactions in joint plots...")
 
 myData <- read.csv(file="output/meltedDataThreeCategories.csv", header=TRUE, sep=",")
 
-levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "A"] <- "Competitive"
-levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "B"] <- "Self Improvement"
+levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "A"] <- "Competition"
+levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "B"] <- "Self-Improvement"
 levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "C"] <- "Mutual Help"
 levels(myData$ScoreSystem)[levels(myData$ScoreSystem) == "D"] <- "Extreme Altruism"
 
