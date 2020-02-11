@@ -57,7 +57,6 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel,
 
 
   longData <- longData[(longData$scoreSystem %in% behaviorsToProcess),]
-  # print(longData)
 
   hist <- ggplot(longData, aes(longData$scoreSystem, longData$yVar, fill=longData$scoreSystem)) + theme(legend.position="none", axis.text=element_text(size=18), axis.title=element_text(size=18, face="bold"))
   hist <- hist + geom_boxplot()
@@ -73,8 +72,9 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel,
   suppressMessages(ggsave(sprintf("plots/%s.png",plotName)))
 }
 processBoxPlot(myData, "meanNumberOfGives_", "", c("Comp","Self.I.","M.Help","E.Altr"), "Mean number of gives", "meanNumberOfGives", -1, -1, -1)
-processBoxPlot(myData, "meanNumberOfTakes_", "", c("Comp","Self.I.","M.Help","E.Altr"), "Mean number of takes", "meanNumberOfTakes", -1, -1, -1)
-processBoxPlot(myData, "whoFocus_", "", c("Self.I.","E.Altr"), "Focus", "interactionFocus", c("Self 1","2", "3", "Both 4", "5", "6", "Other 7\n  Players  "), c(1,2,3,4,5,6,7), -1)
+processBoxPlot(myData, "meanNumberOfTakes_", "", c("Self.I.","E.Altr"), "Mean number of takes", "meanNumberOfTakesF", -1, -1, -1)
+processBoxPlot(myData, "meanNumberOfTakes_", "", c("Comp", "M.Help"), "Mean number of takes", "meanNumberOfTakesSV", -1, -1, -1)
+processBoxPlot(myData, "whoFocus_", "", c("Self.I.","E.Altr"), "Focus", "interactionFocus", c("Self -3","-2", "-1", "Both 0", "1", "2", "Other 3\n  Players  "), c(1,2,3,4,5,6,7), -1)
 processBoxPlot(myData, "whatFocus_", "", c("Comp", "M.Help"), "Social Valence", "socialValence", c("Help 3","2", "1", "Neutral 0", "-1", "-2", "Complicate -3"), c(1,2,3,4,5,6,7), "reverse")
 
 
