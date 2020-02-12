@@ -1,3 +1,5 @@
+
+# install.packages("coin", repos = 'http://cran.us.r-project.org')
 suppressMessages(library(ez))
 suppressMessages(library(ggplot2))
 suppressMessages(library(multcomp))
@@ -8,6 +10,7 @@ suppressMessages(library(reshape2))
 suppressMessages(library(WRS))
 suppressMessages(library(e1071))
 suppressMessages(library(rstatix))
+suppressMessages(library(coin))
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
 myData$preferredVersion <- unclass(myData$preferredVersion)
@@ -15,7 +18,14 @@ myData$preferredVersion <- unclass(myData$preferredVersion)
 print("Computing normality tests...")
 print("Computing main effects based on the score system...")
 
-processGameVar <- function(myData, yVarPre, yVarPos, xlabel, ylabel){
+
+# from https://www.tutorialspoint.com/r/r_mean_median_mode.htm
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+processGameVar <- function(myData, yVarPre, yVarPos, scaleAdjust){
 
   a <- paste(yVarPre,"A",yVarPos,sep="")
   b <- paste(yVarPre,"B",yVarPos,sep="")
@@ -32,6 +42,7 @@ processGameVar <- function(myData, yVarPre, yVarPos, xlabel, ylabel){
   b <- dietMyData[[b]]
   c <- dietMyData[[c]]
   d <- dietMyData[[d]]
+  colnames(dietMyData) = c("playerId","A","B","C","D")
   
   
   out <- shapiro.test(a)
@@ -63,11 +74,41 @@ processGameVar <- function(myData, yVarPre, yVarPos, xlabel, ylabel){
   out <- pairwise.wilcox.test(longData$value, longData$variable, paired= TRUE, p.adj = "none", exact=FALSE)
   #print(out)
   capture.output(out, file = sprintf("results/mainEffects/scoreSystem/postHoc/friedmanTestPostHoc %s.messageAcrossData",yVarPre))
+
+
+  out <- wilcoxsign_test(A~C, dietMyData)
+  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/postHoc/willcoxonA-C %s.messageAcrossData",yVarPre))
+
+  out <- wilcoxsign_test(B~D, dietMyData)
+  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/postHoc/willcoxonB-D %s.messageAcrossData",yVarPre))
+
+  out <- wilcox_effsize(longData, value ~ variable, paired = TRUE)
+  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/effSize/willcoxon %s.messageAcrossData",yVarPre))
+
+
+  out <- sprintf("Descriptive Statistics")
+  
+  out <- sprintf("mean(a) = %s",mean(a)+scaleAdjust)
+  out <- paste(out, sprintf("mean(b) = %s",mean(b)+scaleAdjust), ";  ")
+  out <- paste(out, sprintf("mean(c) = %s",mean(c)+scaleAdjust), ";  ")
+  out <- paste(out, sprintf("mean(d) = %s",mean(d)+scaleAdjust), ";  ")
+
+  out <- paste(out, sprintf("median(a) = %s",median(a)+scaleAdjust), ";  ")
+  out <- paste(out, sprintf("median(b) = %s",median(b)+scaleAdjust), ";  ")
+  out <- paste(out, sprintf("median(c) = %s",median(c)+scaleAdjust), ";  ")
+  out <- paste(out, sprintf("median(d) = %s",median(d)+scaleAdjust), ";  ")
+
+  out <- paste(out, sprintf("getmode(a) = %s",getmode(a)+scaleAdjust), ";  ")
+  out <- paste(out, sprintf("getmode(b) = %s",getmode(b)+scaleAdjust), ";  ")
+  out <- paste(out, sprintf("getmode(c) = %s",getmode(c)+scaleAdjust), ";  ")
+  out <- paste(out, sprintf("getmode(d) = %s",getmode(d)+scaleAdjust), ";  ")
+  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/descStats %s.messageAcrossData",yVarPre))
+
 }
 # processGameVar("meanNumberOfGives_","")
-processGameVar(myData, "meanNumberOfTakes_","")
-processGameVar(myData, "whoFocus_","")
-processGameVar(myData, "whatFocus_","")
+processGameVar(myData, "meanNumberOfTakes_","",0)
+processGameVar(myData, "whoFocus_","",-4)
+processGameVar(myData, "whatFocus_","",-4)
 
 
 varsToProcess = c("score_A_7","score_B_7","score_C_7","score_D_7")
@@ -88,7 +129,7 @@ for(i in  seq(from=1, to=dim(data)[1], by=2)) {
 }
 
 
-processGameVar(scoreData, "scoreDiff_","")
+processGameVar(scoreData, "scoreDiff_","",0)
 
 
 # print("Computing main effects based on personality...")
