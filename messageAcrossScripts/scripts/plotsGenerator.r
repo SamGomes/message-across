@@ -65,7 +65,7 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel,
     if(trans != -1){
       hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks, trans = trans)
     }else{
-      hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks) + coord_cartesian(ylim = c(0, 4))
+      hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
     }
   }
   hist <- hist + labs(x="Score Attribution System", y=yLabel)  + scale_fill_npg()
@@ -74,7 +74,8 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel,
 processBoxPlot(myData, "meanNumberOfGives_", "", c("Comp","Self.I.","M.Help","E.Altr"), "Mean number of gives", "meanNumberOfGives", -1, -1, -1)
 processBoxPlot(myData, "meanNumberOfTakes_", "", c("Self.I.","E.Altr"), "Mean number of takes", "meanNumberOfTakesF", -1, -1, -1)
 processBoxPlot(myData, "meanNumberOfTakes_", "", c("Comp", "M.Help"), "Mean number of takes", "meanNumberOfTakesSV", c("0", "1", "2", "3", "4"), c(0,1,2,3,4), -1)
-processBoxPlot(myData, "whoFocus_", "", c("Self.I.","E.Altr"), "Focus", "interactionFocus", c("Self -3","-2", "-1", "Both 0", "1", "2", "Other 3\n  Players  "), c(1,2,3,4,5,6,7), -1)
+# processBoxPlot(myData, "whoFocus_", "", c("Self.I.","E.Altr"), "Focus", "interactionFocus", c("Self -3","-2", "-1", "Both 0", "1", "2", "Other 3\n  Players  "), c(1,2,3,4,5,6,7), -1)
+processBoxPlot(myData, "whoFocus_", "", c("Self.I.","E.Altr"), "Focus", "interactionFocus", c("Self -3","-2", "-1", "Both 0", "1", "2", "Other 3\n  Player   "), c(1,2,3,4,5,6,7), -1)
 processBoxPlot(myData, "whatFocus_", "", c("Comp", "M.Help"), "Social Valence", "socialValence", c("Help 3","2", "1", "Neutral 0", "-1", "-2", "Complicate -3"), c(1,2,3,4,5,6,7), "reverse")
 
 

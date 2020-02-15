@@ -16,8 +16,8 @@ Rscript ./scripts/analiser.r
 # echo "Analysing data by categories..."
 # Rscript ./scripts/analiserCategorical.r
 
-# echo "Creating plots..."
-# Rscript ./scripts/plotsGenerator.r
+echo "Creating plots..."
+Rscript ./scripts/plotsGenerator.r
 
 # echo "Testing data..."
 # Rscript ./scripts/tester.r
