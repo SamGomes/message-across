@@ -26,7 +26,6 @@ getmode <- function(v) {
 }
 
 processGameVar <- function(myData, yVarPre, yVarPos, scaleAdjust){
-
   a <- paste(yVarPre,"A",yVarPos,sep="")
   b <- paste(yVarPre,"B",yVarPos,sep="")
   c <- paste(yVarPre,"C",yVarPos,sep="")
@@ -102,13 +101,20 @@ processGameVar <- function(myData, yVarPre, yVarPos, scaleAdjust){
   out <- paste(out, sprintf("getmode(b) = %s",getmode(b)+scaleAdjust), ";  ")
   out <- paste(out, sprintf("getmode(c) = %s",getmode(c)+scaleAdjust), ";  ")
   out <- paste(out, sprintf("getmode(d) = %s",getmode(d)+scaleAdjust), ";  ")
-  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/descStats %s.messageAcrossData",yVarPre))
 
+  out <- paste(out, sprintf("stdev(a) = %s",sd(a)), ";  ")
+  out <- paste(out, sprintf("stdev(b) = %s",sd(b)), ";  ")
+  out <- paste(out, sprintf("stdev(c) = %s",sd(c)), ";  ")
+  out <- paste(out, sprintf("stdev(d) = %s",sd(d)), ";  ")
+
+  capture.output(out, file = sprintf("results/mainEffects/scoreSystem/descStats %s.messageAcrossData",yVarPre))
 }
+
 # processGameVar("meanNumberOfGives_","")
-processGameVar(myData, "meanNumberOfTakes_","",0)
 processGameVar(myData, "whoFocus_","",-4)
 processGameVar(myData, "whatFocus_","",-4)
+processGameVar(myData, "meanNumberOfTakes_","",0)
+processGameVar(myData, "score_","_7",0)
 
 
 varsToProcess = c("score_A_7","score_B_7","score_C_7","score_D_7")
@@ -128,8 +134,10 @@ for(i in  seq(from=1, to=dim(data)[1], by=2)) {
   j <- j+1
 }
 
-
 processGameVar(scoreData, "scoreDiff_","",0)
+
+
+
 
 
 # print("Computing main effects based on personality...")
