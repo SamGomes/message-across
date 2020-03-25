@@ -13,7 +13,8 @@ public static class Globals
         INDIVIDUALISTIC,
         MUTUAL_HELP,
         P_ALTROISTIC,
-        NEUTRAL
+        TUTORIAL,
+        CUSTOM
     }
 
     public enum PlayerId
@@ -91,7 +92,7 @@ public static class Globals
             Globals.gameId += (char)('A' + UnityEngine.Random.Range(0, 26));
         }
 
-        Globals.gameParam = Globals.ExercisesConfig.NEUTRAL;
+        Globals.gameParam = Globals.ExercisesConfig.TUTORIAL;
         if (Globals.savedObjects == null)
         {
             Globals.savedObjects = new List<GameObject>();

@@ -24,7 +24,7 @@ public class ScoreValue
 }
 [Serializable]
 public class ScoreSystem
-{
+{   
     public List<ScoreValue> giveScores;
     public List<ScoreValue> takeScores;
 
@@ -238,29 +238,30 @@ public class GameManager : MonoBehaviour
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
         switch (Globals.gameParam)
         {
-            case Globals.ExercisesConfig.NEUTRAL: //special condition also removes the score
+            case Globals.ExercisesConfig.TUTORIAL: //special condition also removes the score
                 scorePanelsObject.transform.GetChild(0).GetComponentInChildren<Text>().gameObject.SetActive(false);
                 scorePanelsObject.transform.GetChild(1).GetComponentInChildren<Text>().gameObject.SetActive(false);
-                scoreSystemName = "scoreSystemConfigNeutral";
+                scoreSystemName = "scoreSystemConfigTutorial";
                 break;
             case Globals.ExercisesConfig.COMPETITIVE:
                 scoreSystemName = "scoreSystemConfigComp";
                 break;
             case Globals.ExercisesConfig.INDIVIDUALISTIC:
-                scoreSystemName = "scoreSystemConfigIndividualistic";
+                scoreSystemName = "scoreSystemConfigInd";
                 break;
             case Globals.ExercisesConfig.MUTUAL_HELP:
-                scoreSystemName = "scoreSystemConfigMutualHelp";
+                scoreSystemName = "scoreSystemConfigMH";
                 break;
             case Globals.ExercisesConfig.P_ALTROISTIC:
-                scoreSystemName = "scoreSystemConfigPAltruistic";
+                scoreSystemName = "scoreSystemConfigPAlt";
+                break;
+            case Globals.ExercisesConfig.CUSTOM:
+                scoreSystemName = "scoreSystemConfigCustom";
                 break;
         }
 
         string scoreConfigPath = Application.streamingAssetsPath + "/"+ scoreSystemName + ".cfg";
         string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
-//        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfigTest.cfg";
-//        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfigTalkNPlay.cfg";
 
         string generalConfigText = "";
         string scoreConfigText = "";
