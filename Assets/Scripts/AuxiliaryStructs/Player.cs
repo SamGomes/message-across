@@ -70,7 +70,7 @@ public class Player
         this.myButtons = myButtons;
 
         this.numPossibleActionsPerLevel = numPossibleActionsPerLevel;
-        this.currNumPossibleActionsPerLevel = 0;
+        currNumPossibleActionsPerLevel = 0;
     }
 
     public void Init(string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
@@ -78,13 +78,10 @@ public class Player
         this.id = id;
         this.ui = ui;
 
-        //this.buttonColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 1.0f);
         this.backgroundColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 0.8f);
-        //marker.transform.position = activeButtonPos;
         this.gameManagerRef = gameManagerRef;
 
         marker = UnityEngine.Object.Instantiate(markerPrefab, canvas.transform);
-        //marker.transform.Rotate(new Vector3(1, 0, 0), angle);
         foreach (SpriteRenderer image in marker.GetComponentsInChildren<SpriteRenderer>()) {
             image.color = this.backgroundColor;
         }
@@ -123,7 +120,6 @@ public class Player
         this.score = -1;
 
         SetNumPossibleActions(0);
-//        ResetNumPossibleActions();
 
         this.gameButton = marker.GetComponentInChildren<GameButton>();
         this.gameButton.SetOwner(this);
@@ -225,16 +221,13 @@ public class Player
                 scoreUpdateUIup.GetComponentInChildren<Text>().text = "+" + increase;
                 scoreUpdateUIup.SetActive(false);
                 scoreUpdateUIup.SetActive(true);
-                //newColor = new Color(0.0f, 1.0f, 0.0f);
             }
             else if(increase < 0)
             {
                 scoreUpdateUIdown.GetComponentInChildren<Text>().text = "-" + Math.Abs(increase);
                 scoreUpdateUIdown.SetActive(false);
                 scoreUpdateUIdown.SetActive(true);
-                //newColor = new Color(1.0f, 0.0f, 0.0f);
             }
-            //gameManagerRef.StartCoroutine(TimedSetColor(0.5f, newColor));
         }
 
     }

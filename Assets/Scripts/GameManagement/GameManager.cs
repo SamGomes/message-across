@@ -11,57 +11,6 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 
-[Serializable]
-public class ScoreValue
-{
-    public bool usefulForMe;
-    public bool usefulForOther;
-
-    public string diffLetters;
-
-    public int myValue;
-    public int otherValue;
-}
-[Serializable]
-public class ScoreSystem
-{   
-    public List<ScoreValue> giveScores;
-    public List<ScoreValue> takeScores;
-
-    public int completeWordMyScore;
-    public int completeWordOtherScore;
-}
-
-[Serializable]
-public class ExercisesListWrapper
-{
-    public List<Exercise> exercises;
-}
-
-[Serializable]
-public class ExerciseGroupsWrapper
-{
-    public List<ExercisesListWrapper> exerciseGroups;
-}
-
-[Serializable]
-public struct GeneralSettings
-{
-    public List<Player> players;
-    public int gameId;
-    public int numLevels;
-}
-
-[Serializable]
-public struct GameSettings
-{
-    public ExerciseGroupsWrapper exercisesGroups;
-    public GeneralSettings generalSettings;
-    public ScoreSystem scoreSystem;
-}
-
-
-
 public class GameManager : MonoBehaviour
 {
     private int startingLevelDelayInSeconds;
@@ -72,8 +21,6 @@ public class GameManager : MonoBehaviour
 
     private int exerciseGroupIndex;
 
-    public GameSettings settings;
-
     public GameObject canvas;
     public GameObject stateCanvas;
 
@@ -82,22 +29,15 @@ public class GameManager : MonoBehaviour
 
     public GameObject playerMarkersContainer;
     public GameObject playerMarkerPrefab;
-    public GameObject playerUIPrefab;
     
-
     public bool isGameplayPaused;
     public bool isGameplayStarted;
 
     public bool isButtonOverlap;
 
-    public GameObject namesInputLocation;
-    public GameObject playerNameInputFieldPrefabRef;
-    
     public GameObject wordPanelsObject;
     public GameObject scorePanelsObject;
 
-    public GameObject timePanel;
-    
     public GameObject emoji;
 
     public LetterSpawner[] letterSpawners;
@@ -185,7 +125,7 @@ public class GameManager : MonoBehaviour
     private void UpdateButtonOverlaps(Player currPlayer, int potentialIndex)
     {
         isButtonOverlap = false;
-        foreach (Player player in settings.generalSettings.players)
+        foreach (Player player in Globals.settings.generalSettings.players)
         {
             if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
             {
@@ -194,7 +134,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        foreach (Player player in settings.generalSettings.players)
+        foreach (Player player in Globals.settings.generalSettings.players)
         {
             foreach(GameObject obj in player.GetMaskedHalf())
             {
@@ -204,10 +144,6 @@ public class GameManager : MonoBehaviour
             {
                 player.GetActiveHalf().AddRange(player.GetMaskedHalf());
             }
-            //else
-            //{
-            //    player.SetActiveHalf(player.GetActiveHalf().Except(player.GetMaskedHalf()).ToList());
-            //}
             player.UpdateActiveHalf(player.IsPressingButton());
 
             
@@ -300,21 +236,21 @@ public class GameManager : MonoBehaviour
         }
 
         //string json = JsonUtility.ToJson(settings, true);
-        settings.generalSettings = JsonUtility.FromJson<GeneralSettings>(generalConfigText);
-        settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
-        settings.exercisesGroups = JsonUtility.FromJson<ExerciseGroupsWrapper>(exercisesConfigText);
+        Globals.settings.generalSettings = JsonUtility.FromJson<GeneralSettings>(generalConfigText);
+        Globals.settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
+        Globals.settings.exercisesGroups = JsonUtility.FromJson<ExerciseGroupsWrapper>(exercisesConfigText);
         
 
-        numLevelsLeft = settings.generalSettings.numLevels;
+        numLevelsLeft = Globals.settings.generalSettings.numLevels;
         
         DontDestroyOnLoad(stateCanvas);
         Globals.savedObjects.Add(stateCanvas);
 
 
-        for (int i = 0; i < settings.generalSettings.players.Count; i++)
+        for (int i = 0; i < Globals.settings.generalSettings.players.Count; i++)
         {
             GameObject playerUI = playerUIs[i];
-            Player currPlayer = settings.generalSettings.players[i];
+            Player currPlayer = Globals.settings.generalSettings.players[i];
 
             string bufferedPlayerIds = "";
             if(i < Globals.bufferedPlayerIds.Count){
@@ -325,8 +261,11 @@ public class GameManager : MonoBehaviour
                 bufferedPlayerIds = "NO_NAME_" + i;
             }
 
-            currPlayer.Init(bufferedPlayerIds, this, playerMarkerPrefab, playerMarkersContainer, playerUI, wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject, (i%2==0));
-            currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = currPlayer.GetBackgroundColor();
+            currPlayer.Init(bufferedPlayerIds, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
+                wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
+                (i % 2 == 0));
+            currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color =
+                currPlayer.GetBackgroundColor();
             
             //set buttons for touch screen
             UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
@@ -350,7 +289,9 @@ public class GameManager : MonoBehaviour
                         {
                             Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
                         }
-                        playerButtons[currPlayer.GetActivebuttonIndex()].GetComponent<Image>().color = currPlayer.GetButtonColor();
+
+                        playerButtons[currPlayer.GetActivebuttonIndex()].GetComponent<Image>().color =
+                            currPlayer.GetButtonColor();
                         UpdateButtonOverlaps(currPlayer, innerButtonI);
                         currPlayer.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
                         currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
@@ -369,7 +310,7 @@ public class GameManager : MonoBehaviour
 
                         //verify if button should be pressed
                         bool playerOverlappedAndPressing = false;
-                        foreach (Player player in settings.generalSettings.players)
+                        foreach (Player player in Globals.settings.generalSettings.players)
                         {
                             if (player != currPlayer && player.IsPressingButton())
                             {
@@ -377,7 +318,9 @@ public class GameManager : MonoBehaviour
                                 break;
                             }
                         }
-                        if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1 || (isButtonOverlap && playerOverlappedAndPressing))
+
+                        if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1 ||
+                            (isButtonOverlap && playerOverlappedAndPressing))
                         {
                             Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
                             currButton.GetComponent<Image>().color = Color.red;
@@ -387,9 +330,10 @@ public class GameManager : MonoBehaviour
                         Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
                         currPlayer.SetActiveInteraction(iType);
 
-                        foreach (Player player in settings.generalSettings.players)
+                        foreach (Player player in Globals.settings.generalSettings.players)
                         {
-                            if (player != currPlayer && player.IsPressingButton() && player.GetActivebuttonIndex() == currPlayer.GetActivebuttonIndex())
+                            if (player != currPlayer && player.IsPressingButton() &&
+                                player.GetActivebuttonIndex() == currPlayer.GetActivebuttonIndex())
                             {
                                 return;
                             }
@@ -418,12 +362,11 @@ public class GameManager : MonoBehaviour
             currPlayer.SetScore(0, 0, 0);
         }
         
-        //UpdateButtonOverlaps(settings.generalSettings.players[0], 0);
         isGameplayStarted = true;
 
-        exerciseGroupIndex = UnityEngine.Random.Range(0, settings.exercisesGroups.exerciseGroups.Count);
+        exerciseGroupIndex = UnityEngine.Random.Range(0, Globals.settings.exercisesGroups.exerciseGroups.Count);
         countdownText.gameObject.SetActive(false);
-        Shuffle<ExercisesListWrapper>(settings.exercisesGroups.exerciseGroups);
+        Shuffle<ExercisesListWrapper>(Globals.settings.exercisesGroups.exerciseGroups);
 
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
@@ -452,20 +395,22 @@ public class GameManager : MonoBehaviour
     private IEnumerator RecordMetrics()
     {
         //spawn questionnaires before changing word
-        foreach (Player player in settings.generalSettings.players)
+        foreach (Player player in Globals.settings.generalSettings.players)
         {
-            yield return StartCoroutine(Globals.logManager.WriteToLog("behavioralchangingcrossantlogs", "logs", new Dictionary<string, string>() {
-                { "gameId", Globals.gameId.ToString() },
-                { "levelId", Globals.currLevelId.ToString() },
-                { "playerId", player.GetId().ToString() },
-                { "color", player.GetButtonColor().ToString() },
-                { "levelWord", player.GetCurrExercise().targetWord },
-                { "wordState", player.GetCurrWordState() },
-                { "scoreSystem", scoreSystemName },
-                { "score", player.GetScore().ToString() },
-                { "numberOfGives", player.numGives.ToString() },
-                { "numberOfTakes", player.numTakes.ToString() }
-            }));
+            yield return StartCoroutine(Globals.logManager.WriteToLog("behavioralchangingcrossantlogs", "logs",
+                new Dictionary<string, string>()
+                {
+                    {"gameId", Globals.gameId.ToString()},
+                    {"levelId", Globals.currLevelId.ToString()},
+                    {"playerId", player.GetId().ToString()},
+                    {"color", player.GetButtonColor().ToString()},
+                    {"levelWord", player.GetCurrExercise().targetWord},
+                    {"wordState", player.GetCurrWordState()},
+                    {"scoreSystem", scoreSystemName},
+                    {"score", player.GetScore().ToString()},
+                    {"numberOfGives", player.numGives.ToString()},
+                    {"numberOfTakes", player.numTakes.ToString()}
+                }));
 
             player.numGives = 0;
             player.numTakes = 0;
@@ -514,7 +459,7 @@ public class GameManager : MonoBehaviour
         }
         emoji.GetComponent<Animator>().speed = 0;
 
-        foreach (Player player in settings.generalSettings.players)
+        foreach (Player player in Globals.settings.generalSettings.players)
         {
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
@@ -542,7 +487,7 @@ public class GameManager : MonoBehaviour
             spawner.BeginSpawning();
         }
         
-        foreach(Player player in settings.generalSettings.players)
+        foreach(Player player in Globals.settings.generalSettings.players)
         {
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
             {
@@ -559,7 +504,8 @@ public class GameManager : MonoBehaviour
     
     private void ChangeTargetWords()
     {
-        List<Exercise> selectedExerciseGroup = new List<Exercise>(settings.exercisesGroups.exerciseGroups[exerciseGroupIndex++ % settings.exercisesGroups.exerciseGroups.Count].exercises);
+        List<Exercise> selectedExerciseGroup = new List<Exercise>(Globals.settings.exercisesGroups
+            .exerciseGroups[exerciseGroupIndex++ % Globals.settings.exercisesGroups.exerciseGroups.Count].exercises);
         if (selectedExerciseGroup.Count <= 0)
         {
             Debug.Log("No exercises available");
@@ -571,9 +517,8 @@ public class GameManager : MonoBehaviour
 
 
         int i = UnityEngine.Random.Range(0,1);
-        foreach (Player player in settings.generalSettings.players)
+        foreach (Player player in Globals.settings.generalSettings.players)
         {
-            //displayPanel.GetComponent<DisplayPanel>().SetTargetImage(newExercise.targetWord);
             player.SetCurrExercise(newExercise.playerExercises[(i++) % newExercise.playerExercises.Count]);
             player.InitCurrWordState();
 
@@ -643,7 +588,7 @@ public class GameManager : MonoBehaviour
 
         
         
-        //diferent rewards in different utility conditions
+        //different rewards in different utility conditions
         bool usefulForMe = false;
         bool usefulForOther = false;
         
@@ -653,7 +598,7 @@ public class GameManager : MonoBehaviour
         {
             case Globals.KeyInteractionType.GIVE:
                 usefulForMe = TestAndExecuteHit(false, letterText, letter, currHitter);
-                foreach (Player usefulTargetPlayer in settings.generalSettings.players)
+                foreach (Player usefulTargetPlayer in Globals.settings.generalSettings.players)
                 {
                     if (usefulTargetPlayer == currHitter)
                     {
@@ -667,7 +612,7 @@ public class GameManager : MonoBehaviour
                     }
 
                 }
-                scores = settings.scoreSystem.giveScores;
+                scores = Globals.settings.scoreSystem.giveScores;
                 currHitter.numGives++;
                 break;
             case Globals.KeyInteractionType.TAKE:
@@ -676,7 +621,7 @@ public class GameManager : MonoBehaviour
                 {
                     //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
                 }
-                foreach (Player usefulTargetPlayer in settings.generalSettings.players)
+                foreach (Player usefulTargetPlayer in Globals.settings.generalSettings.players)
                 {
                     if (usefulTargetPlayer == currHitter)
                     {
@@ -689,7 +634,7 @@ public class GameManager : MonoBehaviour
 
                     usefulForOther = TestAndExecuteHit(false, letterText, letter, usefulTargetPlayer);
                 }
-                scores = settings.scoreSystem.takeScores;
+                scores = Globals.settings.scoreSystem.takeScores;
                 currHitter.numTakes++;
                 break;
         }
@@ -705,9 +650,9 @@ public class GameManager : MonoBehaviour
         }
 
         float otherPlayersCompletionMean = 0;
-        int otherPlayersCount = settings.generalSettings.players.Count() - 1;
+        int otherPlayersCount = Globals.settings.generalSettings.players.Count() - 1;
         float currPlayerCompletion = currHitter.GetCurrWordState().Count();
-        foreach (Player innerPlayer in settings.generalSettings.players)
+        foreach (Player innerPlayer in Globals.settings.generalSettings.players)
         {
             if (innerPlayer == currHitter)
             {
@@ -715,20 +660,28 @@ public class GameManager : MonoBehaviour
             }
             otherPlayersCompletionMean += (float)innerPlayer.GetCurrWordState().Count() / otherPlayersCount;
         }
-        Globals.DiffLetters playerDiff = (currPlayerCompletion > otherPlayersCompletionMean) ? Globals.DiffLetters.HIGHER : (currPlayerCompletion == otherPlayersCompletionMean) ? Globals.DiffLetters.EQUAL : Globals.DiffLetters.LOWER;
+
+        Globals.DiffLetters playerDiff = (currPlayerCompletion > otherPlayersCompletionMean)
+            ?
+            Globals.DiffLetters.HIGHER
+            : (currPlayerCompletion == otherPlayersCompletionMean)
+                ? Globals.DiffLetters.EQUAL
+                : Globals.DiffLetters.LOWER;
 
         bool scoreOptionFound = false;
         foreach (ScoreValue score in scores)
         {
-            if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff == (Globals.DiffLetters)Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
+            if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff ==
+                (Globals.DiffLetters) Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
             {
                 currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue, 1.3f);
-                foreach (Player innerPlayer in settings.generalSettings.players)
+                foreach (Player innerPlayer in Globals.settings.generalSettings.players)
                 {
                     if (innerPlayer == currHitter)
                     {
                         continue;
                     }
+
                     innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue, 1.3f);
                 }
                 scoreOptionFound = true;
@@ -738,7 +691,8 @@ public class GameManager : MonoBehaviour
 
         if (!scoreOptionFound)
         {
-            Debug.Log("could not find score option for <usefulForMe: " + usefulForMe + ", usefulForOther: " + usefulForOther + ", playerDiff: " + playerDiff + ">");
+            Debug.Log("could not find score option for <usefulForMe: " + usefulForMe + ", usefulForOther: " +
+                      usefulForOther + ", playerDiff: " + playerDiff + ">");
         }
 
 
@@ -754,7 +708,7 @@ public class GameManager : MonoBehaviour
 
         bool areWordsUnfinished = false;
         bool arePlayersWithoutActions = true;
-        foreach (Player player in settings.generalSettings.players)
+        foreach (Player player in Globals.settings.generalSettings.players)
         {
             if (player.GetCurrNumPossibleActionsPerLevel() > 0)
             {
@@ -774,15 +728,19 @@ public class GameManager : MonoBehaviour
             else
             {
                 if (!player.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
-                    player.SetScore(player.GetScore() + settings.scoreSystem.completeWordMyScore, settings.scoreSystem.completeWordMyScore, 1.3f);
-                foreach (Player innerPlayer in settings.generalSettings.players)
+                    player.SetScore(player.GetScore() + Globals.settings.scoreSystem.completeWordMyScore,
+                        Globals.settings.scoreSystem.completeWordMyScore, 1.3f);
+                foreach (Player innerPlayer in Globals.settings.generalSettings.players)
                 {
                     if (player == innerPlayer)
                     {
                         continue;
                     }
+
                     if (!innerPlayer.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
-                        innerPlayer.SetScore(innerPlayer.GetScore() + settings.scoreSystem.completeWordOtherScore, settings.scoreSystem.completeWordOtherScore, 1.3f);
+                        innerPlayer.SetScore(
+                            innerPlayer.GetScore() + Globals.settings.scoreSystem.completeWordOtherScore,
+                            Globals.settings.scoreSystem.completeWordOtherScore, 1.3f);
                 }
             }
         }
@@ -795,7 +753,7 @@ public class GameManager : MonoBehaviour
 
     public List<Player> GetPlayers()
     {
-        return settings.generalSettings.players;
+        return Globals.settings.generalSettings.players;
     }
 }
 

@@ -17,15 +17,12 @@ public class LetterSpawner : MonoBehaviour
 
     private string currStarredWord;
 
-
     private List<char> letters = new List<char>(){ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
-    //"1", "2", "3", "4", "5", "6", "7", "8", "9"};
-
 
     private List<char> lettersPool;
     private List<GameObject> currLetters;
 
-    public float exerciseWordsPercentage = 0.8f; //to export
+    public float sharedWordsPercentage;
 
 
     private void Awake()
@@ -40,6 +37,12 @@ public class LetterSpawner : MonoBehaviour
         isStopped = true;
         float initialDelayInSeconds = Random.Range(minIntervalRange, maxIntervalRange);
         StartCoroutine(SpawnLetterWithDelay(initialDelayInSeconds));
+        
+        sharedWordsPercentage = Globals.settings.generalSettings.sharedWordsPercentage;
+        if (sharedWordsPercentage == 0.0f)
+        {
+            sharedWordsPercentage = 0.8f;
+        }
     }
 
     public void BeginSpawning()
@@ -107,12 +110,12 @@ public class LetterSpawner : MonoBehaviour
 
         List<char> currWordsLetters = new List<char>();
         List<char> allLetters = new List<char>();
-        foreach (Player player in gameManager.settings.generalSettings.players)
+        foreach (Player player in Globals.settings.generalSettings.players)
         {
             currWordsLetters = currWordsLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
         }
 
-        float total = currWordsLetters.Count / exerciseWordsPercentage;
+        float total = currWordsLetters.Count / sharedWordsPercentage;
         lettersPool.AddRange(currWordsLetters);
 
         while (lettersPool.Count < total)

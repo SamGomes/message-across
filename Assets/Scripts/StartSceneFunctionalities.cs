@@ -48,6 +48,8 @@ public static class Globals
         LOWER
     }
 
+    public static GameSettings settings;
+    
     public static KeyInteractionType[] keyInteractionTypes;
     public static ButtonId[] buttonIds;
 
