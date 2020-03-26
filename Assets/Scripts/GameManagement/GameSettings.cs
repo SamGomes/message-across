@@ -44,6 +44,9 @@ public struct GeneralSettings
     public List<Player> players;
     public int numLevels;
     public float sharedWordsPercentage;
+    public string logMode;
+    public string databaseName;
+    public string mongoDbKey;
 }
 
 [Serializable]

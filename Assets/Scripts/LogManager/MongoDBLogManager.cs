@@ -38,7 +38,7 @@ public class MongoDBLogManager : LogManager
     public override void InitLogs(MonoBehaviour monoBehaviourObject)
     {
         this.monoBehaviourObject = monoBehaviourObject;
-        myApiKey = "skgyQ8WGQIP6tfmjytmcjzlgZDU2jWBD";
+        myApiKey = Globals.settings.generalSettings.mongoDbKey;
     }
 
     private UnityWebRequest ConvertEntityToPostRequest(Dictionary<string,string> entity, string database, string collection)

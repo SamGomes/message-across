@@ -81,7 +81,8 @@ public static class Globals
         }
     }
 
-    //settings are only updated upon user score system choice
+    //settings and properties that derive from user choice are only
+    // updated upon user score system choice
     public static void InitGlobals()
     {
         Globals.keyInteractionTypes = (Globals.KeyInteractionType[])Enum.GetValues(typeof(Globals.KeyInteractionType));
@@ -105,7 +106,6 @@ public static class Globals
         Globals.effectsAudioManager = new AudioManager(false);
         Globals.trackEffectsAudioManager = new AudioManager(false);
 
-        Globals.logManager = new DebugLogManager();
         if(Globals.bufferedPlayerIds == null)
         {
             Globals.bufferedPlayerIds = new List<string>();

@@ -168,7 +168,6 @@ public class GameManager : MonoBehaviour
         {
             Globals.InitGlobals();
         }
-        Globals.logManager.InitLogs(this);
         isGameplayPaused = false;
         
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
@@ -240,7 +239,31 @@ public class GameManager : MonoBehaviour
         Globals.settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
         Globals.settings.exercisesGroups = JsonUtility.FromJson<ExerciseGroupsWrapper>(exercisesConfigText);
         
+        switch(Globals.settings.generalSettings.logMode)
+        {
+            case "DEBUG":
+                Globals.logManager = new DebugLogManager();
+                break;
+            
+            case "MONGO":
+                Globals.logManager = new MongoDBLogManager();
+                break;
+            
+            default:
+                Globals.logManager = new DebugLogManager();
+                break;
+        }
+        Globals.logManager.InitLogs(this);
 
+        
+        yield return StartCoroutine(Globals.logManager.WriteToLog(Globals.settings.generalSettings.databaseName, "logs",
+            new Dictionary<string, string>()
+            {
+                {"gameId", Globals.gameId.ToString()},
+                {"levelId", Globals.currLevelId.ToString()}
+            }));
+        
+        
         numLevelsLeft = Globals.settings.generalSettings.numLevels;
         
         DontDestroyOnLoad(stateCanvas);
@@ -397,7 +420,7 @@ public class GameManager : MonoBehaviour
         //spawn questionnaires before changing word
         foreach (Player player in Globals.settings.generalSettings.players)
         {
-            yield return StartCoroutine(Globals.logManager.WriteToLog("messageAcrossLogs", "logs",
+            yield return StartCoroutine(Globals.logManager.WriteToLog(Globals.settings.generalSettings.databaseName, "logs",
                 new Dictionary<string, string>()
                 {
                     {"gameId", Globals.gameId.ToString()},
