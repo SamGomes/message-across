@@ -81,6 +81,7 @@ public static class Globals
         }
     }
 
+    //settings are only updated upon user score system choice
     public static void InitGlobals()
     {
         Globals.keyInteractionTypes = (Globals.KeyInteractionType[])Enum.GetValues(typeof(Globals.KeyInteractionType));

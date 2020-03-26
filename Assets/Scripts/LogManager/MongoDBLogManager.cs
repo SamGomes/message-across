@@ -10,10 +10,7 @@ public class MongoDBLogManager : LogManager
 
     MonoBehaviour monoBehaviourObject;
     private string myApiKey;
-
     Hashtable postHeader;
-    private List<PendingCall> pendingCalls;
-    private UnityWebRequestAsyncOperation currRequest;
 
     private struct PendingCall
     {
@@ -26,18 +23,15 @@ public class MongoDBLogManager : LogManager
             www.SetRequestHeader("Content-Type", "application/json"); //in order to be recognized by the mongo server
         }
     }
-    private IEnumerator ExecuteCall(UnityWebRequestAsyncOperation currConnection, PendingCall call)
+    private IEnumerator ExecuteCall(PendingCall call)
     {
-        //Debug.Log("number of pending calls: " + pendingCalls.Count);
-        yield return currConnection;
-        currConnection = call.www.SendWebRequest();
+        UnityWebRequestAsyncOperation currConnection = call.www.SendWebRequest();
         yield return currConnection;
         Debug.Log("remote call error code returned (no return means no error): "+ call.www.error);
         if (call.yieldedReaction != null)
         {
             call.yieldedReaction(call.www.downloadHandler.text);
         }
-        pendingCalls.Remove(call);
         yield return currConnection;
     }
 
@@ -45,7 +39,6 @@ public class MongoDBLogManager : LogManager
     {
         this.monoBehaviourObject = monoBehaviourObject;
         myApiKey = "skgyQ8WGQIP6tfmjytmcjzlgZDU2jWBD";
-        pendingCalls = new List<PendingCall>();
     }
 
     private UnityWebRequest ConvertEntityToPostRequest(Dictionary<string,string> entity, string database, string collection)
@@ -68,7 +61,6 @@ public class MongoDBLogManager : LogManager
     private UnityWebRequest ConvertEntityToPutRequest(System.Object entity, string database, string collection, string query)
     {
         string url = "https://api.mlab.com/api/1/databases/" + database + "/collections/" + collection + "?apiKey=" + myApiKey + query;
-
         string entityJson = JsonUtility.ToJson(entity);
         UnityWebRequest www = UnityWebRequest.Put(url, entityJson);
         return www;
@@ -78,9 +70,7 @@ public class MongoDBLogManager : LogManager
     public override IEnumerator WriteToLog(string database, string table, Dictionary<string,string> argsNValues)
     {
         PendingCall call = new PendingCall(ConvertEntityToPostRequest(argsNValues, database, table), null);
-        pendingCalls.Add(call);
-        yield return monoBehaviourObject.StartCoroutine(ExecuteCall(currRequest, call));
-        pendingCalls.Remove(call);
+        yield return monoBehaviourObject.StartCoroutine(ExecuteCall(call));
     }
 
     public override IEnumerator GetFromLog(string database, string table, Func<string, int> yieldedReactionToGet)
@@ -89,35 +79,10 @@ public class MongoDBLogManager : LogManager
         yield return null;
     }
 
-    //public override IEnumerator GetLastSessionConditionFromLog(Func<string, int> yieldedReactionToGet)
-    //{
-    //   string query = "&s={\"_id\": -1}&l=1"; //query which returns the last game result
-    //   PendingCall call = new PendingCall(ConvertEntityToGetRequest(databaseName, "gameresultslog", query), 
-    //        delegate (string lastGameEntry){
-    //            string lastConditionString = "";
-
-    //            lastGameEntry = "{ \"results\": " + lastGameEntry + "}";
-    //            DataEntryGameResultLogQueryResult lastGameEntriesObject = JsonUtility.FromJson<DataEntryGameResultLogQueryResult>(lastGameEntry);
-    //            if (lastGameEntriesObject.results.Count > 0)
-    //            {
-    //                lastConditionString = ((DataEntryGameResultLog)(lastGameEntriesObject.results[lastGameEntriesObject.results.Count - 1])).condition;
-    //            }
-    //            yieldedReactionToGet(lastConditionString);
-    //            return 0;
-    //        }
-    //    );
-    //    pendingCalls.Add(call);
-    //    yield return GameGlobals.monoBehaviourFunctionalities.StartCoroutine(ExecuteCall(currRequest, call));
-    //    pendingCalls.Remove(call);
-    //}
-
     public override IEnumerator EndLogs()
     {
-        while (pendingCalls.Count > 0)
-        {
-            yield return null;
-        }
         Debug.Log("Log Closed.");
+        yield return null;
     }
 }
 

@@ -372,6 +372,8 @@ public class GameManager : MonoBehaviour
         Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
         StartCoroutine(ChangeLevel(false, false));
+        
+        AudioListener[] myListeners = FindObjectsOfType(typeof(AudioListener)) as AudioListener[];
     }
 
     // Use this for initialization
@@ -397,7 +399,7 @@ public class GameManager : MonoBehaviour
         //spawn questionnaires before changing word
         foreach (Player player in Globals.settings.generalSettings.players)
         {
-            yield return StartCoroutine(Globals.logManager.WriteToLog("behavioralchangingcrossantlogs", "logs",
+            yield return StartCoroutine(Globals.logManager.WriteToLog("messageAcrossLogs", "logs",
                 new Dictionary<string, string>()
                 {
                     {"gameId", Globals.gameId.ToString()},
