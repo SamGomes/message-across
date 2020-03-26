@@ -372,8 +372,6 @@ public class GameManager : MonoBehaviour
         Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
         StartCoroutine(ChangeLevel(false, false));
-        
-        AudioListener[] myListeners = FindObjectsOfType(typeof(AudioListener)) as AudioListener[];
     }
 
     // Use this for initialization
