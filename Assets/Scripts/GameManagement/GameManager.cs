@@ -245,7 +245,7 @@ public class GameManager : MonoBehaviour
                 Globals.logManager = new DebugLogManager();
                 break;
             
-            case "MONGO":
+            case "MLAB":
                 Globals.logManager = new MongoDBLogManager();
                 break;
             
@@ -255,15 +255,6 @@ public class GameManager : MonoBehaviour
         }
         Globals.logManager.InitLogs(this);
 
-        
-        yield return StartCoroutine(Globals.logManager.WriteToLog(Globals.settings.generalSettings.databaseName, "logs",
-            new Dictionary<string, string>()
-            {
-                {"gameId", Globals.gameId.ToString()},
-                {"levelId", Globals.currLevelId.ToString()}
-            }));
-        
-        
         numLevelsLeft = Globals.settings.generalSettings.numLevels;
         
         DontDestroyOnLoad(stateCanvas);
