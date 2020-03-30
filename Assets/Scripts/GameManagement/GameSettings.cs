@@ -43,7 +43,7 @@ public struct GeneralSettings
 {
     public List<Player> players;
     public int numLevels;
-    public float sharedWordsPercentage;
+    public float playersLettersSpawnP;
     public string logMode;
     public string databaseName;
     public string mongoDbKey;

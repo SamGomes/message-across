@@ -22,7 +22,7 @@ public class LetterSpawner : MonoBehaviour
     private List<char> lettersPool;
     private List<GameObject> currLetters;
 
-    public float sharedWordsPercentage;
+    public float playersLettersSpawnP;
 
 
     private void Awake()
@@ -38,10 +38,10 @@ public class LetterSpawner : MonoBehaviour
         float initialDelayInSeconds = Random.Range(minIntervalRange, maxIntervalRange);
         StartCoroutine(SpawnLetterWithDelay(initialDelayInSeconds));
         
-        sharedWordsPercentage = Globals.settings.generalSettings.sharedWordsPercentage;
-        if (sharedWordsPercentage == 0.0f)
+        playersLettersSpawnP = Globals.settings.generalSettings.playersLettersSpawnP;
+        if (playersLettersSpawnP == 0.0f)
         {
-            sharedWordsPercentage = 0.8f;
+            playersLettersSpawnP = 0.8f;
         }
     }
 
@@ -115,7 +115,7 @@ public class LetterSpawner : MonoBehaviour
             currWordsLetters = currWordsLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
         }
 
-        float total = currWordsLetters.Count / sharedWordsPercentage;
+        float total = currWordsLetters.Count / playersLettersSpawnP;
         lettersPool.AddRange(currWordsLetters);
 
         while (lettersPool.Count < total)
