@@ -9,10 +9,6 @@ public static class Globals
 {
     public enum ExercisesConfig
     {
-        COMPETITIVE,
-        INDIVIDUALISTIC,
-        MUTUAL_HELP,
-        P_ALTROISTIC,
         TUTORIAL,
         CUSTOM
     }

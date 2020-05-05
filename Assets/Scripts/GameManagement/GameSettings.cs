@@ -26,6 +26,7 @@ public class ScoreSystem
     public int completeWordOtherScore;
 }
 
+
 [Serializable]
 public class ExercisesListWrapper
 {
@@ -39,8 +40,16 @@ public class ExerciseGroupsWrapper
 }
 
 [Serializable]
+public class ScoreSystemParam
+{
+    public string obfuscatedName;
+    public string path;
+}
+
+[Serializable]
 public struct GeneralSettings
 {
+    public List<ScoreSystemParam> scoreSystemParams;
     public List<Player> players;
     public int numLevels;
     public float playersLettersSpawnP;

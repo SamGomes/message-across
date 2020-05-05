@@ -150,10 +150,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    
 
-
-    private IEnumerator YieldedStart()
+    void Start()
     {
+        isGameplayStarted = false;
+        
         startingLevelDelayInSeconds = 5;
 
         quitButton.onClick.AddListener(delegate(){
@@ -169,75 +171,13 @@ public class GameManager : MonoBehaviour
             Globals.InitGlobals();
         }
         isGameplayPaused = false;
-        
-        string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
-        switch (Globals.gameParam)
-        {
-            case Globals.ExercisesConfig.TUTORIAL: //special condition also removes the score
-                scorePanelsObject.transform.GetChild(0).GetComponentInChildren<Text>().gameObject.SetActive(false);
-                scorePanelsObject.transform.GetChild(1).GetComponentInChildren<Text>().gameObject.SetActive(false);
-                scoreSystemName = "scoreSystemConfigTutorial";
-                break;
-            case Globals.ExercisesConfig.COMPETITIVE:
-                scoreSystemName = "scoreSystemConfigComp";
-                break;
-            case Globals.ExercisesConfig.INDIVIDUALISTIC:
-                scoreSystemName = "scoreSystemConfigInd";
-                break;
-            case Globals.ExercisesConfig.MUTUAL_HELP:
-                scoreSystemName = "scoreSystemConfigMH";
-                break;
-            case Globals.ExercisesConfig.P_ALTROISTIC:
-                scoreSystemName = "scoreSystemConfigPAlt";
-                break;
-            case Globals.ExercisesConfig.CUSTOM:
-                scoreSystemName = "scoreSystemConfigCustom";
-                break;
-        }
 
-        string scoreConfigPath = Application.streamingAssetsPath + "/"+ scoreSystemName + ".cfg";
-        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
-
-        string generalConfigText = "";
-        string scoreConfigText = "";
-        string exercisesConfigText = "";
-        if (generalConfigPath.Contains("://") || generalConfigPath.Contains(":///")) //url instead of path
+        if (Globals.gameParam == Globals.ExercisesConfig.TUTORIAL)
         {
-            UnityWebRequest www = UnityWebRequest.Get(generalConfigPath);
-            yield return www.SendWebRequest();
-            generalConfigText = www.downloadHandler.text;
+            //special condition also removes the score
+            scorePanelsObject.transform.GetChild(0).GetComponentInChildren<Text>().gameObject.SetActive(false);
+            scorePanelsObject.transform.GetChild(1).GetComponentInChildren<Text>().gameObject.SetActive(false);
         }
-        else
-        {
-            generalConfigText = File.ReadAllText(generalConfigPath);
-        }
-
-        if (scoreConfigPath.Contains("://") || scoreConfigPath.Contains(":///")) //url instead of path
-        {
-            UnityWebRequest www = UnityWebRequest.Get(scoreConfigPath);
-            yield return www.SendWebRequest();
-            scoreConfigText = www.downloadHandler.text;
-        }
-        else
-        {
-            scoreConfigText = File.ReadAllText(scoreConfigPath);
-        }
-
-        if (exercisesConfigPath.Contains("://") || exercisesConfigPath.Contains(":///")) //url instead of path
-        {
-            UnityWebRequest www = UnityWebRequest.Get(generalConfigPath);
-            yield return www.SendWebRequest();
-            exercisesConfigText = www.downloadHandler.text;
-        }
-        else
-        {
-            exercisesConfigText = File.ReadAllText(exercisesConfigPath);
-        }
-
-        //string json = JsonUtility.ToJson(settings, true);
-        Globals.settings.generalSettings = JsonUtility.FromJson<GeneralSettings>(generalConfigText);
-        Globals.settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
-        Globals.settings.exercisesGroups = JsonUtility.FromJson<ExerciseGroupsWrapper>(exercisesConfigText);
         
         switch(Globals.settings.generalSettings.logMode)
         {
@@ -290,7 +230,7 @@ public class GameManager : MonoBehaviour
                 if (buttonI < pointerPlaceholders.Count)
                 {
                     currButton.GetComponent<Image>().color = currPlayer.GetButtonColor();
-                    int innerButtonI = buttonI; //for corotine to save the iterated values
+                    int innerButtonI = buttonI; //for coroutine to save the iterated values
                     currButton.onClick.AddListener(delegate ()
                     {
                         //verify if button should be pressed
@@ -386,13 +326,6 @@ public class GameManager : MonoBehaviour
         Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
         StartCoroutine(ChangeLevel(false, false));
-    }
-
-    // Use this for initialization
-    void Start()
-    {
-        isGameplayStarted = false;
-        StartCoroutine(YieldedStart());
     }
 
 
