@@ -124,7 +124,7 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         foreach (ScoreSystemParam param in scoreSystemParams)
         {
             Button button = Object.Instantiate(buttonPrefab, paramsButtonsObject.transform);
-            button.GetComponentInChildren<Text>().text = param.obfuscatedName;
+            button.GetComponentInChildren<Text>().text = param.prefix;
             
             button.onClick.AddListener(delegate () { 
                 Globals.gameParam = Globals.ExercisesConfig.CUSTOM;

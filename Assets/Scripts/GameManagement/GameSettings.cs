@@ -42,7 +42,7 @@ public class ExerciseGroupsWrapper
 [Serializable]
 public class ScoreSystemParam
 {
-    public string obfuscatedName;
+    public string prefix;
     public string filename;
 }
 
