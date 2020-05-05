@@ -12,7 +12,8 @@ public class ParamsSceneFunctionalities : MonoBehaviour
 {
     public Button startButton;
     public Button buttonPrefab;
-    public GameObject paramsButtons;
+    public GameObject paramsButtonsObject;
+    private string scoreConfigPath;
 
 
     void Start()
@@ -20,12 +21,42 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         StartCoroutine(YieldedStart());
     }
     
+    private void UpdateButtonColors(Button selectedButton)
+    {
+        Button[] paramsButtons = paramsButtonsObject.GetComponentsInChildren<Button>();
+        foreach (Button innerButton in paramsButtons)
+        {
+            if (selectedButton == innerButton)
+            {
+                continue;
+            }
+            innerButton.GetComponentInChildren<Image>().color = new Color(1.0f, 1.0f, 1.0f);
+        }
+        selectedButton.GetComponentInChildren<Image>().color = new Color(0.0f, 1.0f, 0.0f);
+    }
+
+    IEnumerator LoadScoreConfig()
+    {
+        string scoreConfigText = "";
+        if (scoreConfigPath.Contains("://") || scoreConfigPath.Contains(":///")) //url instead of path
+        {
+            UnityWebRequest www = UnityWebRequest.Get(scoreConfigPath);
+            yield return www.SendWebRequest();
+            scoreConfigText = www.downloadHandler.text;
+        }
+        else
+        {
+            scoreConfigText = File.ReadAllText(scoreConfigPath);
+        }
+        Globals.settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
+    }
+    
     // Start is called before the first frame update
     IEnumerator YieldedStart()
     {
+        scoreConfigPath =  Application.streamingAssetsPath + "/scoreSystemConfigTutorial.cfg";
         string generalConfigText = "";
         string exercisesConfigText = "";
-        string scoreConfigText = "";
         
         
         
@@ -66,7 +97,10 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         {
             Globals.InitGlobals();
         }
-        startButton.onClick.AddListener(delegate () {
+        startButton.onClick.AddListener(delegate ()
+        {
+
+            StartCoroutine(LoadScoreConfig());
             SceneManager.LoadScene("mainScene");
         });
 
@@ -74,53 +108,37 @@ public class ParamsSceneFunctionalities : MonoBehaviour
 
         
         List<ScoreSystemParam> scoreSystemParams = Globals.settings.generalSettings.scoreSystemParams;
+        
+        //generate tutorial button
+        Button tbutton = Object.Instantiate(buttonPrefab, paramsButtonsObject.transform);
+        tbutton.GetComponentInChildren<Text>().text = "T";
+        tbutton.onClick.AddListener(delegate () {
+            scoreConfigPath =  Application.streamingAssetsPath + "/scoreSystemConfigTutorial.cfg";
+            Globals.gameParam = Globals.ExercisesConfig.TUTORIAL;
+            UpdateButtonColors(tbutton);
+            //update button colors
+            
+        });
+        
+        //generate other buttons
         foreach (ScoreSystemParam param in scoreSystemParams)
         {
-            Button button = Object.Instantiate(buttonPrefab, paramsButtons.transform);
+            Button button = Object.Instantiate(buttonPrefab, paramsButtonsObject.transform);
             button.GetComponentInChildren<Text>().text = param.obfuscatedName;
+            
+            button.onClick.AddListener(delegate () { 
+                Globals.gameParam = Globals.ExercisesConfig.CUSTOM;
+                string scoreConfigName = Globals.settings.generalSettings.scoreSystemParams[scoreSystemParams.FindIndex(a => a == param)].filename;;
+                scoreConfigPath = Application.streamingAssetsPath + "/" + scoreConfigName + ".cfg";
+                UpdateButtonColors(button);
+            });
         }
         
         
         
-        
-//        int i = 0;
-//        foreach(Button button in paramsButtons)
-//        {
-//            button.GetComponentInChildren<Image>().color = new Color(1.0f, 1.0f, 1.0f);
-//            int j = i;
-//            button.onClick.AddListener(delegate () {
-//                Globals.gameParam = (Globals.ExercisesConfig) j;
-//                
-//                string scoreConfigPath = ;
-//                
-//                if (scoreConfigPath.Contains("://") || scoreConfigPath.Contains(":///")) //url instead of path
-//                {
-//                    UnityWebRequest www = UnityWebRequest.Get(scoreConfigPath);
-//                    yield return www.SendWebRequest();
-//                    scoreConfigText = www.downloadHandler.text;
-//                }
-//                else
-//                {
-//                    scoreConfigText = File.ReadAllText(scoreConfigPath);
-//                }
-//                Globals.settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
-//
-//
-//                //update button colors
-//                foreach (Button innerButton in paramsButtons)
-//                {
-//                    if (button == innerButton)
-//                    {
-//                        continue;
-//                    }
-//                    innerButton.GetComponentInChildren<Image>().color = new Color(1.0f, 1.0f, 1.0f);
-//                }
-//                button.GetComponentInChildren<Image>().color = new Color(0.0f, 1.0f, 0.0f);
-//            });
-//            i++;
-//        }
 
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
     }
+
 }
