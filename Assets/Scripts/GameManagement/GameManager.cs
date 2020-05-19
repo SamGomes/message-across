@@ -185,7 +185,7 @@ public class GameManager : MonoBehaviour
                 Globals.logManager = new DebugLogManager();
                 break;
             
-            case "MLAB":
+            case "MONGO":
                 Globals.logManager = new MongoDBLogManager();
                 break;
             

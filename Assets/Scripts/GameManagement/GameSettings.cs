@@ -55,7 +55,7 @@ public struct GeneralSettings
     public float playersLettersSpawnP;
     public string logMode;
     public string databaseName;
-    public string mongoDbKey;
+    public string mongoConnector;
 }
 
 [Serializable]

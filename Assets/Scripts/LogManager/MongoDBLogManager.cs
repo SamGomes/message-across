@@ -1,88 +1,71 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
 using UnityEngine;
 using UnityEngine.Networking;
+
+
+[Serializable]
+public class QueryObject
+{
+    public string find;
+    public string sort;
+    public int limit;
+}
 
 //Debug log manager
 public class MongoDBLogManager : LogManager
 {
+    private MonoBehaviour monoBehaviourObject;
+    private MongoClient client;
 
-    MonoBehaviour monoBehaviourObject;
-    private string myApiKey;
-    Hashtable postHeader;
-
-    private struct PendingCall
-    {
-        public UnityWebRequest www;
-        public Func<string, int> yieldedReaction;
-        public PendingCall(UnityWebRequest www, Func<string, int> yieldedReaction)
-        {
-            this.yieldedReaction = yieldedReaction;
-            this.www = www;
-            www.SetRequestHeader("Content-Type", "application/json"); //in order to be recognized by the mongo server
-        }
-    }
-    private IEnumerator ExecuteCall(PendingCall call)
-    {
-        UnityWebRequestAsyncOperation currConnection = call.www.SendWebRequest();
-        yield return currConnection;
-        Debug.Log("remote call error code returned (no return means no error): "+ call.www.error);
-        if (call.yieldedReaction != null)
-        {
-            call.yieldedReaction(call.www.downloadHandler.text);
-        }
-        yield return currConnection;
-    }
-
+    
     public override void InitLogs(MonoBehaviour monoBehaviourObject)
     {
         this.monoBehaviourObject = monoBehaviourObject;
-        myApiKey = Globals.settings.generalSettings.mongoDbKey;
+        this.client = new MongoClient(Globals.settings.generalSettings.mongoConnector);
     }
-
-    private UnityWebRequest ConvertEntityToPostRequest(Dictionary<string,string> entity, string database, string collection)
-    {
-        string url = "https://api.mlab.com/api/1/databases/" + database + "/collections/" + collection + "?apiKey=" + myApiKey;
-
-        string entityJson = StringifyDictionaryForLogs(entity);
-        byte[] formData = System.Text.Encoding.UTF8.GetBytes(entityJson);
-        UnityWebRequest www = UnityWebRequest.Post(url, entityJson);
-        www.uploadHandler = (UploadHandler)new UploadHandlerRaw(formData);
-        www.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
-        return www;
-    }
-    private UnityWebRequest ConvertEntityToGetRequest(string database, string collection, string query)
-    {
-        string url = "https://api.mlab.com/api/1/databases/" + database + "/collections/" + collection + "?apiKey=" + myApiKey + query;
-        UnityWebRequest www = UnityWebRequest.Get(url);
-        return www;
-    }
-    private UnityWebRequest ConvertEntityToPutRequest(System.Object entity, string database, string collection, string query)
-    {
-        string url = "https://api.mlab.com/api/1/databases/" + database + "/collections/" + collection + "?apiKey=" + myApiKey + query;
-        string entityJson = JsonUtility.ToJson(entity);
-        UnityWebRequest www = UnityWebRequest.Put(url, entityJson);
-        return www;
-    }
-
+    
 
     public override IEnumerator WriteToLog(string database, string table, Dictionary<string,string> argsNValues)
     {
-        PendingCall call = new PendingCall(ConvertEntityToPostRequest(argsNValues, database, table), null);
-        yield return monoBehaviourObject.StartCoroutine(ExecuteCall(call));
-    }
-
-    public override IEnumerator GetFromLog(string database, string table, Func<string, int> yieldedReactionToGet)
-    {
-        Debug.Log("database: " + database + " ; " + table + " ; ");
+        var databaseObj = client.GetDatabase(database);
+        var document = BsonDocument.Parse(StringifyDictionaryForLogs(argsNValues));
+        databaseObj.GetCollection<BsonDocument>(table).InsertOne(document);
         yield return null;
     }
+
+    public override IEnumerator GetFromLog(string database, string table, string query, Func<string, int> yieldedReactionToGet)
+    {
+        var databaseObj = client.GetDatabase(database);
+        var collection = databaseObj.GetCollection<BsonDocument>(table);
+
+        QueryObject queryObj = JsonUtility.FromJson<QueryObject>(query);
+        
+        var queryRes = collection.Find(queryObj.find).Sort(queryObj.sort).Limit(queryObj.limit).ToList();
+        //remove _id attributes
+        foreach(var queryItem in queryRes)
+        {
+            queryItem.RemoveAt(0);
+        }
+        yield return yieldedReactionToGet(queryRes.ToJson());
+    }
+
+    public override IEnumerator UpdateLog(string database, string table, string query, Dictionary<string, string> argsNValues)
+    {
+        var databaseObj = client.GetDatabase(database);
+        var collection = databaseObj.GetCollection<BsonDocument>(table);
+        return null;
+    }
+
 
     public override IEnumerator EndLogs()
     {
-        Debug.Log("Log Closed.");
-        yield return null;
+        return null;
     }
 }
 
