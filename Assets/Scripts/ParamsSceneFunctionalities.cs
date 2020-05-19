@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.NetworkInformation;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -49,6 +50,7 @@ public class ParamsSceneFunctionalities : MonoBehaviour
             scoreConfigText = File.ReadAllText(scoreConfigPath);
         }
         Globals.settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
+        Globals.settings.scoreSystem.path = scoreConfigPath;
     }
     
     // Start is called before the first frame update

@@ -1,1 +1,0 @@
-mongoexport -h ds135107.mlab.com:35107 -d behavioralchangingcrossantlogs -c logs -u user01 -p user01 -o ./logs.csv --csv -f gameId,levelId,playerId,color,levelWord,wordState,scoreSystem,score,numberOfGives,numberOfTakes

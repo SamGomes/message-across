@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -47,7 +48,7 @@ public class GameManager : MonoBehaviour
     
     private float timeLeft;
 
-    private string scoreSystemName; //to be able to recover condition
+    private string scoreSystemPath; //to be able to recover condition
 
     public void PauseGame()
     {
@@ -154,6 +155,9 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+
+        scoreSystemPath = Globals.settings.scoreSystem.path;
+        
         isGameplayStarted = false;
         
         startingLevelDelayInSeconds = 5;
@@ -353,7 +357,7 @@ public class GameManager : MonoBehaviour
                     {"color", player.GetButtonColor().ToString()},
                     {"levelWord", player.GetCurrExercise().targetWord},
                     {"wordState", player.GetCurrWordState()},
-                    {"scoreSystem", scoreSystemName},
+                    {"scoreSystem", scoreSystemPath},
                     {"score", player.GetScore().ToString()},
                     {"numberOfGives", player.numGives.ToString()},
                     {"numberOfTakes", player.numTakes.ToString()}

@@ -19,6 +19,8 @@ public class ScoreValue
 [Serializable]
 public class ScoreSystem
 {   
+    public string path;
+
     public List<ScoreValue> giveScores;
     public List<ScoreValue> takeScores;
 

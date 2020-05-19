@@ -1,0 +1,5 @@
+gameId,levelId,playerId,color,levelWord,wordState,scoreSystem,score,numberOfGives,numberOfTakes
+PLAIFKCMUCBGGOBBQMHX,1,NO_NAME_0,"RGBA(0.200, 0.200, 0.200, 1.000)",MILK,"   K",/home/samgomes/Documents/doutoramento/reps/message-across/Assets/StreamingAssets/scoreSystemConfigComp.cfg,0,4,0
+PLAIFKCMUCBGGOBBQMHX,1,NO_NAME_1,"RGBA(1.000, 1.000, 1.000, 1.000)",LOCK,L   ,/home/samgomes/Documents/doutoramento/reps/message-across/Assets/StreamingAssets/scoreSystemConfigComp.cfg,0,4,0
+EWBQMEZMYAMEMMHZRJTS,1,NO_NAME_0,"RGBA(0.200, 0.200, 0.200, 1.000)",JEEP," E  ",/home/samgomes/Documents/doutoramento/reps/message-across/Assets/StreamingAssets/scoreSystemConfigComp.cfg,0,0,4
+EWBQMEZMYAMEMMHZRJTS,1,NO_NAME_1,"RGBA(1.000, 1.000, 1.000, 1.000)",BEEF,"    ",/home/samgomes/Documents/doutoramento/reps/message-across/Assets/StreamingAssets/scoreSystemConfigComp.cfg,-5,0,4
