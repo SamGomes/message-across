@@ -59,7 +59,7 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel,
   longData <- longData[(longData$scoreSystem %in% behaviorsToProcess),]
 
   hist <- ggplot(longData, aes(longData$scoreSystem, longData$yVar, fill=longData$scoreSystem)) + theme(legend.position="none", axis.text=element_text(size=18), axis.title=element_text(size=18, face="bold"))
-  hist <- hist + geom_boxplot()
+  hist <- hist + geom_boxplot(color="white")
   if( labels!=-1 && breaks!=-1){
     if(trans != -1){
       hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks, trans = trans)
@@ -67,9 +67,9 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel,
       hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
     }
   }
-  hist <- hist + labs(x="Score Attribution System", y=yLabel)  + scale_fill_manual(values=c("#e56102", "#5e3c99", "#0700dd", "#fcfc05"))
+  hist <- hist + labs(x="Score Attribution System", y=yLabel) + scale_fill_manual(values=c("#d7191c", "#75a352", "#0700dd", "#fcfc05")) + theme(axis.title.x = element_text(colour = "white"), axis.title.y = element_text(colour = "white"), axis.text.x = element_text(colour = "white"), axis.text.y = element_text(colour = "white"), panel.background = element_rect(fill = "transparent"), plot.background = element_rect(fill = "transparent", color = NA), panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"), panel.grid.minor = element_line(size = 0.25, linetype = 'solid', colour = "white"), legend.background = element_rect(fill = "transparent"), legend.box.background = element_rect(fill = "transparent"))
   # hist <- hist + labs(x="Score Attribution System", y=yLabel)  + scale_fill_manual(values=c("#d7191c", "#75a352", "#0700dd", "#fcfc05"))
-  suppressMessages(ggsave(sprintf("plots/%s.png",plotName)))
+  suppressMessages(ggsave(sprintf("plots/%s.png", plotName), bg = "transparent"))
 }
 processBoxPlot(myData, "meanNumberOfGives_", "", c("Comp","Self.I.","M.Help","E.Altr"), "Mean number of gives", "meanNumberOfGives", -1, -1, -1)
 processBoxPlot(myData, "meanNumberOfTakes_", "", c("Self.I.","E.Altr"), "Mean number of takes", "meanNumberOfTakesF", -1, -1, -1)
