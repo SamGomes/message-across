@@ -54,6 +54,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -177,6 +178,7 @@ SpriteRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -272,11 +274,10 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.30588236}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 21300000, guid: c4bd8baacc087d74db70a98584b1e76f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
@@ -472,11 +473,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5937196130010621944}
     m_Modifications:
-    - target: {fileID: -927199367670048503, guid: 91cba17c1dfab6947893161574a2f7e6,
-        type: 3}
-      propertyPath: m_Name
-      value: BackgroundBH
-      objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 91cba17c1dfab6947893161574a2f7e6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -552,6 +548,16 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 6a9a38376f8156f4db1d63c6f3e12511, type: 2}
+    - target: {fileID: -2416733968201007103, guid: 91cba17c1dfab6947893161574a2f7e6,
+        type: 3}
+      propertyPath: m_ReceiveShadows
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 91cba17c1dfab6947893161574a2f7e6,
+        type: 3}
+      propertyPath: m_Name
+      value: BackgroundBH
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 91cba17c1dfab6947893161574a2f7e6, type: 3}
 --- !u!4 &153030788088868460 stripped
@@ -567,11 +573,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5937196130010621944}
     m_Modifications:
-    - target: {fileID: -927199367670048503, guid: 91cba17c1dfab6947893161574a2f7e6,
-        type: 3}
-      propertyPath: m_Name
-      value: BackgroundTH
-      objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 91cba17c1dfab6947893161574a2f7e6,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -647,6 +648,16 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: 6a9a38376f8156f4db1d63c6f3e12511, type: 2}
+    - target: {fileID: -2416733968201007103, guid: 91cba17c1dfab6947893161574a2f7e6,
+        type: 3}
+      propertyPath: m_ReceiveShadows
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 91cba17c1dfab6947893161574a2f7e6,
+        type: 3}
+      propertyPath: m_Name
+      value: BackgroundTH
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 91cba17c1dfab6947893161574a2f7e6, type: 3}
 --- !u!4 &2061372947287837110 stripped
