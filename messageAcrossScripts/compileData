@@ -1,23 +1,24 @@
 #!/bin/bash
 
-echo "Removing old data..."
-find . -name "*.messageAcrossData" -exec rm -f {} \;
-rm -f "output/*.csv"
-find . -name "*.png" -exec rm -f {} \;
+# echo "Removing old data..."
+# find . -name "*.messageAcrossData" -exec rm -f {} \;
+# rm -f "output/*.csv"
+# find . -name "*.png" -exec rm -f {} \;
 
-echo "Preparing data..."
-python3 -W ignore ./scripts/melter.py
-python3 -W ignore ./scripts/compileUsers.py
-python3 -W ignore ./scripts/melterCategorical.py
+# echo "Preparing data..."
+# python3 -W ignore ./scripts/melter.py
+# python3 -W ignore ./scripts/compileUsers.py
+# python3 -W ignore ./scripts/melterCategorical.py
 
-echo "Analysing data by integers..."
-Rscript ./scripts/analiser.r
+# echo "Analysing data by integers..."
+# Rscript ./scripts/analiser.r
 
-echo "Analysing data by categories..."
-Rscript ./scripts/analiserCategorical.r
+# echo "Analysing data by categories..."
+# Rscript ./scripts/analiserCategorical.r
 
-echo "Creating plots..."
-Rscript ./scripts/plotsGenerator.r
+# echo "Creating plots..."
+# Rscript ./scripts/plotsGenerator.r
+Rscript ./scripts/plotsGeneratorCHI.r
 
 # echo "Testing data..."
 # Rscript ./scripts/tester.r
