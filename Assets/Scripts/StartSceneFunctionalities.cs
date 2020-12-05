@@ -113,20 +113,21 @@ public static class Globals
 
 public class StartSceneFunctionalities : MonoBehaviour
 {
-    public InputField playerNames;
-    public Button startButton;
+    public Button localButton;
+    public Button onlineButton;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        startButton.onClick.AddListener(delegate () {
-            Globals.bufferedPlayerIds = new List<string>(playerNames.text.Split(';'));
-            SceneManager.LoadScene("paramsSetup");
+        localButton.onClick.AddListener(delegate () {
+            SceneManager.LoadScene("startLocal");
         });
-
+        onlineButton.onClick.AddListener(delegate () {
+            SceneManager.LoadScene("startOnline");
+        });
         Globals.InitGlobals();
         Globals.backgroundAudioManager.StopCurrentClip();
-        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
+        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath,Globals.backgroundMusicPath);
     }
 }
