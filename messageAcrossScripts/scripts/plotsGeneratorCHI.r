@@ -34,13 +34,13 @@ suppressMessages(ggsave("plots/interactionEffects/takes/takes.png", height = 4, 
 
 lm0 = lm(who ~ A * ScoreSystem, data = myData)
 x <- emmip(lm0, A ~ ScoreSystem, engine="ggplot", CIs = TRUE) + labs(x="Game Version", y="Focus", colour="Agreeableness") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_x_discrete(labels=c("Competition", "Mutual Help"))
-x + scale_colour_manual(values=c("#d7301f", "#fc8d59", "#fdcc8a"), labels=c("High", "Medium", "Low"), guide = guide_legend(reverse = FALSE)) #+ geom_jitter(aes(x = ScoreSystem, y = takes, colour = C), data = myData, pch = 20, width = 0.1, size=2) 
+x + scale_colour_manual(values=c("#d7301f", "#fc8d59", "#fdcc8a"), labels=c("High", "Medium", "Low"), guide = guide_legend(reverse = FALSE)) + scale_y_reverse("Focus", labels = as.character(c("Me  3","2", "1", "Neutral  0", "-1", "-2", "The Other  -3")), breaks = c(1,2,3,4,5,6,7)) #+ geom_jitter(aes(x = ScoreSystem, y = takes, colour = C), data = myData, pch = 20, width = 0.1, size=2) 
 
 suppressMessages(ggsave("plots/interactionEffects/who/who.png", height = 4, width = 10))
 
 lm0 = lm(what ~ A * ScoreSystem, data = myData)
 x <- emmip(lm0, A ~ ScoreSystem, engine="ggplot", CIs = TRUE) + labs(x="Game Version", y="Social Valence", colour="Agreeableness") + theme(text = element_text(size=20)) + coord_cartesian(ylim=c(1,7)) + scale_x_discrete(labels=c("Competition", "Mutual Help"))
-x + scale_colour_manual(values=c("#d7301f", "#fc8d59", "#fdcc8a"), labels=c("High", "Medium", "Low"), guide = guide_legend(reverse = FALSE)) #+ geom_jitter(aes(x = ScoreSystem, y = takes, colour = C), data = myData, pch = 20, width = 0.1, size=2) 
+x + scale_colour_manual(values=c("#d7301f", "#fc8d59", "#fdcc8a"), labels=c("High", "Medium", "Low"), guide = guide_legend(reverse = FALSE)) + scale_y_reverse("Social Valence", labels = as.character(c("Help  3","2", "1", "Neutral  0", "-1", "-2", "Complicate  -3")), breaks = c(1,2,3,4,5,6,7)) #+ geom_jitter(aes(x = ScoreSystem, y = takes, colour = C), data = myData, pch = 20, width = 0.1, size=2) 
 
 suppressMessages(ggsave("plots/interactionEffects/what/what.png", height = 4, width = 10))
 
