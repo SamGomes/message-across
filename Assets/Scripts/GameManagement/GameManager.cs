@@ -2,23 +2,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Policy;
 using System.Text;
+using AuxiliaryStructs;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 using Mirror;
+using Object = System.Object;
 
 
 public class GameManager : NetworkManager
 {
+    public List<Player> players;
+
     //for netcode
     private int currPlayerI;
     private bool isMyUIInitted;
-    
-    
+
+
     private int startingLevelDelayInSeconds;
 
     public Button quitButton;
@@ -32,40 +35,36 @@ public class GameManager : NetworkManager
 
     public Text countdownText;
 
-
-    public GameObject playerMarkersContainer;
-    public GameObject playerMarkerPrefab;
-    
     public bool isGameplayPaused;
     public bool isGameplayStarted;
 
     public bool isButtonOverlap;
 
-    public GameObject wordPanelsObject;
-    public GameObject scorePanelsObject;
-
     public GameObject emoji;
 
     public LetterSpawner[] letterSpawners;
 
+    //placeholders for track markers
     public List<GameObject> pointerPlaceholders;
-    public List<GameObject> playerUIs;
-    
+
     private float timeLeft;
 
     private string scoreSystemPath; //to be able to recover condition
-    
-    
+
+
+
     public void PauseGame()
     {
-        foreach(LetterSpawner ls in letterSpawners)
+        foreach (LetterSpawner ls in letterSpawners)
         {
-            foreach(Letter letter in ls.GetComponentsInChildren<Letter>())
+            foreach (Letter letter in ls.GetComponentsInChildren<Letter>())
             {
                 letter.isTranslationEnabled = false;
             }
+
             ls.enabled = false;
         }
+
         isGameplayPaused = true;
     }
 
@@ -77,8 +76,10 @@ public class GameManager : NetworkManager
             {
                 letter.isTranslationEnabled = true;
             }
+
             ls.enabled = true;
         }
+
         isGameplayPaused = false;
     }
 
@@ -87,6 +88,7 @@ public class GameManager : NetworkManager
         Globals.backgroundAudioManager.PlayClip("Audio/backgroundLoop");
         SceneManager.LoadScene("gameover");
     }
+
     public void ResetGame()
     {
         EndGame();
@@ -94,10 +96,11 @@ public class GameManager : NetworkManager
         {
             Destroy(obj);
         }
+
         Globals.InitGlobals();
         SceneManager.LoadScene("paramsSetup");
     }
-    
+
     private void Shuffle<T>(IList<T> list)
     {
         for (int i = 0; i < list.Count; i++)
@@ -112,44 +115,52 @@ public class GameManager : NetworkManager
 
     private void UpdateButtonOverlaps(Player currPlayer, int potentialIndex)
     {
-        isButtonOverlap = false;
-        foreach (Player player in Globals.settings.generalSettings.players)
-        {
-            if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
-            {
-                isButtonOverlap = true;
-                break;
-            }
-        }
-
-        foreach (Player player in Globals.settings.generalSettings.players)
-        {
-            foreach(GameObject obj in player.GetMaskedHalf())
-            {
-                obj.SetActive(!isButtonOverlap);
-            }
-            if(!isButtonOverlap)
-            {
-                player.GetActiveHalf().AddRange(player.GetMaskedHalf());
-            }
-            player.UpdateActiveHalf(player.IsPressingButton());
-
-            
-        }
+        // isButtonOverlap = false;
+        // foreach (Player player in Globals.settings.generalSettings.players)
+        // {
+        //     if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
+        //     {
+        //         isButtonOverlap = true;
+        //         break;
+        //     }
+        // }
+        //
+        // foreach (Player player in Globals.settings.generalSettings.players)
+        // {
+        //     foreach(GameObject obj in player.GetMaskedHalf())
+        //     {
+        //         obj.SetActive(!isButtonOverlap);
+        //     }
+        //     if(!isButtonOverlap)
+        //     {
+        //         player.GetActiveHalf().AddRange(player.GetMaskedHalf());
+        //     }
+        //     player.UpdateActiveHalf(player.IsPressingButton());
+        // }
     }
 
     public void Start()
     {
+        players = new List<Player>();
+
         //setup net code
         autoCreatePlayer = false;
         currPlayerI = 0;
         isMyUIInitted = false;
-        
+
+        //check connection type
         if (!NetworkClient.active)
         {
             if (Globals.settings.networkSettings.currMultiplayerOption == "LOCAL")
             {
                 OnStartServer();
+                // setup players and level directly if local
+                if (Globals.settings.networkSettings.currMultiplayerOption == "LOCAL")
+                {
+                    AddPlayer(true, 0);
+                    AddPlayer(true, 1);
+                    StartCoroutine(ChangeLevel(false, false));
+                }
             }
             else if (Globals.settings.networkSettings.currMultiplayerOption == "ONLINE")
             {
@@ -186,7 +197,7 @@ public class GameManager : NetworkManager
                 }
             }
         }
-        
+
     }
 
     public override void OnStartServer()
@@ -194,50 +205,49 @@ public class GameManager : NetworkManager
         base.OnStartServer();
 
         scoreSystemPath = Globals.settings.scoreSystem.path;
-        
+
         isGameplayStarted = false;
-        
+
         startingLevelDelayInSeconds = 5;
 
-        quitButton.onClick.AddListener(delegate(){
-            EndGame();
-        });
-        resetButton.onClick.AddListener(delegate () {
-            ResetGame();
-
-        });
+        quitButton.onClick.AddListener(delegate() { EndGame(); });
+        resetButton.onClick.AddListener(delegate() { ResetGame(); });
 
         if (Globals.savedObjects == null)
         {
             Globals.InitGlobals();
         }
+
         isGameplayPaused = false;
 
         if (Globals.gameParam == Globals.ExercisesConfig.TUTORIAL)
         {
             //special condition also removes the score
-            scorePanelsObject.transform.GetChild(0).GetComponentInChildren<Text>().gameObject.SetActive(false);
-            scorePanelsObject.transform.GetChild(1).GetComponentInChildren<Text>().gameObject.SetActive(false);
+            foreach (Player player in players)
+            {
+                player.scoreText.gameObject.SetActive(false);
+            }
         }
-        
-        switch(Globals.settings.generalSettings.logMode)
+
+        switch (Globals.settings.generalSettings.logMode)
         {
             case "DEBUG":
                 Globals.logManager = new DebugLogManager();
                 break;
-            
+
             case "MONGODB":
                 Globals.logManager = new MongoDBLogManager();
                 break;
-            
+
             default:
                 Globals.logManager = new DebugLogManager();
                 break;
         }
+
         Globals.logManager.InitLogs(this);
 
         numLevelsLeft = Globals.settings.generalSettings.numLevels;
-        
+
         DontDestroyOnLoad(stateCanvas);
         Globals.savedObjects.Add(stateCanvas);
 
@@ -250,36 +260,68 @@ public class GameManager : NetworkManager
 
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
-        
-        //setup players and level directly if local
-        // if (Globals.settings.networkSettings.currMultiplayerOption == "LOCAL")
-        // {
-        //     AddPlayer(0);
-        //     AddPlayer(1);
-        //     StartCoroutine(ChangeLevel(false, false));
-        // }
+
     }
 
     public override void OnServerConnect(NetworkConnection conn)
     {
         base.OnServerConnect(conn);
+
+        //if all players are connected, init their them and start the first level
+        if (currPlayerI == players.Count)
+        {
+            for (int i = 0; i < players.Count; i++)
+            {
+                Player player = players[i];
+
+                //clients do not have local players' representation created
+                PlayerInfo currPlayerInfo = Globals.settings.generalSettings.playersParams[i];
+
+                string bufferedPlayerId = "";
+                if (i < Globals.bufferedPlayerIds.Count)
+                {
+                    bufferedPlayerId = Globals.bufferedPlayerIds[i];
+                }
+                else
+                {
+                    bufferedPlayerId = "NO_NAME_" + i;
+                }
+
+                currPlayerInfo.id = bufferedPlayerId;
+                
+                player.info = currPlayerInfo;
+                player.info.numGives = 0;
+                player.info.numTakes = 0;
+                
+                player.SetTopMask(i % 2 == 0);
+                player.SetScore(0, 0, 0);
+            }
+
+            StartCoroutine(ChangeLevel(false, false));
+        }
+        else if (currPlayerI > players.Count)
+        {
+            currPlayerI--;
+            Debug.Log("Unable To Join, game is full");
+            return;
+        }
+
+    }
+
+    public override void OnClientConnect(NetworkConnection conn)
+    {
+        base.OnClientConnect(conn);
+
         //if my ui is not initted init it and disallow interaction with the other
         AddPlayer(!isMyUIInitted, currPlayerI++);
         if (!isMyUIInitted)
         {
-            for(int i=0; i< currPlayerI; i++)
+            for (int i = 0; i < currPlayerI; i++)
             {
-                foreach(Button button in playerUIs[i].GetComponentsInChildren<Button>())
-                {
-                    button.interactable = false;
-                }
+                AddPlayer(isMyUIInitted, i);
             }
+
             isMyUIInitted = true;
-        }
-        //if all players are connected, start the first level
-        if (currPlayerI == Globals.settings.generalSettings.players.Count)
-        {
-            StartCoroutine(ChangeLevel(false, false));
         }
     }
 
@@ -290,121 +332,112 @@ public class GameManager : NetworkManager
         EndGame();
     }
 
+
     void AddPlayer(bool allowInteraction, int i)
     {
-        GameObject playerUI = playerUIs[i];
-        Player currPlayer = Globals.settings.generalSettings.players[i];
 
-        string bufferedPlayerIds = "";
-        if(i < Globals.bufferedPlayerIds.Count){
-            bufferedPlayerIds = Globals.bufferedPlayerIds[i];
-        }
-        else
-        {
-            bufferedPlayerIds = "NO_NAME_" + i;
-        }
+        // currPlayer.Init(allowInteraction, bufferedPlayerId, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
+        //     wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
+        //     (i % 2 == 0));
+        GameObject playerGameObject = Instantiate(playerPrefab);
+        Player player = playerGameObject.GetComponent<Player>();
 
-        currPlayer.Init(allowInteraction, bufferedPlayerIds, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
-            wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
-            (i % 2 == 0));
-        currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color =
-            currPlayer.GetBackgroundColor();
-        
-        //set buttons for touch screen
-        UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
+        players.Add(player);
 
-        for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
-        {
-            UnityEngine.UI.Button currButton = playerButtons[buttonI];
-            if (buttonI < pointerPlaceholders.Count)
-            {
-                currButton.GetComponent<Image>().color = currPlayer.GetButtonColor();
-                int innerButtonI = buttonI; //for coroutine to save the iterated values
-                currButton.onClick.AddListener(delegate ()
-                {
-                    //verify if button should be pressed
-                    if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1)
-                    {
-                        Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-                        return;
-                    }
-                    if (currPlayer.GetActivebuttonIndex() != innerButtonI)
-                    {
-                        Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
-                    }
 
-                    playerButtons[currPlayer.GetActivebuttonIndex()].GetComponent<Image>().color =
-                        currPlayer.GetButtonColor();
-                    UpdateButtonOverlaps(currPlayer, innerButtonI);
-                    currPlayer.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
-                    currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
-                });
-            }
-            else
-            {
-                int j = buttonI - pointerPlaceholders.Count + 1;
-                Globals.KeyInteractionType iType = (Globals.KeyInteractionType)j;
-                EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
-                EventTrigger.Entry pointerDown = new EventTrigger.Entry();
-                pointerDown.eventID = EventTriggerType.PointerDown;
-                pointerDown.callback.AddListener(delegate (BaseEventData eventData)
-                {
-                    currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+        // GameObject playerUI = player.ui;
+        // //set buttons for touch screen
+        // UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
+        // for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
+        // {
+        //     UnityEngine.UI.Button currButton = playerButtons[buttonI];
+        //     if (buttonI < pointerPlaceholders.Count)
+        //     {
+        //         currButton.GetComponent<Image>().color = player.GetButtonColor();
+        //         int innerButtonI = buttonI; //for coroutine to save the iterated values
+        //         currButton.onClick.AddListener(delegate ()
+        //         {
+        //             //verify if button should be pressed
+        //             if (player.GetCurrNumPossibleActionsPerLevel() < 1)
+        //             {
+        //                 Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
+        //                 return;
+        //             }
+        //             if (player.GetActivebuttonIndex() != innerButtonI)
+        //             {
+        //                 Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
+        //             }
+        //
+        //             playerButtons[player.GetActivebuttonIndex()].GetComponent<Image>().color =
+        //                 player.GetButtonColor();
+        //             UpdateButtonOverlaps(player, innerButtonI);
+        //             player.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
+        //             currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+        //         });
+        //     }
+        //     else
+        //     {
+        //         int j = buttonI - pointerPlaceholders.Count + 1;
+        //         Globals.KeyInteractionType iType = (Globals.KeyInteractionType)j;
+        //         EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
+        //         EventTrigger.Entry pointerDown = new EventTrigger.Entry();
+        //         pointerDown.eventID = EventTriggerType.PointerDown;
+        //         pointerDown.callback.AddListener(delegate (BaseEventData eventData)
+        //         {
+        //             currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+        //
+        //             //verify if button should be pressed
+        //             bool playerOverlappedAndPressing = false;
+        //             foreach (Player innerPlayer in players)
+        //             {
+        //                 if (innerPlayer != player && player.IsPressingButton())
+        //                 {
+        //                     playerOverlappedAndPressing = true;
+        //                     break;
+        //                 }
+        //             }
+        //
+        //             if (player.GetCurrNumPossibleActionsPerLevel() < 1 ||
+        //                 (isButtonOverlap && playerOverlappedAndPressing))
+        //             {
+        //                 Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
+        //                 currButton.GetComponent<Image>().color = Color.red;
+        //                 return;
+        //             }
+        //
+        //             Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
+        //             player.SetActiveInteraction(iType);
+        //
+        //             foreach (Player innerPlayer in players)
+        //             {
+        //                 if (innerPlayer != player && player.IsPressingButton() &&
+        //                     player.GetActivebuttonIndex() == player.GetActivebuttonIndex())
+        //                 {
+        //                     return;
+        //                 }
+        //             }
+        //             player.PressGameButton();
+        //         });
+        //         trigger.triggers.Add(pointerDown);
+        //         EventTrigger.Entry pointerUp = new EventTrigger.Entry();
+        //         pointerUp.eventID = EventTriggerType.PointerUp;
+        //         pointerUp.callback.AddListener(delegate (BaseEventData eventData)
+        //         {
+        //             Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
+        //             //verify if button should be pressed
+        //             if (player.GetCurrNumPossibleActionsPerLevel() > 0)
+        //             {
+        //                 currButton.GetComponent<Image>().color = player.GetButtonColor();
+        //             }
+        //             player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
+        //             player.ReleaseGameButton();
+        //         });
+        //         trigger.triggers.Add(pointerUp);
+        //     }
+        // }
 
-                    //verify if button should be pressed
-                    bool playerOverlappedAndPressing = false;
-                    foreach (Player player in Globals.settings.generalSettings.players)
-                    {
-                        if (player != currPlayer && player.IsPressingButton())
-                        {
-                            playerOverlappedAndPressing = true;
-                            break;
-                        }
-                    }
-
-                    if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1 ||
-                        (isButtonOverlap && playerOverlappedAndPressing))
-                    {
-                        Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-                        currButton.GetComponent<Image>().color = Color.red;
-                        return;
-                    }
-
-                    Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
-                    currPlayer.SetActiveInteraction(iType);
-
-                    foreach (Player player in Globals.settings.generalSettings.players)
-                    {
-                        if (player != currPlayer && player.IsPressingButton() &&
-                            player.GetActivebuttonIndex() == currPlayer.GetActivebuttonIndex())
-                        {
-                            return;
-                        }
-                    }
-                    currPlayer.PressGameButton();
-                });
-                trigger.triggers.Add(pointerDown);
-                EventTrigger.Entry pointerUp = new EventTrigger.Entry();
-                pointerUp.eventID = EventTriggerType.PointerUp;
-                pointerUp.callback.AddListener(delegate (BaseEventData eventData)
-                {
-                    Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
-                    //verify if button should be pressed
-                    if (currPlayer.GetCurrNumPossibleActionsPerLevel() > 0)
-                    {
-                        currButton.GetComponent<Image>().color = currPlayer.GetButtonColor();
-                    }
-                    currPlayer.SetActiveInteraction(Globals.KeyInteractionType.NONE);
-                    currPlayer.ReleaseGameButton();
-                });
-                trigger.triggers.Add(pointerUp);
-            }
-        }
-
-        List<KeyCode> keys = currPlayer.GetMyKeys();
-        currPlayer.SetScore(0, 0, 0);
     }
-    
+
 
     // Update is called once per frame
     void Update()
@@ -413,15 +446,17 @@ public class GameManager : NetworkManager
         {
             return;
         }
-        
+
     }
 
+    [Server]
     private IEnumerator RecordMetrics()
     {
         //spawn questionnaires before changing word
-        foreach (Player player in Globals.settings.generalSettings.players)
+        foreach (Player player in players)
         {
-            yield return StartCoroutine(Globals.logManager.WriteToLog(Globals.settings.generalSettings.databaseName, "logs",
+            yield return StartCoroutine(Globals.logManager.WriteToLog(Globals.settings.generalSettings.databaseName,
+                "logs",
                 new Dictionary<string, string>()
                 {
                     {"gameId", Globals.gameId.ToString()},
@@ -432,26 +467,30 @@ public class GameManager : NetworkManager
                     {"wordState", player.GetCurrWordState()},
                     {"scoreSystem", scoreSystemPath},
                     {"score", player.GetScore().ToString()},
-                    {"numberOfGives", player.numGives.ToString()},
-                    {"numberOfTakes", player.numTakes.ToString()}
+                    {"numberOfGives", player.info.numGives.ToString()},
+                    {"numberOfTakes", player.info.numTakes.ToString()}
                 }));
 
-            player.numGives = 0;
-            player.numTakes = 0;
+            player.info.numGives = 0;
+            player.info.numTakes = 0;
         }
-        
+
     }
 
+    [Server]
     IEnumerator ChangeLevel(bool recordMetrics, bool areWordsUnfinished)
     {
-        
-        if (numLevelsLeft >= 0) { //<= 0 tells the game it is an infinite game (tutorial purposes)
+
+        if (numLevelsLeft >= 0)
+        {
+            //<= 0 tells the game it is an infinite game (tutorial purposes)
             if (numLevelsLeft < 1) //quit on max num levels reached
             {
                 yield return RecordMetrics();
                 EndGame();
                 yield return null;
             }
+
             numLevelsLeft--;
         }
 
@@ -459,6 +498,7 @@ public class GameManager : NetworkManager
         {
             spawner.StopSpawning();
         }
+
         Globals.effectsAudioManager.PlayClip("Audio/wordChange");
 
         if (recordMetrics)
@@ -470,6 +510,7 @@ public class GameManager : NetworkManager
         {
             spawner.UpdateCurrStarredWord("");
         }
+
         ChangeTargetWords();
 
 
@@ -481,9 +522,10 @@ public class GameManager : NetworkManager
         {
             emoji.GetComponent<Animator>().Play("Smiling");
         }
+
         emoji.GetComponent<Animator>().speed = 0;
 
-        foreach (Player player in Globals.settings.generalSettings.players)
+        foreach (Player player in players)
         {
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
@@ -502,6 +544,7 @@ public class GameManager : NetworkManager
             countdownText.text = i.ToString();
             yield return new WaitForSeconds(1.0f);
         }
+
         countdownText.gameObject.SetActive(false);
 
         emoji.GetComponent<Animator>().speed = 1;
@@ -510,22 +553,23 @@ public class GameManager : NetworkManager
         {
             spawner.BeginSpawning();
         }
-        
-        foreach(Player player in Globals.settings.generalSettings.players)
+
+        foreach (Player player in players)
         {
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
             {
                 button.GetComponent<Image>().color = player.GetButtonColor();
             }
+
             player.ResetNumPossibleActions();
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
         }
-        
+
         Globals.currLevelId++;
     }
-    
-    
-    
+
+
+
     private void ChangeTargetWords()
     {
         List<Exercise> selectedExerciseGroup = new List<Exercise>(Globals.settings.exercisesGroups
@@ -540,8 +584,8 @@ public class GameManager : NetworkManager
         selectedExerciseGroup.RemoveAt(random);
 
 
-        int i = UnityEngine.Random.Range(0,1);
-        foreach (Player player in Globals.settings.generalSettings.players)
+        int i = UnityEngine.Random.Range(0, 1);
+        foreach (Player player in players)
         {
             player.SetCurrExercise(newExercise.playerExercises[(i++) % newExercise.playerExercises.Count]);
             player.InitCurrWordState();
@@ -564,25 +608,27 @@ public class GameManager : NetworkManager
         if (execute && usefulForMe)
         {
             int changeIndex = currTargetWord.IndexOf(letterText);
-            while(true)
+            while (true)
             {
                 if (changeIndex == -1)
                 {
                     return false;
-                }else if(currWordState[changeIndex] == ' ')
+                }
+                else if (currWordState[changeIndex] == ' ')
                 {
                     break;
                 }
-                changeIndex = currTargetWord.IndexOf(letterText, changeIndex+1);
+
+                changeIndex = currTargetWord.IndexOf(letterText, changeIndex + 1);
             }
-            
+
             StringBuilder sb = new StringBuilder(currWordState);
             sb[changeIndex] = letterText;
             currWordState = sb.ToString();
-            
+
             player.SetCurrWordState(currWordState);
             letter.GetComponent<Letter>().isTranslationEnabled = false;
-            StartCoroutine(AnimateLetter(letter,player));
+            StartCoroutine(AnimateLetter(letter, player));
         }
 
         return usefulForMe;
@@ -596,38 +642,40 @@ public class GameManager : NetworkManager
 
     public void RecordHit(GameObject letter, Player currHitter)
     {
-        
+
         Letter theActualLetter = letter.gameObject.GetComponent<Letter>();
         if (theActualLetter.IsLocked())
         {
             return;
         }
+
         theActualLetter.Lock();
         char letterText = theActualLetter.letterText;
         letter.transform.localScale *= 1.2f;
-        
-        
+
+
         //verify if button should be pressed
         currHitter.DecreasePossibleActionsPerLevel();
 
-        
-        
+
+
         //different rewards in different utility conditions
         bool usefulForMe = false;
         bool usefulForOther = false;
-        
+
         Globals.KeyInteractionType playerIT = currHitter.GetActiveInteraction();
         List<ScoreValue> scores = new List<ScoreValue>();
         switch (playerIT)
         {
             case Globals.KeyInteractionType.GIVE:
                 usefulForMe = TestAndExecuteHit(false, letterText, letter, currHitter);
-                foreach (Player usefulTargetPlayer in Globals.settings.generalSettings.players)
+                foreach (Player usefulTargetPlayer in players)
                 {
                     if (usefulTargetPlayer == currHitter)
                     {
                         continue;
                     }
+
                     usefulForOther = TestAndExecuteHit(true, letterText, letter, usefulTargetPlayer);
                     if (usefulForOther)
                     {
@@ -636,8 +684,9 @@ public class GameManager : NetworkManager
                     }
 
                 }
+
                 scores = Globals.settings.scoreSystem.giveScores;
-                currHitter.numGives++;
+                currHitter.info.numGives++;
                 break;
             case Globals.KeyInteractionType.TAKE:
                 usefulForMe = TestAndExecuteHit(true, letterText, letter, currHitter);
@@ -645,12 +694,14 @@ public class GameManager : NetworkManager
                 {
                     //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
                 }
-                foreach (Player usefulTargetPlayer in Globals.settings.generalSettings.players)
+
+                foreach (Player usefulTargetPlayer in players)
                 {
                     if (usefulTargetPlayer == currHitter)
                     {
                         continue;
                     }
+
                     if (usefulForOther)
                     {
                         break;
@@ -658,8 +709,9 @@ public class GameManager : NetworkManager
 
                     usefulForOther = TestAndExecuteHit(false, letterText, letter, usefulTargetPlayer);
                 }
+
                 scores = Globals.settings.scoreSystem.takeScores;
-                currHitter.numTakes++;
+                currHitter.info.numTakes++;
                 break;
         }
 
@@ -674,20 +726,20 @@ public class GameManager : NetworkManager
         }
 
         float otherPlayersCompletionMean = 0;
-        int otherPlayersCount = Globals.settings.generalSettings.players.Count() - 1;
+        int otherPlayersCount = players.Count() - 1;
         float currPlayerCompletion = currHitter.GetCurrWordState().Count();
-        foreach (Player innerPlayer in Globals.settings.generalSettings.players)
+        foreach (Player innerPlayer in players)
         {
             if (innerPlayer == currHitter)
             {
                 continue;
             }
-            otherPlayersCompletionMean += (float)innerPlayer.GetCurrWordState().Count() / otherPlayersCount;
+
+            otherPlayersCompletionMean += (float) innerPlayer.GetCurrWordState().Count() / otherPlayersCount;
         }
 
         Globals.DiffLetters playerDiff = (currPlayerCompletion > otherPlayersCompletionMean)
-            ?
-            Globals.DiffLetters.HIGHER
+            ? Globals.DiffLetters.HIGHER
             : (currPlayerCompletion == otherPlayersCompletionMean)
                 ? Globals.DiffLetters.EQUAL
                 : Globals.DiffLetters.LOWER;
@@ -699,7 +751,7 @@ public class GameManager : NetworkManager
                 (Globals.DiffLetters) Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
             {
                 currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue, 1.3f);
-                foreach (Player innerPlayer in Globals.settings.generalSettings.players)
+                foreach (Player innerPlayer in players)
                 {
                     if (innerPlayer == currHitter)
                     {
@@ -708,6 +760,7 @@ public class GameManager : NetworkManager
 
                     innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue, 1.3f);
                 }
+
                 scoreOptionFound = true;
                 break;
             }
@@ -726,13 +779,14 @@ public class GameManager : NetworkManager
             {
                 button.GetComponent<Image>().color = Color.red;
             }
+
             currHitter.ReleaseGameButton();
         }
 
 
         bool areWordsUnfinished = false;
         bool arePlayersWithoutActions = true;
-        foreach (Player player in Globals.settings.generalSettings.players)
+        foreach (Player player in players)
         {
             if (player.GetCurrNumPossibleActionsPerLevel() > 0)
             {
@@ -743,7 +797,7 @@ public class GameManager : NetworkManager
             string currTargetWord = player.GetCurrExercise().targetWord;
             if (currWordState.CompareTo(currTargetWord) != 0)
             {
-                if(!areWordsUnfinished)
+                if (!areWordsUnfinished)
                     areWordsUnfinished = true;
 
                 if (!player.currExerciseFinished)
@@ -754,7 +808,7 @@ public class GameManager : NetworkManager
                 if (!player.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
                     player.SetScore(player.GetScore() + Globals.settings.scoreSystem.completeWordMyScore,
                         Globals.settings.scoreSystem.completeWordMyScore, 1.3f);
-                foreach (Player innerPlayer in Globals.settings.generalSettings.players)
+                foreach (Player innerPlayer in players)
                 {
                     if (player == innerPlayer)
                     {
@@ -768,16 +822,12 @@ public class GameManager : NetworkManager
                 }
             }
         }
+
         if (!areWordsUnfinished || arePlayersWithoutActions)
         {
             StartCoroutine(ChangeLevel(true, areWordsUnfinished));
         }
-        
-    }
 
-    public List<Player> GetPlayers()
-    {
-        return Globals.settings.generalSettings.players;
     }
 }
 

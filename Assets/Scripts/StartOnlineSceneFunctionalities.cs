@@ -21,7 +21,7 @@ public class StartOnlineSceneFunctionalities : MonoBehaviour
         
         joinButton.onClick.AddListener(delegate () {
             Globals.settings.networkSettings.currOnlineOption = "CLIENT";
-            SceneManager.LoadScene("paramsSetup");
+            SceneManager.LoadScene("mainScene");
         });
     }
 }

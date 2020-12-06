@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using AuxiliaryStructs;
 using UnityEngine.UI;
 
 public class LetterSpawner : MonoBehaviour
@@ -110,7 +111,7 @@ public class LetterSpawner : MonoBehaviour
 
         List<char> currWordsLetters = new List<char>();
         List<char> allLetters = new List<char>();
-        foreach (Player player in Globals.settings.generalSettings.players)
+        foreach (Player player in gameManager.players)
         {
             currWordsLetters = currWordsLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using AuxiliaryStructs;
 using UnityEngine;
 
 
@@ -52,7 +53,7 @@ public class ScoreSystemParam
 public struct GeneralSettings
 {
     public List<ScoreSystemParam> scoreSystemParams;
-    public List<Player> players;
+    public List<PlayerInfo> playersParams;
     public int numLevels;
     public float playersLettersSpawnP;
     public string logMode;
