@@ -31,10 +31,13 @@ namespace AuxiliaryStructs
         public Text possibleActionsText;
         public Text scoreText;
 
-        public GameObject marker;
+        private GameObject marker;
+        public GameObject markerPrefab;
         private List<GameObject> maskedHalf;
         private List<GameObject> activeHalf;
         private GameButton gameButton;
+
+        private GameObject trackCanvas;
 
         private Color buttonColor;
 
@@ -49,39 +52,49 @@ namespace AuxiliaryStructs
         private bool allowInteraction;
 
         private bool isTopMask;
+        private bool activeLayout; //parameterize the side of the board player will play in, true if left
 
 
         public void Awake()
         {
-            // PlayerInfo info
-            // this.info = info;
             currNumPossibleActionsPerLevel = 0;
         }
 
-        // public void Init(bool allowInteraction, string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
-        public void Start()
-        {
-            this.backgroundColor = new Color(info.buttonRGB[0], info.buttonRGB[1], info.buttonRGB[2], 0.8f);
 
-            foreach (Button button in this.ui.GetComponentsInChildren<Button>())
+        // public void Init(bool allowInteraction, string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
+        public void Init()
+        {
+            //init colors
+            this.backgroundColor = new Color(info.buttonRGB[0], info.buttonRGB[1], info.buttonRGB[2], 0.8f);
+            
+            //init active layout
+            wordPanel = activeLayout
+                ? gameObject.transform.Find("WordPanels/LeftDisplay").gameObject
+                : gameObject.transform.Find("WordPanels/RightDisplay").gameObject;
+            
+            statePanel = activeLayout
+                ? gameObject.transform.Find("StateCanvas/LeftPanel").gameObject
+                : gameObject.transform.Find("StateCanvas/RightPanel").gameObject;
+
+            ui = activeLayout
+                ? gameObject.transform.Find("UICanvas/LeftPlayerUI").gameObject
+                : gameObject.transform.Find("UICanvas/RightPlayerUI").gameObject;
+
+            if (activeLayout)
             {
-                button.interactable = allowInteraction;
+                Destroy(gameObject.transform.Find("WordPanels/RightDisplay").gameObject);
+                Destroy(gameObject.transform.Find("StateCanvas/RightPanel").gameObject);
+                Destroy(gameObject.transform.Find("UICanvas/RightPlayerUI").gameObject);
+            }
+            else
+            {
+                Destroy(gameObject.transform.Find("WordPanels/LeftDisplay").gameObject);
+                Destroy(gameObject.transform.Find("StateCanvas/LeftPanel").gameObject);
+                Destroy(gameObject.transform.Find("UICanvas/LeftPlayerUI").gameObject);
             }
             
-            foreach (SpriteRenderer image in marker.GetComponentsInChildren<SpriteRenderer>())
-            {
-                image.color = this.backgroundColor;
-            }
-
             wordPanel.transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = backgroundColor;
-
-            UpdateTopMask();
-
-            MeshRenderer[] meshes = marker.GetComponentsInChildren<MeshRenderer>();
-            foreach (MeshRenderer mesh in meshes)
-            {
-                mesh.material.color = backgroundColor;
-            }
+            
 
             wordPanel.SetActive(true);
             statePanel.SetActive(true);
@@ -95,23 +108,17 @@ namespace AuxiliaryStructs
             scoreText = statePanel.transform.Find("scoreText").GetComponent<Text>();
 
             buttonColor = SetColor(backgroundColor);
-
-            score = -1;
-            SetNumPossibleActions(0);
-
-            gameButton = marker.GetComponentInChildren<GameButton>();
-            gameButton.SetOwner(this);
-
-            pressingButton = false;
-        }
-
-        public void SetInfo(PlayerInfo info)
-        {
-            this.info = info;
-        }
-
-        private void UpdateTopMask()
-        {
+            
+            
+            //init marker upon track set. Transform prefab in instance
+            marker = UnityEngine.Object.Instantiate(markerPrefab, trackCanvas.transform);
+            MeshRenderer[] meshes = marker.GetComponentsInChildren<MeshRenderer>();
+            foreach (MeshRenderer mesh in meshes)
+            {
+                mesh.material.color = backgroundColor;
+            }
+            
+            //update marker sides
             maskedHalf = new List<GameObject>();
             maskedHalf.Add((isTopMask)
                 ? marker.transform.Find("Button/BackgroundTH").gameObject
@@ -135,11 +142,35 @@ namespace AuxiliaryStructs
                 : marker.transform.Find("trackBH").gameObject);
 
             activeHalf[1].SetActive(false); //lets init it to hidden
+            
+            
+            foreach (Button button in ui.GetComponentsInChildren<Button>())
+            {
+                button.interactable = allowInteraction;
+            }
+            foreach (SpriteRenderer image in marker.GetComponentsInChildren<SpriteRenderer>())
+            {
+                image.color = this.backgroundColor;
+            }
+            
+            score = -1;
+            SetNumPossibleActions(0);
+            pressingButton = false;
         }
+        
+        public void SetTrackCanvas(GameObject trackCanvas)
+        {
+            this.trackCanvas = trackCanvas;
+        }
+        
+        public void SetActiveLayout(bool leftIfTrue)
+        {
+            this.activeLayout = leftIfTrue;
+        }
+        
         public void SetTopMask(bool isTopMask)
         {
             this.isTopMask = isTopMask;
-            UpdateTopMask();
         }
 
         private Color SetColor(Color newColor)
@@ -247,11 +278,6 @@ namespace AuxiliaryStructs
         public int GetScore()
         {
             return this.score;
-        }
-
-        public void SetWordPanel(GameObject wordPanel)
-        {
-            this.wordPanel = wordPanel;
         }
 
         public GameObject GetWordPanel()

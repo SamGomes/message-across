@@ -16,7 +16,7 @@ using Object = System.Object;
 public class GameManager : NetworkManager
 {
     public List<Player> players;
-
+    
     //for netcode
     private int currPlayerI;
     private bool isMyUIInitted;
@@ -30,8 +30,7 @@ public class GameManager : NetworkManager
 
     private int exerciseGroupIndex;
 
-    public GameObject canvas;
-    public GameObject stateCanvas;
+    public GameObject playerMarkersContainer;
 
     public Text countdownText;
 
@@ -142,9 +141,9 @@ public class GameManager : NetworkManager
     public void Start()
     {
         players = new List<Player>();
-
+        
         //setup net code
-        autoCreatePlayer = false;
+        // autoCreatePlayer = false;
         currPlayerI = 0;
         isMyUIInitted = false;
 
@@ -157,8 +156,8 @@ public class GameManager : NetworkManager
                 // setup players and level directly if local
                 if (Globals.settings.networkSettings.currMultiplayerOption == "LOCAL")
                 {
-                    AddPlayer(true, 0);
-                    AddPlayer(true, 1);
+                    CreatePlayer(null);
+                    CreatePlayer(null);
                     StartCoroutine(ChangeLevel(false, false));
                 }
             }
@@ -178,25 +177,25 @@ public class GameManager : NetworkManager
         else
         {
             Debug.Log("Connecting to " + this.networkAddress + "...");
-            if (GUILayout.Button("Cancel Connection Attempt"))
-            {
-                this.StopClient();
-            }
+            // if (GUILayout.Button("Cancel Connection Attempt"))
+            // {
+            //     this.StopClient();
+            // }
         }
 
         // client ready
-        if (NetworkClient.isConnected && !ClientScene.ready)
-        {
-            if (GUILayout.Button("Client Ready"))
-            {
-                ClientScene.Ready(NetworkClient.connection);
-
-                if (ClientScene.localPlayer == null)
-                {
-                    ClientScene.AddPlayer(NetworkClient.connection);
-                }
-            }
-        }
+        // if (NetworkClient.isConnected && !ClientScene.ready)
+        // {
+        //     if (GUILayout.Button("Client Ready"))
+        //     {
+        //         ClientScene.Ready(NetworkClient.connection);
+        //
+        //         if (ClientScene.localPlayer == null)
+        //         {
+        //             ClientScene.AddPlayer(NetworkClient.connection);
+        //         }
+        //     }
+        // }
 
     }
 
@@ -219,15 +218,7 @@ public class GameManager : NetworkManager
         }
 
         isGameplayPaused = false;
-
-        if (Globals.gameParam == Globals.ExercisesConfig.TUTORIAL)
-        {
-            //special condition also removes the score
-            foreach (Player player in players)
-            {
-                player.scoreText.gameObject.SetActive(false);
-            }
-        }
+        
 
         switch (Globals.settings.generalSettings.logMode)
         {
@@ -248,82 +239,91 @@ public class GameManager : NetworkManager
 
         numLevelsLeft = Globals.settings.generalSettings.numLevels;
 
-        DontDestroyOnLoad(stateCanvas);
-        Globals.savedObjects.Add(stateCanvas);
-
+        // DontDestroyOnLoad(stateCanvas);
+        // Globals.savedObjects.Add(stateCanvas);
 
         isGameplayStarted = true;
 
         exerciseGroupIndex = UnityEngine.Random.Range(0, Globals.settings.exercisesGroups.exerciseGroups.Count);
         countdownText.gameObject.SetActive(false);
-        Shuffle<ExercisesListWrapper>(Globals.settings.exercisesGroups.exerciseGroups);
+        Shuffle(Globals.settings.exercisesGroups.exerciseGroups);
 
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
     }
 
-    public override void OnServerConnect(NetworkConnection conn)
+
+    public override void OnServerAddPlayer(NetworkConnection conn)
     {
-        base.OnServerConnect(conn);
+        base.OnServerAddPlayer(conn);
 
-        //if all players are connected, init their them and start the first level
-        if (currPlayerI == players.Count)
+        Player player = CreatePlayer(conn);
+        
+        //setup client player on connection
+        //clients do not have local players' info created
+        PlayerInfo currPlayerInfo = Globals.settings.generalSettings.playersParams[currPlayerI];
+    
+        string bufferedPlayerId = "";
+        if (currPlayerI < Globals.bufferedPlayerIds.Count)
         {
-            for (int i = 0; i < players.Count; i++)
-            {
-                Player player = players[i];
-
-                //clients do not have local players' representation created
-                PlayerInfo currPlayerInfo = Globals.settings.generalSettings.playersParams[i];
-
-                string bufferedPlayerId = "";
-                if (i < Globals.bufferedPlayerIds.Count)
-                {
-                    bufferedPlayerId = Globals.bufferedPlayerIds[i];
-                }
-                else
-                {
-                    bufferedPlayerId = "NO_NAME_" + i;
-                }
-
-                currPlayerInfo.id = bufferedPlayerId;
+            bufferedPlayerId = Globals.bufferedPlayerIds[currPlayerI];
+        }
+        else
+        {
+            bufferedPlayerId = "NO_NAME_" + currPlayerI;
+        }
+    
+        currPlayerInfo.id = bufferedPlayerId;
                 
-                player.info = currPlayerInfo;
-                player.info.numGives = 0;
-                player.info.numTakes = 0;
+        player.info = currPlayerInfo;
+        player.info.numGives = 0;
+        player.info.numTakes = 0;
                 
-                player.SetTopMask(i % 2 == 0);
-                player.SetScore(0, 0, 0);
-            }
-
+        player.SetActiveLayout(currPlayerI % 2 == 0);
+        player.SetTopMask(currPlayerI % 2 == 0);
+        player.SetTrackCanvas(playerMarkersContainer);
+        player.Init();
+                
+        player.SetScore(0, 0, 0);
+    
+        if (Globals.gameParam == Globals.ExercisesConfig.TUTORIAL)
+        {
+            //special condition also removes the score
+            player.scoreText.gameObject.SetActive(false);
+        }
+        
+        currPlayerI++;
+        
+        //if all players are connected, init their them and start the first level
+        if (currPlayerI == Globals.settings.generalSettings.playersParams.Count)
+        {
             StartCoroutine(ChangeLevel(false, false));
         }
-        else if (currPlayerI > players.Count)
+        else if (currPlayerI > numPlayers)
         {
             currPlayerI--;
             Debug.Log("Unable To Join, game is full");
-            return;
         }
-
+    
     }
 
-    public override void OnClientConnect(NetworkConnection conn)
-    {
-        base.OnClientConnect(conn);
-
-        //if my ui is not initted init it and disallow interaction with the other
-        AddPlayer(!isMyUIInitted, currPlayerI++);
-        if (!isMyUIInitted)
-        {
-            for (int i = 0; i < currPlayerI; i++)
-            {
-                AddPlayer(isMyUIInitted, i);
-            }
-
-            isMyUIInitted = true;
-        }
-    }
+    // public override void OnClientConnect(NetworkConnection conn)
+    // {
+    //     base.OnClientConnect(conn);
+    //
+    //     //if my ui is not initted init it and disallow interaction with the other
+    //     AddPlayer(!isMyUIInitted);
+    //     if (!isMyUIInitted)
+    //     {
+    //         for (int i = 0; i < currPlayerI; i++)
+    //         {
+    //             AddPlayer(isMyUIInitted);
+    //         }
+    //
+    //         isMyUIInitted = true;
+    //     }
+    // }
 
     public override void OnServerDisconnect(NetworkConnection conn)
     {
@@ -333,17 +333,19 @@ public class GameManager : NetworkManager
     }
 
 
-    void AddPlayer(bool allowInteraction, int i)
+    Player CreatePlayer(NetworkConnection conn)
     {
 
-        // currPlayer.Init(allowInteraction, bufferedPlayerId, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
-        //     wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
-        //     (i % 2 == 0));
+        //fdgfd currPlayer.Init(allowInteraction, bufferedPlayerId, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
+        //fgdgfd     wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
+        //gfdgfd     (i % 2 == 0));
+        
         GameObject playerGameObject = Instantiate(playerPrefab);
+        NetworkServer.AddPlayerForConnection(conn, playerGameObject);
+        
         Player player = playerGameObject.GetComponent<Player>();
-
         players.Add(player);
-
+        return player;
 
         // GameObject playerUI = player.ui;
         // //set buttons for touch screen
