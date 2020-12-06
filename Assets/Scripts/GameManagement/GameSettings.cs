@@ -61,8 +61,19 @@ public struct GeneralSettings
 }
 
 [Serializable]
+public struct MANetworkSettings
+{
+    public string currMultiplayerOption;
+
+    //for online games
+    public string currOnlineOption;
+    public string serverIP;
+}
+
+[Serializable]
 public struct GameSettings
 {
+    public MANetworkSettings networkSettings;
     public ExerciseGroupsWrapper exercisesGroups;
     public GeneralSettings generalSettings;
     public ScoreSystem scoreSystem;

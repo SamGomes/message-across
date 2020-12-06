@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 [Serializable]
 public class Player
 {
@@ -59,6 +60,8 @@ public class Player
     private GameObject ui;
 
     public bool pressingButton;
+    
+    private bool allowInteraction;
 
 
 
@@ -73,10 +76,17 @@ public class Player
         currNumPossibleActionsPerLevel = 0;
     }
 
-    public void Init(string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
+    public void Init(bool allowInteraction, string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
     {
         this.id = id;
         this.ui = ui;
+
+        
+        foreach(Button button in this.ui.GetComponentsInChildren<Button>())
+        {
+            button.interactable = allowInteraction;
+        }
+        
 
         this.backgroundColor = new Color(buttonRGB[0], buttonRGB[1], buttonRGB[2], 0.8f);
         this.gameManagerRef = gameManagerRef;
@@ -106,6 +116,9 @@ public class Player
 
         this.wordPanel = wordPanel;
         this.statePanel = statePanel;
+
+        wordPanel.SetActive(true);
+        statePanel.SetActive(true);
 
         scoreUpdateUIup = statePanel.transform.Find("scoreUpdateUI/up").gameObject;
         scoreUpdateUIup.SetActive(false);

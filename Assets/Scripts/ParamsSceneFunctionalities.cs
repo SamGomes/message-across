@@ -59,11 +59,12 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         scoreConfigPath =  Application.streamingAssetsPath + "/scoreSystemConfigTutorial.cfg";
         string generalConfigText = "";
         string exercisesConfigText = "";
-        
-        
-        
+        string networkConfigText = "";
+
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
         string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
+        
+        string networkConfigPath = Application.streamingAssetsPath + "/networkConfig.cfg";
 
         
         if (generalConfigPath.Contains("://") || generalConfigPath.Contains(":///")) //url instead of path
@@ -74,7 +75,14 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         }
         else
         {
-            generalConfigText = File.ReadAllText(generalConfigPath);
+            try
+            {
+                generalConfigText = File.ReadAllText(generalConfigPath);
+            }
+            catch (FileNotFoundException e)
+            {
+                generalConfigText = "";
+            }
         }
 
         
@@ -86,22 +94,61 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         }
         else
         {
-            exercisesConfigText = File.ReadAllText(exercisesConfigPath);
+            try
+            {
+                exercisesConfigText = File.ReadAllText(exercisesConfigPath);
+            }
+            catch (FileNotFoundException e)
+            {
+                exercisesConfigText = "";
+            }
+        }
+        
+        
+        if (networkConfigPath.Contains("://") || networkConfigPath.Contains(":///")) //url instead of path
+        {
+            UnityWebRequest www = UnityWebRequest.Get(generalConfigPath);
+            yield return www.SendWebRequest();
+            networkConfigText = www.downloadHandler.text;
+        }
+        else
+        {
+            try
+            {
+                networkConfigText = File.ReadAllText(networkConfigPath);
+            }
+            catch (FileNotFoundException e)
+            {
+                networkConfigText = "";
+            }
+        }
+
+        if (generalConfigText == "" || exercisesConfigText == "")
+        {
+            Debug.LogError("Game cannot start without general or exercise configurations!");
+            yield return null;
         }
 
         //string json = JsonUtility.ToJson(settings, true);
         Globals.settings.generalSettings = JsonUtility.FromJson<GeneralSettings>(generalConfigText);
         Globals.settings.exercisesGroups = JsonUtility.FromJson<ExerciseGroupsWrapper>(exercisesConfigText);
+
+        if (networkConfigText != "")
+        {
+            //auto config
+            Globals.settings.networkSettings = JsonUtility.FromJson<MANetworkSettings>(networkConfigText);
+        }
+
+
         
-
-
+        
+        
         if (Globals.savedObjects == null)
         {
             Globals.InitGlobals();
         }
         startButton.onClick.AddListener(delegate ()
         {
-
             StartCoroutine(LoadScoreConfig());
             SceneManager.LoadScene("mainScene");
         });

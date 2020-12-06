@@ -13,11 +13,14 @@ public class StartOnlineSceneFunctionalities : MonoBehaviour
 
     void Start()
     {
+        Globals.settings.networkSettings.currMultiplayerOption = "ONLINE";
         hostButton.onClick.AddListener(delegate () {
+            Globals.settings.networkSettings.currOnlineOption = "HOST";
             SceneManager.LoadScene("paramsSetup");
         });
         
         joinButton.onClick.AddListener(delegate () {
+            Globals.settings.networkSettings.currOnlineOption = "CLIENT";
             SceneManager.LoadScene("paramsSetup");
         });
     }

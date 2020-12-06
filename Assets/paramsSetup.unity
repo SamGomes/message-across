@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.37311947, g: 0.38074005, b: 0.35872722, a: 1}
+  m_IndirectSpecularColor: {r: 0.37311953, g: 0.38074014, b: 0.3587274, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -173,6 +173,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.8679245, g: 0.8679245, b: 0.8679245, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -362,6 +363,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -403,6 +405,11 @@ PrefabInstance:
         type: 3}
       propertyPath: isTranslationEnabled
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 498597019893004150, guid: f31bf636445269449ae7445df9a7599f,
+        type: 3}
+      propertyPath: sceneId
+      value: 940297214
       objectReference: {fileID: 0}
     - target: {fileID: 1386018766661905261, guid: f31bf636445269449ae7445df9a7599f,
         type: 3}
@@ -718,6 +725,11 @@ PrefabInstance:
       propertyPath: isTranslationEnabled
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 498597019893004150, guid: f31bf636445269449ae7445df9a7599f,
+        type: 3}
+      propertyPath: sceneId
+      value: 887476893
+      objectReference: {fileID: 0}
     - target: {fileID: 607728178594711512, guid: f31bf636445269449ae7445df9a7599f,
         type: 3}
       propertyPath: m_LocalScale.y
@@ -1010,6 +1022,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1328,6 +1341,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1476,6 +1490,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.8679245, g: 0.8679245, b: 0.8679245, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []

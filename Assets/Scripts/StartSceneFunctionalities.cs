@@ -43,7 +43,8 @@ public static class Globals
         EQUAL,
         LOWER
     }
-
+    
+    
     public static GameSettings settings;
     
     public static KeyInteractionType[] keyInteractionTypes;
@@ -64,6 +65,7 @@ public static class Globals
     public static List<string> bufferedPlayerIds;
 
     public static string backgroundMusicPath;
+
     
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
     {

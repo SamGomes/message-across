@@ -1,19 +1,24 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
+using System.Security.Policy;
 using System.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+using Mirror;
 
-public class GameManager : MonoBehaviour
+
+public class GameManager : NetworkManager
 {
+    //for netcode
+    private int currPlayerI;
+    private bool isMyUIInitted;
+    
+    
     private int startingLevelDelayInSeconds;
 
     public Button quitButton;
@@ -49,7 +54,8 @@ public class GameManager : MonoBehaviour
     private float timeLeft;
 
     private string scoreSystemPath; //to be able to recover condition
-
+    
+    
     public void PauseGame()
     {
         foreach(LetterSpawner ls in letterSpawners)
@@ -60,8 +66,6 @@ public class GameManager : MonoBehaviour
             }
             ls.enabled = false;
         }
-
-        
         isGameplayPaused = true;
     }
 
@@ -93,24 +97,7 @@ public class GameManager : MonoBehaviour
         Globals.InitGlobals();
         SceneManager.LoadScene("paramsSetup");
     }
-
-    public string OrderedFormOfNumber(int i)
-    {
-        string suffix = "th";
-        switch (i)
-        {
-            case 1:
-                suffix = "st";
-                break;
-            case 2:
-                suffix = "nd";
-                break;
-            case 3:
-                suffix = "rd";
-                break;
-        }
-        return i + suffix;
-    }
+    
     private void Shuffle<T>(IList<T> list)
     {
         for (int i = 0; i < list.Count; i++)
@@ -151,10 +138,60 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    
-
-    void Start()
+    public void Start()
     {
+        //setup net code
+        autoCreatePlayer = false;
+        currPlayerI = 0;
+        isMyUIInitted = false;
+        
+        if (!NetworkClient.active)
+        {
+            if (Globals.settings.networkSettings.currMultiplayerOption == "LOCAL")
+            {
+                OnStartServer();
+            }
+            else if (Globals.settings.networkSettings.currMultiplayerOption == "ONLINE")
+            {
+                if (Globals.settings.networkSettings.currOnlineOption == "HOST")
+                {
+                    this.StartHost();
+                }
+                else if (Globals.settings.networkSettings.currOnlineOption == "CLIENT")
+                {
+                    this.StartClient();
+                    this.networkAddress = GUILayout.TextField(Globals.settings.networkSettings.serverIP);
+                }
+            }
+        }
+        else
+        {
+            Debug.Log("Connecting to " + this.networkAddress + "...");
+            if (GUILayout.Button("Cancel Connection Attempt"))
+            {
+                this.StopClient();
+            }
+        }
+
+        // client ready
+        if (NetworkClient.isConnected && !ClientScene.ready)
+        {
+            if (GUILayout.Button("Client Ready"))
+            {
+                ClientScene.Ready(NetworkClient.connection);
+
+                if (ClientScene.localPlayer == null)
+                {
+                    ClientScene.AddPlayer(NetworkClient.connection);
+                }
+            }
+        }
+        
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
 
         scoreSystemPath = Globals.settings.scoreSystem.path;
         
@@ -205,121 +242,6 @@ public class GameManager : MonoBehaviour
         Globals.savedObjects.Add(stateCanvas);
 
 
-        for (int i = 0; i < Globals.settings.generalSettings.players.Count; i++)
-        {
-            GameObject playerUI = playerUIs[i];
-            Player currPlayer = Globals.settings.generalSettings.players[i];
-
-            string bufferedPlayerIds = "";
-            if(i < Globals.bufferedPlayerIds.Count){
-                bufferedPlayerIds = Globals.bufferedPlayerIds[i];
-            }
-            else
-            {
-                bufferedPlayerIds = "NO_NAME_" + i;
-            }
-
-            currPlayer.Init(bufferedPlayerIds, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
-                wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
-                (i % 2 == 0));
-            currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color =
-                currPlayer.GetBackgroundColor();
-            
-            //set buttons for touch screen
-            UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
-
-            for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
-            {
-                UnityEngine.UI.Button currButton = playerButtons[buttonI];
-                if (buttonI < pointerPlaceholders.Count)
-                {
-                    currButton.GetComponent<Image>().color = currPlayer.GetButtonColor();
-                    int innerButtonI = buttonI; //for coroutine to save the iterated values
-                    currButton.onClick.AddListener(delegate ()
-                    {
-                        //verify if button should be pressed
-                        if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1)
-                        {
-                            Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-                            return;
-                        }
-                        if (currPlayer.GetActivebuttonIndex() != innerButtonI)
-                        {
-                            Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
-                        }
-
-                        playerButtons[currPlayer.GetActivebuttonIndex()].GetComponent<Image>().color =
-                            currPlayer.GetButtonColor();
-                        UpdateButtonOverlaps(currPlayer, innerButtonI);
-                        currPlayer.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
-                        currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
-                    });
-                }
-                else
-                {
-                    int j = buttonI - pointerPlaceholders.Count + 1;
-                    Globals.KeyInteractionType iType = (Globals.KeyInteractionType)j;
-                    EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
-                    EventTrigger.Entry pointerDown = new EventTrigger.Entry();
-                    pointerDown.eventID = EventTriggerType.PointerDown;
-                    pointerDown.callback.AddListener(delegate (BaseEventData eventData)
-                    {
-                        currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
-
-                        //verify if button should be pressed
-                        bool playerOverlappedAndPressing = false;
-                        foreach (Player player in Globals.settings.generalSettings.players)
-                        {
-                            if (player != currPlayer && player.IsPressingButton())
-                            {
-                                playerOverlappedAndPressing = true;
-                                break;
-                            }
-                        }
-
-                        if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1 ||
-                            (isButtonOverlap && playerOverlappedAndPressing))
-                        {
-                            Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-                            currButton.GetComponent<Image>().color = Color.red;
-                            return;
-                        }
-
-                        Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
-                        currPlayer.SetActiveInteraction(iType);
-
-                        foreach (Player player in Globals.settings.generalSettings.players)
-                        {
-                            if (player != currPlayer && player.IsPressingButton() &&
-                                player.GetActivebuttonIndex() == currPlayer.GetActivebuttonIndex())
-                            {
-                                return;
-                            }
-                        }
-                        currPlayer.PressGameButton();
-                    });
-                    trigger.triggers.Add(pointerDown);
-                    EventTrigger.Entry pointerUp = new EventTrigger.Entry();
-                    pointerUp.eventID = EventTriggerType.PointerUp;
-                    pointerUp.callback.AddListener(delegate (BaseEventData eventData)
-                    {
-                        Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
-                        //verify if button should be pressed
-                        if (currPlayer.GetCurrNumPossibleActionsPerLevel() > 0)
-                        {
-                            currButton.GetComponent<Image>().color = currPlayer.GetButtonColor();
-                        }
-                        currPlayer.SetActiveInteraction(Globals.KeyInteractionType.NONE);
-                        currPlayer.ReleaseGameButton();
-                    });
-                    trigger.triggers.Add(pointerUp);
-                }
-            }
-
-            List<KeyCode> keys = currPlayer.GetMyKeys();
-            currPlayer.SetScore(0, 0, 0);
-        }
-        
         isGameplayStarted = true;
 
         exerciseGroupIndex = UnityEngine.Random.Range(0, Globals.settings.exercisesGroups.exerciseGroups.Count);
@@ -328,10 +250,161 @@ public class GameManager : MonoBehaviour
 
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
-
-        StartCoroutine(ChangeLevel(false, false));
+        
+        //setup players and level directly if local
+        // if (Globals.settings.networkSettings.currMultiplayerOption == "LOCAL")
+        // {
+        //     AddPlayer(0);
+        //     AddPlayer(1);
+        //     StartCoroutine(ChangeLevel(false, false));
+        // }
     }
 
+    public override void OnServerConnect(NetworkConnection conn)
+    {
+        base.OnServerConnect(conn);
+        //if my ui is not initted init it and disallow interaction with the other
+        AddPlayer(!isMyUIInitted, currPlayerI++);
+        if (!isMyUIInitted)
+        {
+            for(int i=0; i< currPlayerI; i++)
+            {
+                foreach(Button button in playerUIs[i].GetComponentsInChildren<Button>())
+                {
+                    button.interactable = false;
+                }
+            }
+            isMyUIInitted = true;
+        }
+        //if all players are connected, start the first level
+        if (currPlayerI == Globals.settings.generalSettings.players.Count)
+        {
+            StartCoroutine(ChangeLevel(false, false));
+        }
+    }
+
+    public override void OnServerDisconnect(NetworkConnection conn)
+    {
+        base.OnServerDisconnect(conn);
+        //when a player looses connection, the game ends immediately
+        EndGame();
+    }
+
+    void AddPlayer(bool allowInteraction, int i)
+    {
+        GameObject playerUI = playerUIs[i];
+        Player currPlayer = Globals.settings.generalSettings.players[i];
+
+        string bufferedPlayerIds = "";
+        if(i < Globals.bufferedPlayerIds.Count){
+            bufferedPlayerIds = Globals.bufferedPlayerIds[i];
+        }
+        else
+        {
+            bufferedPlayerIds = "NO_NAME_" + i;
+        }
+
+        currPlayer.Init(allowInteraction, bufferedPlayerIds, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
+            wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
+            (i % 2 == 0));
+        currPlayer.GetWordPanel().transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color =
+            currPlayer.GetBackgroundColor();
+        
+        //set buttons for touch screen
+        UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
+
+        for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
+        {
+            UnityEngine.UI.Button currButton = playerButtons[buttonI];
+            if (buttonI < pointerPlaceholders.Count)
+            {
+                currButton.GetComponent<Image>().color = currPlayer.GetButtonColor();
+                int innerButtonI = buttonI; //for coroutine to save the iterated values
+                currButton.onClick.AddListener(delegate ()
+                {
+                    //verify if button should be pressed
+                    if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1)
+                    {
+                        Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
+                        return;
+                    }
+                    if (currPlayer.GetActivebuttonIndex() != innerButtonI)
+                    {
+                        Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
+                    }
+
+                    playerButtons[currPlayer.GetActivebuttonIndex()].GetComponent<Image>().color =
+                        currPlayer.GetButtonColor();
+                    UpdateButtonOverlaps(currPlayer, innerButtonI);
+                    currPlayer.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
+                    currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+                });
+            }
+            else
+            {
+                int j = buttonI - pointerPlaceholders.Count + 1;
+                Globals.KeyInteractionType iType = (Globals.KeyInteractionType)j;
+                EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
+                EventTrigger.Entry pointerDown = new EventTrigger.Entry();
+                pointerDown.eventID = EventTriggerType.PointerDown;
+                pointerDown.callback.AddListener(delegate (BaseEventData eventData)
+                {
+                    currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+
+                    //verify if button should be pressed
+                    bool playerOverlappedAndPressing = false;
+                    foreach (Player player in Globals.settings.generalSettings.players)
+                    {
+                        if (player != currPlayer && player.IsPressingButton())
+                        {
+                            playerOverlappedAndPressing = true;
+                            break;
+                        }
+                    }
+
+                    if (currPlayer.GetCurrNumPossibleActionsPerLevel() < 1 ||
+                        (isButtonOverlap && playerOverlappedAndPressing))
+                    {
+                        Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
+                        currButton.GetComponent<Image>().color = Color.red;
+                        return;
+                    }
+
+                    Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
+                    currPlayer.SetActiveInteraction(iType);
+
+                    foreach (Player player in Globals.settings.generalSettings.players)
+                    {
+                        if (player != currPlayer && player.IsPressingButton() &&
+                            player.GetActivebuttonIndex() == currPlayer.GetActivebuttonIndex())
+                        {
+                            return;
+                        }
+                    }
+                    currPlayer.PressGameButton();
+                });
+                trigger.triggers.Add(pointerDown);
+                EventTrigger.Entry pointerUp = new EventTrigger.Entry();
+                pointerUp.eventID = EventTriggerType.PointerUp;
+                pointerUp.callback.AddListener(delegate (BaseEventData eventData)
+                {
+                    Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
+                    //verify if button should be pressed
+                    if (currPlayer.GetCurrNumPossibleActionsPerLevel() > 0)
+                    {
+                        currButton.GetComponent<Image>().color = currPlayer.GetButtonColor();
+                    }
+                    currPlayer.SetActiveInteraction(Globals.KeyInteractionType.NONE);
+                    currPlayer.ReleaseGameButton();
+                });
+                trigger.triggers.Add(pointerUp);
+            }
+        }
+
+        List<KeyCode> keys = currPlayer.GetMyKeys();
+        currPlayer.SetScore(0, 0, 0);
+    }
+    
 
     // Update is called once per frame
     void Update()
