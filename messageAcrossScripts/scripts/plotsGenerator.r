@@ -33,7 +33,7 @@ plot <- plot + geom_text(stat='count', size=8, aes(label=..count.., x=1, y=(..co
 suppressMessages(ggsave(sprintf("plots/mainEffects/preferredVersion.png"), width = 8, height = 4))
 
 print("Plotting game variables...")
-processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel, plotName, labels, breaks, trans){
+processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel, plotName, labels, breaks, trans, yLimMin, yLimMax){
 
   varsToProcess = c(sprintf("%sA%s",yVarPre,yVarPos),sprintf("%sB%s",yVarPre,yVarPos),sprintf("%sC%s",yVarPre,yVarPos),sprintf("%sD%s",yVarPre,yVarPos))
 
@@ -43,14 +43,15 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel,
   longData <- melt(data, id="playerId", measured=varsToProcess)
 
   names(longData)<-c("playerId", "scoreSystem", "yVar")
-  longData$scoreSystem <- factor(longData$scoreSystem, labels=c("Comp","Self.I.","M.Help","E.Altr"))
+  longData$scoreSystem <- factor(longData$scoreSystem, labels=c("Comp","Self.I.","M.Help","E.Altr."))
   longData <- longData[order(longData$playerId),]
 
 
   longData <- longData[(longData$scoreSystem %in% behaviorsToProcess),]
 
   hist <- ggplot(longData, aes(longData$scoreSystem, longData$yVar, fill=longData$scoreSystem)) + theme(legend.position="none", axis.text=element_text(size=18), axis.title=element_text(size=18, face="bold"))
-  hist <- hist + geom_boxplot(color="white")
+  hist <- hist + geom_boxplot()
+  # hist <- hist + geom_boxplot(color="white")
   if( labels!=-1 && breaks!=-1){
     if(trans != -1){
       hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks, trans = trans)
@@ -58,17 +59,24 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel,
       hist <- hist +  scale_y_continuous(yLabel, labels = as.character(labels), breaks = breaks)
     }
   }
-  hist <- hist + labs(x="Score Attribution System", y=yLabel) + scale_fill_manual(values=c("#d7191c", "#75a352", "#0700dd", "#fcfc05")) + theme(axis.title.x = element_text(colour = "white"), axis.title.y = element_text(colour = "white"), axis.text.x = element_text(colour = "white"), axis.text.y = element_text(colour = "white"), panel.background = element_rect(fill = "transparent"), plot.background = element_rect(fill = "transparent", color = NA), panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"), panel.grid.minor = element_line(size = 0.25, linetype = 'solid', colour = "white"), legend.background = element_rect(fill = "transparent"), legend.box.background = element_rect(fill = "transparent"))
+  hist <- hist + labs(x="Score Attribution System", y=yLabel) + scale_fill_manual(values=c("#E56102", "#5E3C99", "#d7191c", "#75a352")) #+ theme(axis.title.x = element_text(colour = "white"), axis.title.y = element_text(colour = "white"), axis.text.x = element_text(colour = "white"), axis.text.y = element_text(colour = "white"), panel.background = element_rect(fill = "transparent"), plot.background = element_rect(fill = "transparent", color = NA), panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "white"), panel.grid.minor = element_line(size = 0.25, linetype = 'solid', colour = "white"), legend.background = element_rect(fill = "transparent"), legend.box.background = element_rect(fill = "transparent"))
   # hist <- hist + labs(x="Score Attribution System", y=yLabel)  + scale_fill_manual(values=c("#d7191c", "#75a352", "#0700dd", "#fcfc05"))
-  suppressMessages(ggsave(sprintf("plots/%s.png", plotName), bg = "transparent"))
+  # suppressMessages(ggsave(sprintf("plots/%s.png", plotName), bg = "transparent"))
+
+  if(yLimMin!=-1 && yLimMax!=-1){
+    if(yLimMin =="NA") yLimMin = NA
+    if(yLimMax =="NA") yLimMax = NA
+    hist <- hist + ylim(yLimMin, yLimMax)
+  }
+  suppressMessages(ggsave(sprintf("plots/%s.png", plotName)))
 }
-processBoxPlot(myData, "meanNumberOfGives_", "", c("Comp","Self.I.","M.Help","E.Altr"), "Mean number of gives", "meanNumberOfGives", -1, -1, -1)
-processBoxPlot(myData, "meanNumberOfTakes_", "", c("Self.I.","E.Altr"), "Mean number of takes", "meanNumberOfTakesF", -1, -1, -1)
-processBoxPlot(myData, "meanNumberOfTakes_", "", c("Comp", "M.Help"), "Mean number of takes", "meanNumberOfTakesSV", c("0", "1", "2", "3", "4"), c(0,1,2,3,4), -1)
-# processBoxPlot(myData, "whoFocus_", "", c("Self.I.","E.Altr"), "Focus", "interactionFocus", c("Self -3","-2", "-1", "Both 0", "1", "2", "Other 3\n  Players  "), c(1,2,3,4,5,6,7), -1)
-processBoxPlot(myData, "whoFocus_", "", c("Self.I.","E.Altr"), "Interaction motives", "interactionMotives", c("Self-oriented -3","-2", "-1", "Neutral 0", "1", "2", "Others-oriented 3"), c(1,2,3,4,5,6,7), -1)
-processBoxPlot(myData, "whatFocus_", "", c("Comp", "M.Help"), "Social valence", "socialValence", c("Help 3","2", "1", "Neutral 0", "-1", "-2", "Complicate -3"), c(1,2,3,4,5,6,7), "reverse")
-processBoxPlot(myData, "score_", "_7", c("Self.I.","E.Altr"), "Final score", "finalScore", -1, -1, -1)
+processBoxPlot(myData, "meanNumberOfGives_", "", c("Comp","Self.I.","M.Help","E.Altr."), "Mean number of gives", "meanNumberOfGives", -1, -1, -1, -1, -1)
+processBoxPlot(myData, "meanNumberOfTakes_", "", c("Self.I.","E.Altr."), "Mean number of takes", "meanNumberOfTakesF", -1, -1, -1, -1, -1)
+processBoxPlot(myData, "meanNumberOfTakes_", "", c("Comp", "M.Help"), "Mean number of takes", "meanNumberOfTakesSV", c("0", "1", "2", "3", "4"), c(0,1,2,3,4), -1, -1, -1)
+# processBoxPlot(myData, "whoFocus_", "", c("Self.I.","E.Altr."), "Focus", "interactionFocus", c("Self -3","-2", "-1", "Both 0", "1", "2", "Other 3\n  Players  "), c(1,2,3,4,5,6,7), -1)
+processBoxPlot(myData, "whoFocus_", "", c("Self.I.","E.Altr."), "Interaction motives", "interactionMotives", c("Self-oriented -3","-2", "-1", "Neutral 0", "1", "2", "Others-oriented 3"), c(1,2,3,4,5,6,7), -1, -1, -1)
+processBoxPlot(myData, "whatFocus_", "", c("Comp", "M.Help"), "Social valence", "socialValence", c("Help 3","2", "1", "Neutral 0", "-1", "-2", "Complicate -3"), c(1,2,3,4,5,6,7), "reverse", -1, -1)
+processBoxPlot(myData, "score_", "_7", c("Self.I.","E.Altr."), "Final score", "finalScore", -1, -1, -1, 0, "NA")
 
 
 
@@ -89,7 +97,7 @@ for(i in  seq(from=1, to=dim(data)[1], by=2)) {
   j <- j+1
 }
 
-processBoxPlot(scoreData, "score_", "", c("Comp", "M.Help"), "Final score diff.", "scoreDiffs", -1, -1)
+processBoxPlot(scoreData, "score_", "", c("Comp", "M.Help"), "Final score diff.", "scoreDiffs", -1, -1, -1, -1)
 
 
 
@@ -103,7 +111,7 @@ data <- myData[, (names(myData) %in% keeps)]
 longData1 <- melt(data, id="playerId", measured=varsToProcess)
 colnames(longData1)[colnames(longData1)=="variable"] <- "version"
 colnames(longData1)[colnames(longData1)=="value"] <- "focus"
-longData1$version <- factor(longData1$version, labels=c("Comp","Self.I.","M.Help","E.Altr"))
+longData1$version <- factor(longData1$version, labels=c("Comp","Self.I.","M.Help","E.Altr."))
 
 yVarPre="whatFocus_"
 yVarPos=""
@@ -114,7 +122,7 @@ data <- myData[, (names(myData) %in% keeps)]
 longData2 <- melt(data, id="playerId", measured=varsToProcess)
 colnames(longData2)[colnames(longData2)=="variable"] <- "version"
 colnames(longData2)[colnames(longData2)=="value"] <- "intention"
-longData2$version <- factor(longData2$version, labels=c("Comp","Self.I.","M.Help","E.Altr"))
+longData2$version <- factor(longData2$version, labels=c("Comp","Self.I.","M.Help","E.Altr."))
 
 
 # focus and valence
@@ -136,7 +144,7 @@ longData = merge(longData1, longData2, by = c("playerId","version"))
 longDataSplitted <- split(longData,longData$version)
 longDataMean = data.frame(matrix(ncol = 0, nrow = 4))
 j = 1
-for(i in  c("Comp","Self.I.","M.Help","E.Altr")) {
+for(i in  c("Comp","Self.I.","M.Help","E.Altr.")) {
   longDataMean$version[j] <- i
   longDataMean$focus[j] <- mean(longDataSplitted[[i]]$focus)
   longDataMean$intention[j] <- mean(longDataSplitted[[i]]$intention)
