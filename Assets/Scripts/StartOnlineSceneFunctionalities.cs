@@ -8,7 +8,6 @@ public class StartOnlineSceneFunctionalities : MonoBehaviour
     public InputField playerName;
     public Button hostButton;
     public Button joinButton;
-    public InputField joinIP;
 
 
     void Start()

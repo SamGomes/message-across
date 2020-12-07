@@ -170,7 +170,7 @@ public class GameManager : NetworkManager
                 else if (Globals.settings.networkSettings.currOnlineOption == "CLIENT")
                 {
                     this.StartClient();
-                    this.networkAddress = GUILayout.TextField(Globals.settings.networkSettings.serverIP);
+                    this.networkAddress = "localhost";//Globals.settings.networkSettings.serverIP;
                 }
             }
         }
@@ -256,8 +256,6 @@ public class GameManager : NetworkManager
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
-        base.OnServerAddPlayer(conn);
-
         Player player = CreatePlayer(conn);
         
         //setup client player on connection
@@ -298,7 +296,8 @@ public class GameManager : NetworkManager
         //if all players are connected, init their them and start the first level
         if (currPlayerI == Globals.settings.generalSettings.playersParams.Count)
         {
-            StartCoroutine(ChangeLevel(false, false));
+            //start game
+            // StartCoroutine(ChangeLevel(false, false));
         }
         else if (currPlayerI > numPlayers)
         {
@@ -307,7 +306,8 @@ public class GameManager : NetworkManager
         }
     
     }
-
+    
+    
     // public override void OnClientConnect(NetworkConnection conn)
     // {
     //     base.OnClientConnect(conn);

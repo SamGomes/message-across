@@ -55,12 +55,6 @@ namespace AuxiliaryStructs
         private bool activeLayout; //parameterize the side of the board player will play in, true if left
 
 
-        public void Awake()
-        {
-            currNumPossibleActionsPerLevel = 0;
-        }
-
-
         // public void Init(bool allowInteraction, string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
         public void Init()
         {
@@ -154,6 +148,7 @@ namespace AuxiliaryStructs
             }
             
             score = -1;
+            currNumPossibleActionsPerLevel = 0;
             SetNumPossibleActions(0);
             pressingButton = false;
         }
