@@ -26,5 +26,10 @@ namespace AuxiliaryStructs
         public int numGives;
         public int numTakes;
 
+        public PlayerInfo()
+        {
+            this.numGives = 0;
+            this.numTakes = 0;
+        }
     }
 }

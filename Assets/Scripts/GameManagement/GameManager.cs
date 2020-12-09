@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using AuxiliaryStructs;
 using UnityEngine;
@@ -17,11 +18,7 @@ public class GameManager : NetworkManager
 {
     public List<Player> players;
     
-    //for netcode
-    private int currPlayerI;
-    private bool isMyUIInitted;
-
-
+    
     private int startingLevelDelayInSeconds;
 
     public Button quitButton;
@@ -29,8 +26,6 @@ public class GameManager : NetworkManager
     private int numLevelsLeft;
 
     private int exerciseGroupIndex;
-
-    public GameObject playerMarkersContainer;
 
     public Text countdownText;
 
@@ -144,8 +139,6 @@ public class GameManager : NetworkManager
         
         //setup net code
         // autoCreatePlayer = false;
-        currPlayerI = 0;
-        isMyUIInitted = false;
 
         //check connection type
         if (!NetworkClient.active)
@@ -156,8 +149,8 @@ public class GameManager : NetworkManager
                 // setup players and level directly if local
                 if (Globals.settings.networkSettings.currMultiplayerOption == "LOCAL")
                 {
-                    CreatePlayer(null);
-                    CreatePlayer(null);
+                    CreatePlayer(null, 0, true);
+                    CreatePlayer(null, 1, true);
                     StartCoroutine(ChangeLevel(false, false));
                 }
             }
@@ -254,57 +247,30 @@ public class GameManager : NetworkManager
     }
 
 
+    public override void OnServerConnect(NetworkConnection conn)
+    {
+        base.OnServerConnect(conn);
+
+        int i = 0;
+        //generate representations of all player already online
+        while(i < numPlayers)
+        {
+            //here we already created the player and added it in the connection, we will simply init it
+            CreatePlayer(conn, i, false);
+            i++;
+        }
+    }
+
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
-        Player player = CreatePlayer(conn);
-        
-        //setup client player on connection
-        //clients do not have local players' info created
-        PlayerInfo currPlayerInfo = Globals.settings.generalSettings.playersParams[currPlayerI];
-    
-        string bufferedPlayerId = "";
-        if (currPlayerI < Globals.bufferedPlayerIds.Count)
-        {
-            bufferedPlayerId = Globals.bufferedPlayerIds[currPlayerI];
-        }
-        else
-        {
-            bufferedPlayerId = "NO_NAME_" + currPlayerI;
-        }
-    
-        currPlayerInfo.id = bufferedPlayerId;
-                
-        player.info = currPlayerInfo;
-        player.info.numGives = 0;
-        player.info.numTakes = 0;
-                
-        player.SetActiveLayout(currPlayerI % 2 == 0);
-        player.SetTopMask(currPlayerI % 2 == 0);
-        player.SetTrackCanvas(playerMarkersContainer);
-        player.Init();
-                
-        player.SetScore(0, 0, 0);
-    
-        if (Globals.gameParam == Globals.ExercisesConfig.TUTORIAL)
-        {
-            //special condition also removes the score
-            player.scoreText.gameObject.SetActive(false);
-        }
-        
-        currPlayerI++;
-        
-        //if all players are connected, init their them and start the first level
-        if (currPlayerI == Globals.settings.generalSettings.playersParams.Count)
+        CreatePlayer(conn, numPlayers, true);
+
+        //if all players are connected, start the first level
+        if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
         {
             //start game
             // StartCoroutine(ChangeLevel(false, false));
         }
-        else if (currPlayerI > numPlayers)
-        {
-            currPlayerI--;
-            Debug.Log("Unable To Join, game is full");
-        }
-    
     }
     
     
@@ -333,110 +299,59 @@ public class GameManager : NetworkManager
     }
 
 
-    Player CreatePlayer(NetworkConnection conn)
+    Player CreatePlayer(NetworkConnection conn, int orderNum, bool generatePlayerInServer)
     {
 
         //fdgfd currPlayer.Init(allowInteraction, bufferedPlayerId, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
         //fgdgfd     wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
         //gfdgfd     (i % 2 == 0));
-        
-        GameObject playerGameObject = Instantiate(playerPrefab);
-        NetworkServer.AddPlayerForConnection(conn, playerGameObject);
-        
-        Player player = playerGameObject.GetComponent<Player>();
-        players.Add(player);
-        return player;
+        Player player = null;
+        if (generatePlayerInServer)
+        {
+            GameObject playerGameObject = Instantiate(playerPrefab);
+            //instantiates playerGameObject in all clients automatically
+            NetworkServer.AddPlayerForConnection(conn, playerGameObject);
+            player = playerGameObject.GetComponent<Player>();
+            players.Add(player);
+        }
+        else
+        {
+            player = players[orderNum];
+        }
 
-        // GameObject playerUI = player.ui;
-        // //set buttons for touch screen
-        // UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
-        // for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
-        // {
-        //     UnityEngine.UI.Button currButton = playerButtons[buttonI];
-        //     if (buttonI < pointerPlaceholders.Count)
-        //     {
-        //         currButton.GetComponent<Image>().color = player.GetButtonColor();
-        //         int innerButtonI = buttonI; //for coroutine to save the iterated values
-        //         currButton.onClick.AddListener(delegate ()
-        //         {
-        //             //verify if button should be pressed
-        //             if (player.GetCurrNumPossibleActionsPerLevel() < 1)
-        //             {
-        //                 Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-        //                 return;
-        //             }
-        //             if (player.GetActivebuttonIndex() != innerButtonI)
-        //             {
-        //                 Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
-        //             }
-        //
-        //             playerButtons[player.GetActivebuttonIndex()].GetComponent<Image>().color =
-        //                 player.GetButtonColor();
-        //             UpdateButtonOverlaps(player, innerButtonI);
-        //             player.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
-        //             currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
-        //         });
-        //     }
-        //     else
-        //     {
-        //         int j = buttonI - pointerPlaceholders.Count + 1;
-        //         Globals.KeyInteractionType iType = (Globals.KeyInteractionType)j;
-        //         EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
-        //         EventTrigger.Entry pointerDown = new EventTrigger.Entry();
-        //         pointerDown.eventID = EventTriggerType.PointerDown;
-        //         pointerDown.callback.AddListener(delegate (BaseEventData eventData)
-        //         {
-        //             currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
-        //
-        //             //verify if button should be pressed
-        //             bool playerOverlappedAndPressing = false;
-        //             foreach (Player innerPlayer in players)
-        //             {
-        //                 if (innerPlayer != player && player.IsPressingButton())
-        //                 {
-        //                     playerOverlappedAndPressing = true;
-        //                     break;
-        //                 }
-        //             }
-        //
-        //             if (player.GetCurrNumPossibleActionsPerLevel() < 1 ||
-        //                 (isButtonOverlap && playerOverlappedAndPressing))
-        //             {
-        //                 Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-        //                 currButton.GetComponent<Image>().color = Color.red;
-        //                 return;
-        //             }
-        //
-        //             Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
-        //             player.SetActiveInteraction(iType);
-        //
-        //             foreach (Player innerPlayer in players)
-        //             {
-        //                 if (innerPlayer != player && player.IsPressingButton() &&
-        //                     player.GetActivebuttonIndex() == player.GetActivebuttonIndex())
-        //                 {
-        //                     return;
-        //                 }
-        //             }
-        //             player.PressGameButton();
-        //         });
-        //         trigger.triggers.Add(pointerDown);
-        //         EventTrigger.Entry pointerUp = new EventTrigger.Entry();
-        //         pointerUp.eventID = EventTriggerType.PointerUp;
-        //         pointerUp.callback.AddListener(delegate (BaseEventData eventData)
-        //         {
-        //             Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
-        //             //verify if button should be pressed
-        //             if (player.GetCurrNumPossibleActionsPerLevel() > 0)
-        //             {
-        //                 currButton.GetComponent<Image>().color = player.GetButtonColor();
-        //             }
-        //             player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
-        //             player.ReleaseGameButton();
-        //         });
-        //         trigger.triggers.Add(pointerUp);
-        //     }
-        // }
+        
+        //setup player after instantiation
+        //clients do not have local players' info created
+        PlayerInfo currPlayerInfo = Globals.settings.generalSettings.playersParams[orderNum];
+
+        string bufferedPlayerId = "";
+        if (numPlayers < Globals.bufferedPlayerIds.Count)
+        {
+            bufferedPlayerId = Globals.bufferedPlayerIds[orderNum];
+        }
+        else
+        {
+            bufferedPlayerId = "NO_NAME_" + orderNum;
+        }
+
+        currPlayerInfo.id = bufferedPlayerId;
+
+        //all these methods are broadcasted to each client
+        player.SetActiveLayout(orderNum % 2 == 0);
+        player.SetTopMask(orderNum % 2 == 0);
+        player.Init(currPlayerInfo);
+
+        player.SetScore(0, 0, 0);
+        player.SetNumPossibleActions(0);
+        
+        
+        if (Globals.gameParam == Globals.ExercisesConfig.TUTORIAL)
+        {
+            //special condition also removes the score
+            player.HideScoreText();
+        }
+        
+        return player;
 
     }
 

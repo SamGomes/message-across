@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using AuxiliaryStructs;
 using Mirror;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace AuxiliaryStructs
 {
     public class Player : NetworkBehaviour
     {
+         
         public PlayerInfo info;
 
         public Color backgroundColor;
@@ -56,10 +58,14 @@ namespace AuxiliaryStructs
 
 
         // public void Init(bool allowInteraction, string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
-        public void Init()
+        [ClientRpc]
+        public void Init(PlayerInfo info)
         {
+            this.info = info;
+            this.trackCanvas = GameObject.Find("Track/playerMarkers").gameObject;
+
             //init colors
-            this.backgroundColor = new Color(info.buttonRGB[0], info.buttonRGB[1], info.buttonRGB[2], 0.8f);
+            backgroundColor = new Color(info.buttonRGB[0], info.buttonRGB[1], info.buttonRGB[2], 0.8f);
             
             //init active layout
             wordPanel = activeLayout
@@ -149,25 +155,126 @@ namespace AuxiliaryStructs
             
             score = -1;
             currNumPossibleActionsPerLevel = 0;
-            SetNumPossibleActions(0);
             pressingButton = false;
+            
+            
+            //init ui buttons
+            
+            //only set buttons for local player
+//            if (isLocalPlayer)
+//            {
+//                GameObject playerUI = ui;
+//                //set buttons for touch screen
+//                UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
+//                for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
+//                {
+//                    UnityEngine.UI.Button currButton = playerButtons[buttonI];
+//                    if (buttonI < pointerPlaceholders.Count)
+//                    {
+//                        currButton.GetComponent<Image>().color = player.GetButtonColor();
+//                        int innerButtonI = buttonI; //for coroutine to save the iterated values
+//                        currButton.onClick.AddListener(delegate ()
+//                        {
+//                            //verify if button should be pressed
+//                            if (player.GetCurrNumPossibleActionsPerLevel() < 1)
+//                            {
+//                                Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
+//                                return;
+//                            }
+//                            if (player.GetActivebuttonIndex() != innerButtonI)
+//                            {
+//                                Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
+//                            }
+//                
+//                            playerButtons[player.GetActivebuttonIndex()].GetComponent<Image>().color =
+//                                player.GetButtonColor();
+//                            UpdateButtonOverlaps(player, innerButtonI);
+//                            player.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
+//                            currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+//                        });
+//                    }
+//                    else
+//                    {
+//                        int j = buttonI - pointerPlaceholders.Count + 1;
+//                        Globals.KeyInteractionType iType = (Globals.KeyInteractionType)j;
+//                        EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
+//                        EventTrigger.Entry pointerDown = new EventTrigger.Entry();
+//                        pointerDown.eventID = EventTriggerType.PointerDown;
+//                        pointerDown.callback.AddListener(delegate (BaseEventData eventData)
+//                        {
+//                            currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+//                
+//                            //verify if button should be pressed
+//                            bool playerOverlappedAndPressing = false;
+//                            foreach (Player innerPlayer in players)
+//                            {
+//                                if (innerPlayer != player && player.IsPressingButton())
+//                                {
+//                                    playerOverlappedAndPressing = true;
+//                                    break;
+//                                }
+//                            }
+//                
+//                            if (player.GetCurrNumPossibleActionsPerLevel() < 1 ||
+//                                (isButtonOverlap && playerOverlappedAndPressing))
+//                            {
+//                                Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
+//                                currButton.GetComponent<Image>().color = Color.red;
+//                                return;
+//                            }
+//                
+//                            Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
+//                            player.SetActiveInteraction(iType);
+//                
+//                            foreach (Player innerPlayer in players)
+//                            {
+//                                if (innerPlayer != player && player.IsPressingButton() &&
+//                                    player.GetActivebuttonIndex() == player.GetActivebuttonIndex())
+//                                {
+//                                    return;
+//                                }
+//                            }
+//                            player.PressGameButton();
+//                        });
+//                        trigger.triggers.Add(pointerDown);
+//                        EventTrigger.Entry pointerUp = new EventTrigger.Entry();
+//                        pointerUp.eventID = EventTriggerType.PointerUp;
+//                        pointerUp.callback.AddListener(delegate (BaseEventData eventData)
+//                        {
+//                            Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
+//                            //verify if button should be pressed
+//                            if (player.GetCurrNumPossibleActionsPerLevel() > 0)
+//                            {
+//                                currButton.GetComponent<Image>().color = player.GetButtonColor();
+//                            }
+//                            player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
+//                            player.ReleaseGameButton();
+//                        });
+//                        trigger.triggers.Add(pointerUp);
+//                    }
+//                }
+//            }
         }
         
-        public void SetTrackCanvas(GameObject trackCanvas)
-        {
-            this.trackCanvas = trackCanvas;
-        }
         
+        [ClientRpc]
         public void SetActiveLayout(bool leftIfTrue)
         {
             this.activeLayout = leftIfTrue;
         }
         
+        [ClientRpc]
         public void SetTopMask(bool isTopMask)
         {
             this.isTopMask = isTopMask;
         }
 
+        [ClientRpc]
+        public void HideScoreText()
+        {
+            scoreText.gameObject.SetActive(false);
+        }
+        
         private Color SetColor(Color newColor)
         {
             statePanel.GetComponentInChildren<Image>().color = newColor;
@@ -198,6 +305,7 @@ namespace AuxiliaryStructs
             return info.id;
         }
 
+        [ClientRpc]
         public void SetCurrExercise(PlayerExercise newExercise)
         {
             currExercise = newExercise;
@@ -208,6 +316,7 @@ namespace AuxiliaryStructs
             return currExercise;
         }
 
+        [ClientRpc]
         public void InitCurrWordState()
         {
             currWordState = "";
@@ -223,6 +332,7 @@ namespace AuxiliaryStructs
             playerDisplayTexts[1].text = currWordState;
         }
 
+        [ClientRpc]
         public void SetCurrWordState(string newCurrWordState)
         {
             currWordState = newCurrWordState;
@@ -244,6 +354,7 @@ namespace AuxiliaryStructs
             scoreText.text = "Score: " + score;
         }
 
+        [ClientRpc]
         public void SetScore(int score, int increase, float delay)
         {
             if (this.score != score)
@@ -309,6 +420,7 @@ namespace AuxiliaryStructs
             this.activeHalf = activeHalf;
         }
 
+        [ClientRpc]
         public void UpdateActiveHalf(bool visible)
         {
             for (int i = 0; i < activeHalf.Count; i++)
@@ -349,6 +461,8 @@ namespace AuxiliaryStructs
             return this.marker;
         }
 
+
+        [ClientRpc]
         public void SetNumPossibleActions(int currNumPossibleActionsPerLevel)
         {
             this.currNumPossibleActionsPerLevel = currNumPossibleActionsPerLevel;
@@ -357,22 +471,24 @@ namespace AuxiliaryStructs
             statePanel.GetComponent<Animator>().Play(0);
         }
 
+        [ClientRpc]
         public void ResetNumPossibleActions()
         {
             SetNumPossibleActions(info.numPossibleActionsPerLevel);
         }
 
-        public int GetCurrNumPossibleActionsPerLevel()
-        {
-            return this.currNumPossibleActionsPerLevel;
-        }
-
+        [ClientRpc]
         public void DecreasePossibleActionsPerLevel()
         {
             currNumPossibleActionsPerLevel--;
             //update UI
             possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
             statePanel.GetComponent<Animator>().Play(0);
+        }
+
+        public int GetCurrNumPossibleActionsPerLevel()
+        {
+            return this.currNumPossibleActionsPerLevel;
         }
 
         public void PressGameButton()
