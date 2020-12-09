@@ -247,19 +247,19 @@ public class GameManager : NetworkManager
     }
 
 
-    public override void OnServerConnect(NetworkConnection conn)
-    {
-        base.OnServerConnect(conn);
-
-        int i = 0;
-        //generate representations of all player already online
-        while(i < numPlayers)
-        {
-            //here we already created the player and added it in the connection, we will simply init it
-            CreatePlayer(conn, i, false);
-            i++;
-        }
-    }
+//    public override void OnServerConnect(NetworkConnection conn)
+//    {
+//        base.OnServerConnect(conn);
+//
+//        int i = 0;
+//        //generate representations of all player already online
+//        while(i < numPlayers)
+//        {
+//            //here we already created the player and added it in the connection, we will simply init it
+//            CreatePlayer(conn, i, false);
+//            i++;
+//        }
+//    }
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
@@ -316,7 +316,8 @@ public class GameManager : NetworkManager
         }
         else
         {
-            player = players[orderNum];
+            Player[] playerGameObjects = GetComponentsInChildren<Player>();
+            player = playerGameObjects[orderNum];
         }
 
         
