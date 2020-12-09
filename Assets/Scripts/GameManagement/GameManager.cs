@@ -18,8 +18,8 @@ public class GameManager : NetworkManager
 {
     private int currPlayerI;
     public List<Player> players;
-    
-    
+
+    public GameObject[] playerPlaceholders;
     private int startingLevelDelayInSeconds;
 
     public Button quitButton;
@@ -250,19 +250,6 @@ public class GameManager : NetworkManager
     }
 
 
-//    public override void OnServerConnect(NetworkConnection conn)
-//    {
-//        base.OnServerConnect(conn);
-//
-//        int i = 0;
-//        //generate representations of all player already online
-//        while(i < numPlayers)
-//        {
-//            //here we already created the player and added it in the connection, we will simply init it
-//            CreatePlayer(conn, i, false);
-//            i++;
-//        }
-//    }
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
@@ -273,31 +260,25 @@ public class GameManager : NetworkManager
             InitPlayer(conn, player);
         }
 
-        //if all players are connected, start the first level
         if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
         {
-            //start game
-            // StartCoroutine(ChangeLevel(false, false));
+            //TODO: receive acknowledgements instead of waiting a bit
+            StartCoroutine(StartAfterInit());
         }
+    }
+
+    public IEnumerator StartAfterInit()
+    {
+        yield return new WaitForSeconds(1);
+        //if all players are connected, start the first level
+        
+        //start game
+        StartCoroutine(ChangeLevel(false, false));
+        
     }
     
     
-    // public override void OnClientConnect(NetworkConnection conn)
-    // {
-    //     base.OnClientConnect(conn);
-    //
-    //     //if my ui is not initted init it and disallow interaction with the other
-    //     AddPlayer(!isMyUIInitted);
-    //     if (!isMyUIInitted)
-    //     {
-    //         for (int i = 0; i < currPlayerI; i++)
-    //         {
-    //             AddPlayer(isMyUIInitted);
-    //         }
-    //
-    //         isMyUIInitted = true;
-    //     }
-    // }
+    
 
     public override void OnServerDisconnect(NetworkConnection conn)
     {
@@ -340,6 +321,9 @@ public class GameManager : NetworkManager
             //special condition also removes the score
             player.HideScoreText();
         }
+        
+        //TODO change for being called in clients
+        playerPlaceholders[(orderNum+1) % 2].SetActive(false);
     }
     
     void CreatePlayer(NetworkConnection conn, int orderNum)
@@ -397,7 +381,7 @@ public class GameManager : NetworkManager
 
     }
 
-    [Server]
+    
     IEnumerator ChangeLevel(bool recordMetrics, bool areWordsUnfinished)
     {
 

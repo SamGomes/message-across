@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using AuxiliaryStructs;
 using Mirror;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -42,6 +43,7 @@ namespace AuxiliaryStructs
         private GameButton gameButton;
 
         private GameObject trackCanvas;
+        private Transform markerPlaceholders;
 
         private Color buttonColor;
 
@@ -92,6 +94,7 @@ namespace AuxiliaryStructs
                 ? gameObject.transform.Find("UICanvas/LeftPlayerUI").gameObject
                 : gameObject.transform.Find("UICanvas/RightPlayerUI").gameObject;
 
+            
             if (activeLayout)
             {
                 Destroy(gameObject.transform.Find("WordPanels/RightDisplay").gameObject);
@@ -172,42 +175,45 @@ namespace AuxiliaryStructs
             
             //init ui buttons
             
-            //only set buttons for local player
-//            if (isLocalPlayer)
-//            {
-//                GameObject playerUI = ui;
-//                //set buttons for touch screen
-//                UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
-//                for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
-//                {
-//                    UnityEngine.UI.Button currButton = playerButtons[buttonI];
-//                    if (buttonI < pointerPlaceholders.Count)
-//                    {
-//                        currButton.GetComponent<Image>().color = player.GetButtonColor();
-//                        int innerButtonI = buttonI; //for coroutine to save the iterated values
-//                        currButton.onClick.AddListener(delegate ()
-//                        {
-//                            //verify if button should be pressed
-//                            if (player.GetCurrNumPossibleActionsPerLevel() < 1)
-//                            {
-//                                Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-//                                return;
-//                            }
-//                            if (player.GetActivebuttonIndex() != innerButtonI)
-//                            {
-//                                Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
-//                            }
-//                
-//                            playerButtons[player.GetActivebuttonIndex()].GetComponent<Image>().color =
-//                                player.GetButtonColor();
-//                            UpdateButtonOverlaps(player, innerButtonI);
-//                            player.SetActiveButton(innerButtonI, pointerPlaceholders[innerButtonI].transform.position);
-//                            currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
-//                        });
-//                    }
+//            only set buttons for local player
+            if (isLocalPlayer)
+            {
+                this.markerPlaceholders = GameObject.Find("Track/MarkerPlaceholders").transform;
+                
+                
+                GameObject playerUI = ui;
+                //set buttons for touch screen
+                UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
+                for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
+                {
+                    UnityEngine.UI.Button currButton = playerButtons[buttonI];
+                    if (buttonI < markerPlaceholders.childCount)
+                    {
+                        currButton.GetComponent<Image>().color = GetButtonColor();
+                        int innerButtonI = buttonI; //for coroutine to save the iterated values
+                        currButton.onClick.AddListener(delegate ()
+                        {
+                            //verify if button should be pressed
+                            if (GetCurrNumPossibleActionsPerLevel() < 1)
+                            {
+                                Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
+                                return;
+                            }
+                            if (GetActivebuttonIndex() != innerButtonI)
+                            {
+                                Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
+                            }
+                
+                            playerButtons[GetActivebuttonIndex()].GetComponent<Image>().color =
+                                GetButtonColor();
+                            //UpdateButtonOverlaps(player, innerButtonI);
+                            SetActiveButton(innerButtonI, markerPlaceholders.GetChild(innerButtonI).transform.position);
+                            currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+                        });
+                    }
 //                    else
 //                    {
-//                        int j = buttonI - pointerPlaceholders.Count + 1;
+//                        int j = buttonI - markerPlaceholders.childCount + 1;
 //                        Globals.KeyInteractionType iType = (Globals.KeyInteractionType)j;
 //                        EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
 //                        EventTrigger.Entry pointerDown = new EventTrigger.Entry();
@@ -264,8 +270,8 @@ namespace AuxiliaryStructs
 //                        });
 //                        trigger.triggers.Add(pointerUp);
 //                    }
-//                }
-//            }
+                }
+            }
             initted = true;
         }
 
