@@ -16,6 +16,7 @@ using Object = System.Object;
 
 public class GameManager : NetworkManager
 {
+    private int currPlayerI;
     public List<Player> players;
     
     
@@ -149,8 +150,10 @@ public class GameManager : NetworkManager
                 // setup players and level directly if local
                 if (Globals.settings.networkSettings.currMultiplayerOption == "LOCAL")
                 {
-                    CreatePlayer(null, 0, true);
-                    CreatePlayer(null, 1, true);
+//                    CreatePlayer(null);
+//                    CreatePlayer(null);
+//                    InitPlayer(null,0);
+//                    InitPlayer(null,1);
                     StartCoroutine(ChangeLevel(false, false));
                 }
             }
@@ -263,7 +266,12 @@ public class GameManager : NetworkManager
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
-        CreatePlayer(conn, numPlayers, true);
+        CreatePlayer(conn, currPlayerI++);
+        
+        foreach(Player player in players)
+        {
+            InitPlayer(conn, player);
+        }
 
         //if all players are connected, start the first level
         if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
@@ -298,28 +306,9 @@ public class GameManager : NetworkManager
         EndGame();
     }
 
-
-    Player CreatePlayer(NetworkConnection conn, int orderNum, bool generatePlayerInServer)
+    void InitPlayer(NetworkConnection conn, Player player)
     {
-
-        //fdgfd currPlayer.Init(allowInteraction, bufferedPlayerId, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
-        //fgdgfd     wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
-        //gfdgfd     (i % 2 == 0));
-        Player player = null;
-        if (generatePlayerInServer)
-        {
-            GameObject playerGameObject = Instantiate(playerPrefab);
-            //instantiates playerGameObject in all clients automatically
-            NetworkServer.AddPlayerForConnection(conn, playerGameObject);
-            player = playerGameObject.GetComponent<Player>();
-            players.Add(player);
-        }
-        else
-        {
-            Player[] playerGameObjects = GetComponentsInChildren<Player>();
-            player = playerGameObjects[orderNum];
-        }
-
+        int orderNum = player.GetOrderNum();
         
         //setup player after instantiation
         //clients do not have local players' info created
@@ -351,9 +340,22 @@ public class GameManager : NetworkManager
             //special condition also removes the score
             player.HideScoreText();
         }
-        
-        return player;
+    }
+    
+    void CreatePlayer(NetworkConnection conn, int orderNum)
+    {
 
+        //fdgfd currPlayer.Init(allowInteraction, bufferedPlayerId, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
+        //fgdgfd     wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
+        //gfdgfd     (i % 2 == 0));
+        
+        GameObject playerGameObject = Instantiate(playerPrefab);
+        //instantiates playerGameObject in all clients automatically
+        NetworkServer.AddPlayerForConnection(conn, playerGameObject);
+        Player player = playerGameObject.GetComponent<Player>();
+        player.SetOrderNum(orderNum);
+        players.Add(player);
+        
     }
 
 

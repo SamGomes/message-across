@@ -11,7 +11,9 @@ namespace AuxiliaryStructs
 {
     public class Player : NetworkBehaviour
     {
-         
+        private bool initted;
+        private int orderNum;
+        
         public PlayerInfo info;
 
         public Color backgroundColor;
@@ -56,11 +58,21 @@ namespace AuxiliaryStructs
         private bool isTopMask;
         private bool activeLayout; //parameterize the side of the board player will play in, true if left
 
+        public void Awake()
+        {
+            initted = false;
+        }
 
         // public void Init(bool allowInteraction, string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
         [ClientRpc]
         public void Init(PlayerInfo info)
         {
+            
+            if (initted)
+            {
+                return;
+            }
+
             this.info = info;
             this.trackCanvas = GameObject.Find("Track/playerMarkers").gameObject;
 
@@ -254,18 +266,38 @@ namespace AuxiliaryStructs
 //                    }
 //                }
 //            }
+            initted = true;
+        }
+
+        public void SetOrderNum(int orderNum)
+        {
+            this.orderNum = orderNum;
         }
         
+        public int GetOrderNum()
+        {
+            return orderNum;
+        }
         
         [ClientRpc]
         public void SetActiveLayout(bool leftIfTrue)
         {
+            if (initted)
+            {
+                return;
+            }
+            
             this.activeLayout = leftIfTrue;
         }
         
         [ClientRpc]
         public void SetTopMask(bool isTopMask)
         {
+            if (initted)
+            {
+                return;
+            }
+            
             this.isTopMask = isTopMask;
         }
 
