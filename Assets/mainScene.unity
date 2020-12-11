@@ -648,7 +648,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2737773061194612460}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -43.257, y: 12.42, z: -219.95}
+  m_LocalPosition: {x: -44.1, y: 12.42, z: -219.95}
   m_LocalScale: {x: 2.0624585, y: 2.06246, z: 2.06246}
   m_Children:
   - {fileID: 1924658964869280}
@@ -872,7 +872,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: a9dce12d5ec0e034db10c480e3c02c94, type: 3}
+    m_Font: {fileID: 12800000, guid: 936281a245e210b4fb3a664454429068, type: 3}
     m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 1
@@ -917,7 +917,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 942293535}
   m_LocalRotation: {x: 0.41486654, y: 0.41486648, z: -0.5726131, w: 0.5726132}
-  m_LocalPosition: {x: -2, y: -13.9, z: -74.9}
+  m_LocalPosition: {x: -2.8429985, y: -13.9, z: -74.9}
   m_LocalScale: {x: 3.4823418, y: 5.0862613, z: 10.433292}
   m_Children:
   - {fileID: 1273330583}
@@ -1370,8 +1370,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -26.1, y: -18.4}
-  m_SizeDelta: {x: 1440, y: 900}
+  m_AnchoredPosition: {x: -2.63, y: -4.93}
+  m_SizeDelta: {x: 196.82, y: 226.03}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1553605806
 GameObject:
@@ -6353,7 +6353,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: a9dce12d5ec0e034db10c480e3c02c94, type: 3}
+    m_Font: {fileID: 12800000, guid: 936281a245e210b4fb3a664454429068, type: 3}
     m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 1
@@ -6821,7 +6821,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 6.741235, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1924658964869277

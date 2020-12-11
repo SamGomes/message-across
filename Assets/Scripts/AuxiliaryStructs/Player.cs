@@ -12,7 +12,7 @@ namespace AuxiliaryStructs
 {
     public class Player : NetworkBehaviour
     {
-        public List<Transform> playerPlaceholders;
+        public List<GameObject> playerPlaceholders;
         
         private bool initted;
 //        private int orderNum;
@@ -179,10 +179,17 @@ namespace AuxiliaryStructs
             
             //update ui placeholders after updating the order num
             playerPlaceholders =
-                new List<Transform>(GameObject.Find("CanvasForUI/PlayerPlaceholders").GetComponentsInChildren<Transform>(includeInactive:true));
-            playerPlaceholders.RemoveAt(0);
+                new List<GameObject>();
+            
+            foreach (Transform child in GameObject.Find("CanvasForUI/PlayerPlaceholders").transform){
+                if (null == child)
+                    continue;
+                //child.gameobject contains the current child you can do whatever you want like add it to an array
+                playerPlaceholders.Add(child.gameObject);
+            }
+            
             Debug.Log("orderI: "+((orderNum +1) % 2));
-            playerPlaceholders[(orderNum +1) % 2].gameObject.SetActive(false);
+            playerPlaceholders[(orderNum +1) % 2].SetActive(false);
             
             //init ui buttons
             //only set buttons for local player, the others get "computer said no"
