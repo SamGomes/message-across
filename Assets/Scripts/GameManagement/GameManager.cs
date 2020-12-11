@@ -311,7 +311,7 @@ public class GameManager : NetworkManager
         player.Init(currPlayerInfo, orderNum);
 
         player.SetScore(0, 0, 0);
-        player.SetNumPossibleActions(0);
+        player.SetNumPossibleActions(4);
         
         
         if (Globals.gameParam == Globals.ExercisesConfig.TUTORIAL)

@@ -196,37 +196,25 @@ namespace AuxiliaryStructs
             if (isLocalPlayer)
             {
                 this.markerPlaceholders = GameObject.Find("Track/MarkerPlaceholders").transform;
-                
+                SetActiveButton(0, markerPlaceholders.GetChild(0).transform.position);
                 
                 GameObject playerUI = ui;
                 //set buttons for touch screen
-                UnityEngine.UI.Button[] playerButtons = playerUI.GetComponentsInChildren<UnityEngine.UI.Button>();
+                Button[] playerButtons = playerUI.GetComponentsInChildren<Button>();
+                
+                //position the marker in the left initially
+                ChangeLane(playerButtons, playerButtons[0], 0);
+
                 for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
                 {
-                    UnityEngine.UI.Button currButton = playerButtons[buttonI];
+                    Button currButton = playerButtons[buttonI];
+                    currButton.interactable = true;
                     if (buttonI < markerPlaceholders.childCount)
                     {
                         currButton.GetComponent<Image>().color = GetButtonColor();
                         int innerButtonI = buttonI; //for coroutine to save the iterated values
-                        currButton.onClick.AddListener(delegate ()
-                        {
-                            //verify if button should be pressed
-                            if (GetCurrNumPossibleActionsPerLevel() < 1)
-                            {
-                                Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-                                return;
-                            }
-                            if (GetActivebuttonIndex() != innerButtonI)
-                            {
-                                Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
-                            }
-                
-                            playerButtons[GetActivebuttonIndex()].GetComponent<Image>().color =
-                                GetButtonColor();
-                            //UpdateButtonOverlaps(player, innerButtonI);
-                            SetActiveButton(innerButtonI, markerPlaceholders.GetChild(innerButtonI).transform.position);
-                            currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
-                        });
+                        currButton.onClick.AddListener(delegate () { ChangeLane(playerButtons, currButton, innerButtonI); });
+
                     }
 //                    else
 //                    {
@@ -292,6 +280,25 @@ namespace AuxiliaryStructs
             initted = true;
         }
 
+        public void ChangeLane(Button[] playerButtons, Button currButton, int innerButtonI)
+        {
+            //verify if button should be pressed
+            if (GetCurrNumPossibleActionsPerLevel() < 1)
+            {
+                Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
+                return;
+            }
+            if (GetActivebuttonIndex() != innerButtonI)
+            {
+                Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
+            }
+                
+            playerButtons[GetActivebuttonIndex()].GetComponent<Image>().color =
+                GetButtonColor();
+            //UpdateButtonOverlaps(player, innerButtonI);
+            SetActiveButton(innerButtonI, markerPlaceholders.GetChild(innerButtonI).transform.position);
+            currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+        }
         
         [ClientRpc]
         public void SetActiveLayout(bool leftIfTrue)
