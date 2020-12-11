@@ -12,8 +12,10 @@ namespace AuxiliaryStructs
 {
     public class Player : NetworkBehaviour
     {
+        public List<Transform> playerPlaceholders;
+        
         private bool initted;
-        private int orderNum;
+//        private int orderNum;
         
         public PlayerInfo info;
 
@@ -67,8 +69,9 @@ namespace AuxiliaryStructs
 
         // public void Init(bool allowInteraction, string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
         [ClientRpc]
-        public void Init(PlayerInfo info)
+        public void Init(PlayerInfo info, int orderNum)
         {
+            Debug.Log("init player "+orderNum);
             
             if (initted)
             {
@@ -78,6 +81,7 @@ namespace AuxiliaryStructs
             this.info = info;
             this.trackCanvas = GameObject.Find("Track/playerMarkers").gameObject;
 
+            
             //init colors
             backgroundColor = new Color(info.buttonRGB[0], info.buttonRGB[1], info.buttonRGB[2], 0.8f);
             
@@ -173,9 +177,15 @@ namespace AuxiliaryStructs
             pressingButton = false;
             
             
-            //init ui buttons
+            //update ui placeholders after updating the order num
+            playerPlaceholders =
+                new List<Transform>(GameObject.Find("CanvasForUI/PlayerPlaceholders").GetComponentsInChildren<Transform>(includeInactive:true));
+            playerPlaceholders.RemoveAt(0);
+            Debug.Log("orderI: "+((orderNum +1) % 2));
+            playerPlaceholders[(orderNum +1) % 2].gameObject.SetActive(false);
             
-//            only set buttons for local player
+            //init ui buttons
+            //only set buttons for local player, the others get "computer said no"
             if (isLocalPlayer)
             {
                 this.markerPlaceholders = GameObject.Find("Track/MarkerPlaceholders").transform;
@@ -275,15 +285,6 @@ namespace AuxiliaryStructs
             initted = true;
         }
 
-        public void SetOrderNum(int orderNum)
-        {
-            this.orderNum = orderNum;
-        }
-        
-        public int GetOrderNum()
-        {
-            return orderNum;
-        }
         
         [ClientRpc]
         public void SetActiveLayout(bool leftIfTrue)

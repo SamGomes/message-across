@@ -16,10 +16,8 @@ using Object = System.Object;
 
 public class GameManager : NetworkManager
 {
-    private int currPlayerI;
     public List<Player> players;
 
-    public GameObject[] playerPlaceholders;
     private int startingLevelDelayInSeconds;
 
     public Button quitButton;
@@ -253,17 +251,18 @@ public class GameManager : NetworkManager
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
-        CreatePlayer(conn, currPlayerI++);
-        
+        CreatePlayer(conn);
+
+        int orderNum = 0;
         foreach(Player player in players)
         {
-            InitPlayer(conn, player);
+            InitPlayer(conn, player, orderNum++);
         }
 
         if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
         {
             //TODO: receive acknowledgements instead of waiting a bit
-            StartCoroutine(StartAfterInit());
+            //StartCoroutine(StartAfterInit());
         }
     }
 
@@ -287,10 +286,9 @@ public class GameManager : NetworkManager
         EndGame();
     }
 
-    void InitPlayer(NetworkConnection conn, Player player)
+    void InitPlayer(NetworkConnection conn, Player player, int orderNum)
     {
-        int orderNum = player.GetOrderNum();
-        
+
         //setup player after instantiation
         //clients do not have local players' info created
         PlayerInfo currPlayerInfo = Globals.settings.generalSettings.playersParams[orderNum];
@@ -310,7 +308,7 @@ public class GameManager : NetworkManager
         //all these methods are broadcasted to each client
         player.SetActiveLayout(orderNum % 2 == 0);
         player.SetTopMask(orderNum % 2 == 0);
-        player.Init(currPlayerInfo);
+        player.Init(currPlayerInfo, orderNum);
 
         player.SetScore(0, 0, 0);
         player.SetNumPossibleActions(0);
@@ -322,11 +320,11 @@ public class GameManager : NetworkManager
             player.HideScoreText();
         }
         
-        //TODO change for being called in clients
-        playerPlaceholders[(orderNum+1) % 2].SetActive(false);
     }
-    
-    void CreatePlayer(NetworkConnection conn, int orderNum)
+
+   
+
+    void CreatePlayer(NetworkConnection conn)
     {
 
         //fdgfd currPlayer.Init(allowInteraction, bufferedPlayerId, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
@@ -337,7 +335,6 @@ public class GameManager : NetworkManager
         //instantiates playerGameObject in all clients automatically
         NetworkServer.AddPlayerForConnection(conn, playerGameObject);
         Player player = playerGameObject.GetComponent<Player>();
-        player.SetOrderNum(orderNum);
         players.Add(player);
         
     }
