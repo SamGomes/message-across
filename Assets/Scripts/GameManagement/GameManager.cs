@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using AuxiliaryStructs;
 using UnityEngine;
@@ -12,6 +11,7 @@ using UnityEngine.UI;
 
 using Mirror;
 using Object = System.Object;
+using Random = UnityEngine.Random;
 
 
 public class GameManager : NetworkManager
@@ -44,7 +44,11 @@ public class GameManager : NetworkManager
 
     private string scoreSystemPath; //to be able to recover condition
 
+    
+    private List<char> letters = new List<char>(){ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+    private List<List<char>> letterPools;
 
+    float playersLettersSpawnP;
 
     public void PauseGame()
     {
@@ -221,6 +225,15 @@ public class GameManager : NetworkManager
         Globals.backgroundAudioManager.StopCurrentClip();
         Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
+        //init letter spawner stuff
+        int spawnerId = 0;
+        letterPools = new List<List<char>>();
+        foreach (LetterSpawner spawner in letterSpawners)
+        {
+            spawner.SetId(spawnerId++);
+            letterPools.Add(new List<char>());
+        }
+        playersLettersSpawnP = Globals.settings.generalSettings.playersLettersSpawnP;
     }
 
 
@@ -240,6 +253,12 @@ public class GameManager : NetworkManager
         {
             //TODO: receive acknowledgements instead of waiting a bit
             //StartCoroutine(StartAfterInit());
+            foreach (LetterSpawner spawner in letterSpawners)
+            {
+                InitSpawner(spawner);
+                StartCoroutine(UpdateSpawner(spawner));
+                spawner.StopSpawning();
+            }
         }
     }
     
@@ -308,10 +327,21 @@ public class GameManager : NetworkManager
             return;
         }
         PlayerTrackChanges();
-        
 
+        if (Input.GetKey(KeyCode.S))
+        {
+            foreach (LetterSpawner spawner in letterSpawners)
+            {
+                spawner.StartSpawning();
+            }
+        }
+        
+        
     }
 
+    
+    
+    //--------------------- player movement ------------------------
     [Server]
     public void PlayerTrackChanges()
     {
@@ -373,6 +403,92 @@ public class GameManager : NetworkManager
     }
     
 
+    
+    
+    
+    
+    
+    
+    //--------------------- spawners stuff ------------------------
+    [Server]
+    IEnumerator UpdateSpawner(LetterSpawner spawner)
+    { 
+        while (spawner.IsStopped())
+        {
+            yield return null;
+        }
+        yield return new WaitForSeconds(Random.Range(spawner.minIntervalRange, spawner.maxIntervalRange));
+        
+        //pick new letter
+        
+        if (letterPools[spawner.GetId()].Count == 0)
+        {
+            ResetPool(spawner);
+        }
+        List<char> letterPool = letterPools[spawner.GetId()];
+        
+        int random = Random.Range(0, letterPool.Count - 1);
+        char currLetter = letterPool[random];
+        letterPool.RemoveAt(random);
+        
+        letterPools[spawner.GetId()] = letterPool;
+        
+        spawner.SpawnLetter(currLetter); //spawns the picked letter in each client
+        
+        StartCoroutine(UpdateSpawner(spawner));
+    }
+
+    [Server]
+    void InitSpawner(LetterSpawner spawner)
+    {
+        if (playersLettersSpawnP == 0.0f)
+        {
+            playersLettersSpawnP = 0.8f;
+        }
+    }
+    
+    [Server]
+    private void ResetPool(LetterSpawner spawner)
+    {
+
+        List<char> currWordsLetters = new List<char>();
+        List<char> allLetters = new List<char>();
+//        foreach (Player player in players)
+//        {
+//            currWordsLetters = currWordsLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
+//        }
+        
+        currWordsLetters = new List<char>(){'A','B','C','D'};
+
+        float total = currWordsLetters.Count / playersLettersSpawnP;
+        List<char> letterPool = letterPools[spawner.GetId()];
+
+        while (letterPool.Count < total)
+        {
+            if (allLetters.Count == 0)
+            {
+                allLetters.AddRange(letters);
+            }
+
+            char newLetter = allLetters[Random.Range(0, allLetters.Count - 1)];
+            if (!currWordsLetters.Contains(newLetter))
+            {
+                letterPool.Add(newLetter);
+            }
+            allLetters.Remove(newLetter);
+        }
+        
+        letterPools[spawner.GetId()] = letterPool;
+    }
+    
+    
+    
+    
+    
+    
+    
+    //--------------------- level change ------------------------
+    
     [Server]
     private IEnumerator RecordMetrics()
     {
@@ -401,7 +517,7 @@ public class GameManager : NetworkManager
 
     }
 
-    
+    [Server]
     IEnumerator ChangeLevel(bool recordMetrics, bool areWordsUnfinished)
     {
 
@@ -420,6 +536,7 @@ public class GameManager : NetworkManager
 
         foreach (LetterSpawner spawner in letterSpawners)
         {
+            StartCoroutine(UpdateSpawner(spawner));
             spawner.StopSpawning();
         }
 
@@ -475,7 +592,7 @@ public class GameManager : NetworkManager
         Globals.effectsAudioManager.PlayClip("Audio/snap");
         foreach (LetterSpawner spawner in letterSpawners)
         {
-            spawner.BeginSpawning();
+            spawner.StartSpawning();
         }
 
         foreach (Player player in players)
@@ -491,8 +608,6 @@ public class GameManager : NetworkManager
 
         Globals.currLevelId++;
     }
-
-
 
     private void ChangeTargetWords()
     {
@@ -520,6 +635,7 @@ public class GameManager : NetworkManager
     }
 
 
+    //--------------------- player actions ------------------------
     private bool TestAndExecuteHit(bool execute, char letterText, GameObject letter, Player player)
     {
         string currWordState = player.GetCurrWordState();
