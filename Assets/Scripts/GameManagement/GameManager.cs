@@ -321,8 +321,8 @@ public class GameManager : NetworkManager
             if (player != null && player.ChangedLane())
             {
                 ChangeLane(player);
-                UpdateButtonOverlaps(player, player.GetActiveButtonIndex());
-                player.AckUpdatedButtonOverlaps();
+                UpdateButtonOverlaps(player, player.GetPressedButtonIndex());
+                player.AckChangedLane();
             }
         }
     }
@@ -342,13 +342,13 @@ public class GameManager : NetworkManager
         
         foreach (Player player in players)
         {
-            foreach(GameObject obj in player.GetMaskedHalf())
+            if(isButtonOverlap)
             {
-                obj.SetActive(!isButtonOverlap);
+                player.HideHalfMarker();
             }
-            if(!isButtonOverlap)
+            else
             {
-                player.GetActiveHalf().AddRange(player.GetMaskedHalf());
+                player.ShowHalfMarker();
             }
             player.UpdateActiveHalf(player.IsPressingButton());
         }

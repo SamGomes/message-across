@@ -41,8 +41,11 @@ namespace AuxiliaryStructs
 
         private GameObject marker;
         public GameObject markerPrefab;
+        
         private List<GameObject> maskedHalf;
         private List<GameObject> activeHalf;
+        private List<GameObject> displayedHalf;
+        
         private GameButton gameButton;
 
         private GameObject trackCanvas;
@@ -162,13 +165,12 @@ namespace AuxiliaryStructs
                 : marker.transform.Find("Button/BackgroundBH").gameObject);
             activeHalf.Add((!isTopMask)
                 ? marker.transform.Find("trackTH").gameObject
-                : marker.transform.Find("trackBH").gameObject); //activeHalf[1] is the one of the track
-            activeHalf.Add((isTopMask)
-                ? marker.transform.Find("Button/BackgroundTH").gameObject
-                : marker.transform.Find("Button/BackgroundBH").gameObject);
-            activeHalf.Add((isTopMask)
-                ? marker.transform.Find("trackTH").gameObject
                 : marker.transform.Find("trackBH").gameObject);
+            
+            displayedHalf = new List<GameObject>();
+            displayedHalf.Clear();
+            displayedHalf.AddRange(activeHalf);
+            displayedHalf.AddRange(maskedHalf);
 
             activeHalf[1].SetActive(false); //lets init it to hidden
             
@@ -207,7 +209,6 @@ namespace AuxiliaryStructs
             GameObject playerUI = ui;
             //set buttons for touch screen
             playerButtons = playerUI.GetComponentsInChildren<Button>();
-            //SetActiveButton(0, markerPlaceholders.GetChild(0).transform.position);
                 
             //position the marker in the left initially
 //                ChangeLane(playerButtons, playerButtons[0], 0);
@@ -291,7 +292,8 @@ namespace AuxiliaryStructs
                 }
             }
             
-            changedLane = false;
+            //force change to the first lane at start
+            changedLane = true;
             
             initted = true;
         }
@@ -310,12 +312,10 @@ namespace AuxiliaryStructs
         }
         
         [ClientRpc] 
-        public void AckUpdatedButtonOverlaps()
+        public void AckChangedLane()
         {
             changedLane = false;
         }
-
-        
         
         
         [ClientRpc]
@@ -490,28 +490,42 @@ namespace AuxiliaryStructs
             return this.maskedHalf;
         }
 
-        public List<GameObject> GetActiveHalf()
-        {
-            return this.activeHalf;
-        }
 
-        public void SetActiveHalf(List<GameObject> activeHalf)
+        [ClientRpc]
+        public void HideHalfMarker()
         {
-            this.activeHalf = activeHalf;
+            displayedHalf.Clear();
+            displayedHalf.AddRange(activeHalf);
+        }
+        
+        [ClientRpc]
+        public void ShowHalfMarker()
+        {
+            displayedHalf.Clear();
+            displayedHalf.AddRange(activeHalf);
+            displayedHalf.AddRange(maskedHalf);
         }
 
         [ClientRpc]
         public void UpdateActiveHalf(bool visible)
         {
-            for (int i = 0; i < activeHalf.Count; i++)
+            foreach (GameObject obj in maskedHalf)
             {
+                obj.SetActive(false);
+            }
+            
+            for (int i = 0; i < displayedHalf.Count; i++)
+            {
+                GameObject currObj = displayedHalf[i];
                 if (i % 2 == 0)
                 {
-                    continue;
+                    currObj.SetActive(true);
+                }
+                else
+                {
+                    currObj.SetActive(visible);
                 }
 
-                GameObject currObj = activeHalf[i];
-                currObj.SetActive(visible);
             }
         }
 
