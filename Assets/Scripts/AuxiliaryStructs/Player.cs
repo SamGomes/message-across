@@ -85,6 +85,11 @@ namespace AuxiliaryStructs
         {
             Debug.Log("init player "+orderNum);
             
+            //force change to the first lane at start
+            changedLane = true;
+            currPressedButtonI = 0;
+            ChangedLane();
+            
             if (initted)
             {
                 return;
@@ -209,9 +214,6 @@ namespace AuxiliaryStructs
             GameObject playerUI = ui;
             //set buttons for touch screen
             playerButtons = playerUI.GetComponentsInChildren<Button>();
-                
-            //position the marker in the left initially
-//                ChangeLane(playerButtons, playerButtons[0], 0);
 
             //only set buttons for local player, the others get "computer said no"
             if (isLocalPlayer)
@@ -292,8 +294,7 @@ namespace AuxiliaryStructs
                 }
             }
             
-            //force change to the first lane at start
-            changedLane = true;
+            
             
             initted = true;
         }
@@ -302,8 +303,8 @@ namespace AuxiliaryStructs
         [Command]
         public void ChangeLane(int buttonI)
         {
-            this.changedLane = true;
-            this.currPressedButtonI = buttonI;
+            changedLane = true;
+            currPressedButtonI = buttonI;
         }
         
         public bool ChangedLane()

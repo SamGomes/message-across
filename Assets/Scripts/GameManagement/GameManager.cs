@@ -235,6 +235,7 @@ public class GameManager : NetworkManager
             InitPlayer(conn, player, orderNum++);
         }
 
+        
         if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
         {
             //TODO: receive acknowledgements instead of waiting a bit
@@ -255,7 +256,6 @@ public class GameManager : NetworkManager
 
     void InitPlayer(NetworkConnection conn, Player player, int orderNum)
     {
-
         //setup player after instantiation
         //clients do not have local players' info created
         PlayerInfo currPlayerInfo = Globals.settings.generalSettings.playersParams[orderNum];
@@ -286,7 +286,6 @@ public class GameManager : NetworkManager
             //special condition also removes the score
             player.HideScoreText();
         }
-        
     }
 
    

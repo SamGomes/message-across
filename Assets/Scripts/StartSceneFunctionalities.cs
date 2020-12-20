@@ -70,7 +70,6 @@ public static class Globals
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
     {
         Vector3 sourcePos = source.transform.position;
-        float totalDist = (targetPos - sourcePos).sqrMagnitude;
         float currT = 0;
         while (currT < 1.0f && source != null)
         {
