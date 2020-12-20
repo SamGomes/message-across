@@ -312,11 +312,9 @@ MonoBehaviour:
   players: []
   quitButton: {fileID: 1153279090}
   resetButton: {fileID: 1853533485}
-  countdownText: {fileID: 1381834994}
   isGameplayPaused: 0
   isGameplayStarted: 0
   isButtonOverlap: 0
-  emoji: {fileID: 1924658964869277}
   letterSpawners:
   - {fileID: 264394624}
   - {fileID: 4983876231665582848}
@@ -325,6 +323,7 @@ MonoBehaviour:
   - {fileID: 676340076}
   - {fileID: 4983876231236875756}
   - {fileID: 4983876231438987529}
+  cmge: {fileID: 1787032151}
 --- !u!4 &75445756
 Transform:
   m_ObjectHideFlags: 0
@@ -550,7 +549,6 @@ MonoBehaviour:
   gameManager: {fileID: 75445755}
   minIntervalRange: 2
   maxIntervalRange: 3
-  playersLettersSpawnP: 0
 --- !u!114 &264394625
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6296,6 +6294,70 @@ MonoBehaviour:
   m_FirstSelected: {fileID: 0}
   m_sendNavigationEvents: 1
   m_DragThreshold: 10
+--- !u!1 &1787032148
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1787032150}
+  - component: {fileID: 1787032149}
+  - component: {fileID: 1787032151}
+  m_Layer: 0
+  m_Name: ClientGameElements
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1787032149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1787032148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 1762301974
+  serverOnly: 0
+  m_AssetId: 
+  hasSpawned: 0
+--- !u!4 &1787032150
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1787032148}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.579021, y: -28.137589, z: -118.325806}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1787032151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1787032148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fc09f16ce08c47efb13ba4c07e9c5e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  countdownText: {fileID: 1381834994}
+  emoji: {fileID: 1924658964869277}
 --- !u!1 &1817456428
 GameObject:
   m_ObjectHideFlags: 0
@@ -7098,7 +7160,6 @@ MonoBehaviour:
   gameManager: {fileID: 75445755}
   minIntervalRange: 2
   maxIntervalRange: 3
-  playersLettersSpawnP: 0
 --- !u!1 &4983876231665583102
 GameObject:
   m_ObjectHideFlags: 0
@@ -7216,7 +7277,6 @@ MonoBehaviour:
   gameManager: {fileID: 75445755}
   minIntervalRange: 2
   maxIntervalRange: 3
-  playersLettersSpawnP: 0
 --- !u!222 &5122790629198433074
 CanvasRenderer:
   m_ObjectHideFlags: 0

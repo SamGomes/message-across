@@ -26,14 +26,12 @@ public class GameManager : NetworkManager
 
     private int exerciseGroupIndex;
 
-    public Text countdownText;
 
     public bool isGameplayPaused;
     public bool isGameplayStarted;
 
     public bool isButtonOverlap;
 
-    public GameObject emoji;
 
     public LetterSpawner[] letterSpawners;
 
@@ -50,6 +48,9 @@ public class GameManager : NetworkManager
 
     float playersLettersSpawnP;
 
+
+    public ClientMainGameElements cmge;
+    
     public void PauseGame()
     {
         foreach (LetterSpawner ls in letterSpawners)
@@ -218,8 +219,8 @@ public class GameManager : NetworkManager
 
         isGameplayStarted = true;
 
-        exerciseGroupIndex = UnityEngine.Random.Range(0, Globals.settings.exercisesGroups.exerciseGroups.Count);
-        countdownText.gameObject.SetActive(false);
+        exerciseGroupIndex = Random.Range(0, Globals.settings.exercisesGroups.exerciseGroups.Count);
+        cmge.DisplayCountdownText(false, "");
         Shuffle(Globals.settings.exercisesGroups.exerciseGroups);
 
         Globals.backgroundAudioManager.StopCurrentClip();
@@ -247,23 +248,26 @@ public class GameManager : NetworkManager
         {
             InitPlayer(conn, player, orderNum++);
         }
-
         
         if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
         {
             //TODO: receive acknowledgements instead of waiting a bit
-            //StartCoroutine(StartAfterInit());
-            foreach (LetterSpawner spawner in letterSpawners)
-            {
-                InitSpawner(spawner);
-                StartCoroutine(UpdateSpawner(spawner));
-                spawner.StopSpawning();
-            }
+            StartCoroutine(StartAfterInit());
+//            foreach (LetterSpawner spawner in letterSpawners)
+//            {
+//                InitSpawner(spawner);
+//                StartCoroutine(UpdateSpawner(spawner));
+//                spawner.StopSpawning();
+//            }
         }
     }
-    
-    
-    
+
+
+    IEnumerator StartAfterInit()
+    {
+        yield return new WaitForSeconds(1.0f);
+        StartCoroutine(ChangeLevel(false,false));
+    }
     
 
     public override void OnServerDisconnect(NetworkConnection conn)
@@ -327,16 +331,6 @@ public class GameManager : NetworkManager
             return;
         }
         PlayerTrackChanges();
-
-        if (Input.GetKey(KeyCode.S))
-        {
-            foreach (LetterSpawner spawner in letterSpawners)
-            {
-                spawner.StartSpawning();
-            }
-        }
-        
-        
     }
 
     
@@ -453,12 +447,10 @@ public class GameManager : NetworkManager
 
         List<char> currWordsLetters = new List<char>();
         List<char> allLetters = new List<char>();
-//        foreach (Player player in players)
-//        {
-//            currWordsLetters = currWordsLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
-//        }
-        
-        currWordsLetters = new List<char>(){'A','B','C','D'};
+        foreach (Player player in players)
+        {
+            currWordsLetters = currWordsLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
+        }
 
         float total = currWordsLetters.Count / playersLettersSpawnP;
         List<char> letterPool = letterPools[spawner.GetId()];
@@ -557,14 +549,14 @@ public class GameManager : NetworkManager
 
         if (areWordsUnfinished)
         {
-            emoji.GetComponent<Animator>().Play("Sad");
+            cmge.SetEmojiAnim("Sad");
         }
         else
         {
-            emoji.GetComponent<Animator>().Play("Smiling");
+            cmge.SetEmojiAnim("Smiling");
         }
 
-        emoji.GetComponent<Animator>().speed = 0;
+        cmge.StopEmojiAnim();
 
         foreach (Player player in players)
         {
@@ -577,18 +569,16 @@ public class GameManager : NetworkManager
 
 
         int i = startingLevelDelayInSeconds;
-        countdownText.text = i.ToString();
         yield return new WaitForSeconds(2.0f);
-        countdownText.gameObject.SetActive(true);
         for (i = startingLevelDelayInSeconds; i > 0; i--)
         {
-            countdownText.text = i.ToString();
+            cmge.DisplayCountdownText(true, i.ToString());
             yield return new WaitForSeconds(1.0f);
         }
 
-        countdownText.gameObject.SetActive(false);
+        cmge.DisplayCountdownText(false, "");
 
-        emoji.GetComponent<Animator>().speed = 1;
+        cmge.StartEmojiAnim();
         Globals.effectsAudioManager.PlayClip("Audio/snap");
         foreach (LetterSpawner spawner in letterSpawners)
         {
@@ -609,6 +599,7 @@ public class GameManager : NetworkManager
         Globals.currLevelId++;
     }
 
+    [Server]
     private void ChangeTargetWords()
     {
         List<Exercise> selectedExerciseGroup = new List<Exercise>(Globals.settings.exercisesGroups
@@ -758,7 +749,7 @@ public class GameManager : NetworkManager
         if (usefulForMe || usefulForOther)
         {
             Globals.effectsAudioManager.PlayClip("Audio/snap");
-            emoji.GetComponent<Animator>().Play("Nice");
+            cmge.SetEmojiAnim("Nice");
         }
         else
         {

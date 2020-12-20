@@ -573,7 +573,7 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void ResetNumPossibleActions()
         {
-            SetNumPossibleActions(info.numPossibleActionsPerLevel);
+            this.currNumPossibleActionsPerLevel = info.numPossibleActionsPerLevel;
         }
 
         [ClientRpc]
