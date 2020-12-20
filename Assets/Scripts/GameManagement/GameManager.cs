@@ -106,31 +106,7 @@ public class GameManager : NetworkManager
     }
 
 
-    private void UpdateButtonOverlaps(Player currPlayer, int potentialIndex)
-    {
-        // isButtonOverlap = false;
-        // foreach (Player player in Globals.settings.generalSettings.players)
-        // {
-        //     if (player != currPlayer && player.GetActivebuttonIndex() == potentialIndex)
-        //     {
-        //         isButtonOverlap = true;
-        //         break;
-        //     }
-        // }
-        //
-        // foreach (Player player in Globals.settings.generalSettings.players)
-        // {
-        //     foreach(GameObject obj in player.GetMaskedHalf())
-        //     {
-        //         obj.SetActive(!isButtonOverlap);
-        //     }
-        //     if(!isButtonOverlap)
-        //     {
-        //         player.GetActiveHalf().AddRange(player.GetMaskedHalf());
-        //     }
-        //     player.UpdateActiveHalf(player.IsPressingButton());
-        // }
-    }
+    
 
     public void Start()
     {
@@ -265,16 +241,7 @@ public class GameManager : NetworkManager
             //StartCoroutine(StartAfterInit());
         }
     }
-
-    public IEnumerator StartAfterInit()
-    {
-        yield return new WaitForSeconds(1);
-        //if all players are connected, start the first level
-        
-        //start game
-        StartCoroutine(ChangeLevel(false, false));
-        
-    }
+    
     
     
     
@@ -326,17 +293,11 @@ public class GameManager : NetworkManager
 
     void CreatePlayer(NetworkConnection conn)
     {
-
-        //fdgfd currPlayer.Init(allowInteraction, bufferedPlayerId, this, playerMarkerPrefab, playerMarkersContainer, playerUI,
-        //fgdgfd     wordPanelsObject.transform.GetChild(i).gameObject, scorePanelsObject.transform.GetChild(i).gameObject,
-        //gfdgfd     (i % 2 == 0));
-        
         GameObject playerGameObject = Instantiate(playerPrefab);
         //instantiates playerGameObject in all clients automatically
         NetworkServer.AddPlayerForConnection(conn, playerGameObject);
         Player player = playerGameObject.GetComponent<Player>();
         players.Add(player);
-        
     }
 
 
@@ -347,8 +308,71 @@ public class GameManager : NetworkManager
         {
             return;
         }
+        PlayerTrackChanges();
+        
 
     }
+
+    [Server]
+    public void PlayerTrackChanges()
+    {
+        foreach (Player player in players)
+        {
+            if (player != null && player.ChangedLane())
+            {
+                ChangeLane(player);
+                UpdateButtonOverlaps(player, player.GetActiveButtonIndex());
+                player.AckUpdatedButtonOverlaps();
+            }
+        }
+    }
+    
+    [Server]
+    public void UpdateButtonOverlaps(Player currPlayer, int potentialIndex)
+    {
+        isButtonOverlap = false;
+        foreach (Player player in players)
+        {
+            if (player != currPlayer && player.GetActiveButtonIndex() == potentialIndex)
+            {
+                isButtonOverlap = true;
+                break;
+            }
+        }
+        
+        foreach (Player player in players)
+        {
+            foreach(GameObject obj in player.GetMaskedHalf())
+            {
+                obj.SetActive(!isButtonOverlap);
+            }
+            if(!isButtonOverlap)
+            {
+                player.GetActiveHalf().AddRange(player.GetMaskedHalf());
+            }
+            player.UpdateActiveHalf(player.IsPressingButton());
+        }
+    }
+
+    [Server]
+    void ChangeLane(Player player)
+    {
+        int activeButtonI = player.GetActiveButtonIndex();
+        int pressedButtonI = player.GetPressedButtonIndex();
+        //verify if button should be pressed
+//        if (activeButtonI < 1)
+//        {
+//            Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
+//            return;
+//        }
+        if (activeButtonI != pressedButtonI)
+        {
+            Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
+        }
+               
+        player.SetActiveButton(pressedButtonI, player.markerPlaceholders.GetChild(pressedButtonI).transform.position);
+    }
+    
 
     [Server]
     private IEnumerator RecordMetrics()

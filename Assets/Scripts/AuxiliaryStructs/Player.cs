@@ -13,6 +13,7 @@ namespace AuxiliaryStructs
     public class Player : NetworkBehaviour
     {
         public List<GameObject> playerPlaceholders;
+        public Transform markerPlaceholders;
         
         private bool initted;
 //        private int orderNum;
@@ -45,7 +46,6 @@ namespace AuxiliaryStructs
         private GameButton gameButton;
 
         private GameObject trackCanvas;
-        private Transform markerPlaceholders;
 
         private Color buttonColor;
 
@@ -62,9 +62,18 @@ namespace AuxiliaryStructs
         private bool isTopMask;
         private bool activeLayout; //parameterize the side of the board player will play in, true if left
 
+
+        private Button[] playerButtons;
+       
+        //used to sync with game manager
+        private bool changedLane;
+        private int currPressedButtonI;
+
+        
         public void Awake()
         {
             initted = false;
+            playerButtons = new Button[]{};
         }
 
         // public void Init(bool allowInteraction, string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
@@ -77,7 +86,8 @@ namespace AuxiliaryStructs
             {
                 return;
             }
-
+            
+            
             this.info = info;
             this.trackCanvas = GameObject.Find("Track/playerMarkers").gameObject;
 
@@ -130,7 +140,7 @@ namespace AuxiliaryStructs
             
             
             //init marker upon track set. Transform prefab in instance
-            marker = UnityEngine.Object.Instantiate(markerPrefab, trackCanvas.transform);
+            marker = Instantiate(markerPrefab, trackCanvas.transform);
             MeshRenderer[] meshes = marker.GetComponentsInChildren<MeshRenderer>();
             foreach (MeshRenderer mesh in meshes)
             {
@@ -191,29 +201,32 @@ namespace AuxiliaryStructs
             Debug.Log("orderI: "+((orderNum +1) % 2));
             playerPlaceholders[(orderNum +1) % 2].SetActive(false);
             
+            this.markerPlaceholders = GameObject.Find("Track/MarkerPlaceholders").transform;
+
             //init ui buttons
+            GameObject playerUI = ui;
+            //set buttons for touch screen
+            playerButtons = playerUI.GetComponentsInChildren<Button>();
+            //SetActiveButton(0, markerPlaceholders.GetChild(0).transform.position);
+                
+            //position the marker in the left initially
+//                ChangeLane(playerButtons, playerButtons[0], 0);
+
             //only set buttons for local player, the others get "computer said no"
             if (isLocalPlayer)
             {
-                this.markerPlaceholders = GameObject.Find("Track/MarkerPlaceholders").transform;
-                SetActiveButton(0, markerPlaceholders.GetChild(0).transform.position);
-                
-                GameObject playerUI = ui;
-                //set buttons for touch screen
-                Button[] playerButtons = playerUI.GetComponentsInChildren<Button>();
-                
-                //position the marker in the left initially
-                ChangeLane(playerButtons, playerButtons[0], 0);
-
                 for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
                 {
                     Button currButton = playerButtons[buttonI];
                     currButton.interactable = true;
+                    
+                    currButton.GetComponent<Image>().color = new Color(0.0f, 0.0f, 1.0f);
+                    
                     if (buttonI < markerPlaceholders.childCount)
                     {
                         currButton.GetComponent<Image>().color = GetButtonColor();
                         int innerButtonI = buttonI; //for coroutine to save the iterated values
-                        currButton.onClick.AddListener(delegate () { ChangeLane(playerButtons, currButton, innerButtonI); });
+                        currButton.onClick.AddListener(delegate() { ChangeLane(innerButtonI); });
 
                     }
 //                    else
@@ -277,28 +290,33 @@ namespace AuxiliaryStructs
 //                    }
                 }
             }
+            
+            changedLane = false;
+            
             initted = true;
         }
-
-        public void ChangeLane(Button[] playerButtons, Button currButton, int innerButtonI)
+        
+        //executed in server
+        [Command]
+        public void ChangeLane(int buttonI)
         {
-            //verify if button should be pressed
-            if (GetCurrNumPossibleActionsPerLevel() < 1)
-            {
-                Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-                return;
-            }
-            if (GetActivebuttonIndex() != innerButtonI)
-            {
-                Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
-            }
-                
-            playerButtons[GetActivebuttonIndex()].GetComponent<Image>().color =
-                GetButtonColor();
-            //UpdateButtonOverlaps(player, innerButtonI);
-            SetActiveButton(innerButtonI, markerPlaceholders.GetChild(innerButtonI).transform.position);
-            currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+            this.changedLane = true;
+            this.currPressedButtonI = buttonI;
         }
+        
+        public bool ChangedLane()
+        {
+            return this.changedLane;
+        }
+        
+        [ClientRpc] 
+        public void AckUpdatedButtonOverlaps()
+        {
+            changedLane = false;
+        }
+
+        
+        
         
         [ClientRpc]
         public void SetActiveLayout(bool leftIfTrue)
@@ -431,7 +449,6 @@ namespace AuxiliaryStructs
                     scoreUpdateUIdown.SetActive(true);
                 }
             }
-
         }
 
         public int GetScore()
@@ -444,8 +461,18 @@ namespace AuxiliaryStructs
             return this.wordPanel;
         }
 
+        [ClientRpc]
         public void SetActiveButton(int activeButtonIndex, Vector3 activeButtonPos)
         {
+            //updateUI
+            foreach (Button button in playerButtons)
+            {
+//                button.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+            }
+            playerButtons[activeButtonIndex].GetComponent<Image>().color =
+                GetButtonColor();
+            
+            //updateTrack
             if (currButtonLerp != null)
             {
                 StopCoroutine(currButtonLerp);
@@ -498,11 +525,15 @@ namespace AuxiliaryStructs
             return activeInteraction;
         }
 
-        public int GetActivebuttonIndex()
+        public int GetActiveButtonIndex()
         {
             return this.activeButtonIndex;
         }
 
+        public int GetPressedButtonIndex()
+        {
+            return this.currPressedButtonI;
+        }
 
         public Color GetButtonColor()
         {
