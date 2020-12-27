@@ -220,7 +220,7 @@ public class GameManager : NetworkManager
         isGameplayStarted = true;
 
         exerciseGroupIndex = Random.Range(0, Globals.settings.exercisesGroups.exerciseGroups.Count);
-        cmge.DisplayCountdownText(false, "");
+//        cmge.DisplayCountdownText(false, "");
         Shuffle(Globals.settings.exercisesGroups.exerciseGroups);
 
         Globals.backgroundAudioManager.StopCurrentClip();
@@ -253,12 +253,6 @@ public class GameManager : NetworkManager
         {
             //TODO: receive acknowledgements instead of waiting a bit
             StartCoroutine(StartAfterInit());
-//            foreach (LetterSpawner spawner in letterSpawners)
-//            {
-//                InitSpawner(spawner);
-//                StartCoroutine(UpdateSpawner(spawner));
-//                spawner.StopSpawning();
-//            }
         }
     }
 
@@ -331,7 +325,7 @@ public class GameManager : NetworkManager
             return;
         }
         PlayerTrackChanges();
-        CheckMarkerCollisions();
+//        CheckMarkerCollisions();
 
         PlayerActionChanges();
     }
@@ -460,7 +454,7 @@ public class GameManager : NetworkManager
 
         float total = currWordsLetters.Count / playersLettersSpawnP;
         List<char> letterPool = letterPools[spawner.GetId()];
-
+        letterPool.AddRange(currWordsLetters);
         while (letterPool.Count < total)
         {
             if (allLetters.Count == 0)
@@ -566,11 +560,8 @@ public class GameManager : NetworkManager
 
         foreach (Player player in players)
         {
-            player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
-            foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
-            {
-                button.GetComponent<Image>().color = Color.red;
-            }
+            player.ChangeLane(0);
+            player.SetAllUIButtonsColor(Color.red);
         }
 
 
@@ -665,6 +656,7 @@ public class GameManager : NetworkManager
         }
         player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
         player.ReleaseGameButton();
+        player.UpdateActiveHalf(false);
     }
 
 
@@ -703,6 +695,7 @@ public class GameManager : NetworkManager
             return;
         }
         player.PressGameButton();
+        player.UpdateActiveHalf(true);
     }
     
     [Server]
@@ -711,9 +704,10 @@ public class GameManager : NetworkManager
         foreach (Player player in players)
         {
             GameButton button = player.GetGameButton();
-            GameObject currCollidingLetterObject = button.GetCollidingLetter();
-            if (button.IsClicked() && currCollidingLetterObject!=null)
+            //TODO see how can it be nullable instead of calling button.GetCollidingLetter() 2 times
+            if (button.IsClicked() && button.GetCollidingLetter()!=null)
             {
+                GameObject currCollidingLetterObject = button.GetCollidingLetter();
                 RecordHit(currCollidingLetterObject, player);
                 button.ResetCollidingLetter();
             }

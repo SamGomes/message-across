@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 14000055}
   - component: {fileID: 14000057}
   m_Layer: 0
-  m_Name: background
+  m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -509,7 +509,7 @@ GameObject:
   - component: {fileID: 264394624}
   - component: {fileID: 264394625}
   m_Layer: 0
-  m_Name: spawnerLine1
+  m_Name: SpawnerLine1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -761,7 +761,7 @@ GameObject:
   - component: {fileID: 4712786913894404322}
   - component: {fileID: 6131093439163891416}
   m_Layer: 0
-  m_Name: placeholderLine1
+  m_Name: PlaceholderLine1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -955,7 +955,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1103837467}
   m_Layer: 5
-  m_Name: playerMarkers
+  m_Name: PlayerMarkers
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1105,7 +1105,7 @@ GameObject:
   - component: {fileID: 1273330585}
   - component: {fileID: 1273330584}
   m_Layer: 0
-  m_Name: letterPit
+  m_Name: LetterPit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6449,7 +6449,7 @@ GameObject:
   - component: {fileID: 1822767553}
   - component: {fileID: 1822767555}
   m_Layer: 5
-  m_Name: background
+  m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7118,7 +7118,7 @@ GameObject:
   - component: {fileID: 310018008522933346}
   - component: {fileID: 1169895736547322456}
   m_Layer: 0
-  m_Name: placeholderLine2
+  m_Name: PlaceholderLine2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7135,7 +7135,7 @@ GameObject:
   - component: {fileID: 310018008187125895}
   - component: {fileID: 1169895736346259133}
   m_Layer: 0
-  m_Name: placeholderLine3
+  m_Name: PlaceholderLine3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7172,7 +7172,7 @@ GameObject:
   - component: {fileID: 4983876231665582848}
   - component: {fileID: 4983876231665583104}
   m_Layer: 0
-  m_Name: spawnerLine2
+  m_Name: SpawnerLine2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7236,7 +7236,7 @@ GameObject:
   - component: {fileID: 4983876232001914853}
   - component: {fileID: 4983876232001914652}
   m_Layer: 0
-  m_Name: spawnerLine3
+  m_Name: SpawnerLine3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

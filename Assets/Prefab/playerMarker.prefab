@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6070870669829879947}
   - component: {fileID: 3478244951669071493}
   m_Layer: 0
-  m_Name: trackTH
+  m_Name: TrackTH
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -153,7 +153,7 @@ GameObject:
   - component: {fileID: 3011794947095463359}
   - component: {fileID: 6437437379868210621}
   m_Layer: 0
-  m_Name: trackBH
+  m_Name: TrackBH
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -291,7 +291,6 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 0.30588236}
   m_RaycastTarget: 1
-  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -318,8 +317,9 @@ GameObject:
   - component: {fileID: 7235479703557185563}
   - component: {fileID: 930604261190994116}
   - component: {fileID: 3625886159067671457}
+  - component: {fileID: 8067356860270142463}
   m_Layer: 0
-  m_Name: Button
+  m_Name: GameButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -358,6 +358,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a877e06e3261b64468c74df1a2523a28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
 --- !u!65 &7235479703557185563
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -483,6 +485,22 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
+--- !u!114 &8067356860270142463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8995053680609240644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneId: 0
+  serverOnly: 0
+  m_AssetId: 
+  hasSpawned: 0
 --- !u!1001 &5144545080432231798
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -574,6 +592,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: BackgroundBH
+      objectReference: {fileID: 0}
+    - target: {fileID: 2534866581884222612, guid: 91cba17c1dfab6947893161574a2f7e6,
+        type: 3}
+      propertyPath: m_Name
+      value: Default
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 91cba17c1dfab6947893161574a2f7e6, type: 3}
@@ -674,6 +697,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: BackgroundTH
+      objectReference: {fileID: 0}
+    - target: {fileID: 2534866581884222612, guid: 91cba17c1dfab6947893161574a2f7e6,
+        type: 3}
+      propertyPath: m_Name
+      value: Default
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 91cba17c1dfab6947893161574a2f7e6, type: 3}

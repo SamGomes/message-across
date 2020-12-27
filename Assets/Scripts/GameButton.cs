@@ -16,13 +16,12 @@ public class GameButton : NetworkBehaviour {
 
     private Player owner;
 
-    [ClientRpc]
     public void RegisterButtonDown()
     {
         this.keyPressed = true;
         this.isBeingPressed = true;
     }
-    [ClientRpc]
+
     public void RegisterButtonUp()
     {
         this.isBeingPressed = false;

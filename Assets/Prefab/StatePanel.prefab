@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6029054794307238039}
   - component: {fileID: 1305718485487199296}
   m_Layer: 5
-  m_Name: scoreText
+  m_Name: ScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -63,8 +63,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: a9dce12d5ec0e034db10c480e3c02c94, type: 3}
     m_FontSize: 20
@@ -92,7 +90,7 @@ GameObject:
   - component: {fileID: 2476389026259242132}
   - component: {fileID: 2494835009142382220}
   m_Layer: 0
-  m_Name: arrow
+  m_Name: Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -143,8 +141,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 21300000, guid: a0bee43d0845ecb4091faf403f1f7c31, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
@@ -185,7 +181,7 @@ GameObject:
   - component: {fileID: 2365838925383631384}
   - component: {fileID: 2368661944511800026}
   m_Layer: 0
-  m_Name: down
+  m_Name: Down
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -283,8 +279,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 936281a245e210b4fb3a664454429068, type: 3}
     m_FontSize: 100
@@ -325,7 +319,7 @@ GameObject:
   - component: {fileID: 2366427647832349400}
   - component: {fileID: 2493344958781666132}
   m_Layer: 0
-  m_Name: movingObjects
+  m_Name: MovingObjects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -381,7 +375,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6080181975578193735}
   m_Layer: 5
-  m_Name: scoreUpdateUI
+  m_Name: ScoreUpdateUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -419,7 +413,7 @@ GameObject:
   - component: {fileID: 3226209189913137039}
   - component: {fileID: 3229015652996722509}
   m_Layer: 0
-  m_Name: up
+  m_Name: Up
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -466,7 +460,7 @@ GameObject:
   - component: {fileID: 3336339868690972931}
   - component: {fileID: 3355048565615678235}
   m_Layer: 0
-  m_Name: arrow
+  m_Name: Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -517,8 +511,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 21300000, guid: a0bee43d0845ecb4091faf403f1f7c31, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
@@ -612,8 +604,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: 936281a245e210b4fb3a664454429068, type: 3}
     m_FontSize: 100
@@ -654,7 +644,7 @@ GameObject:
   - component: {fileID: 3226781534558279503}
   - component: {fileID: 3353719210363993795}
   m_Layer: 0
-  m_Name: movingObjects
+  m_Name: MovingObjects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -711,7 +701,7 @@ GameObject:
   - component: {fileID: 6220032769601186623}
   - component: {fileID: 346693305779808721}
   m_Layer: 5
-  m_Name: statePanel
+  m_Name: StatePanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -822,8 +812,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_Sprite: {fileID: 21300000, guid: 09548b61ca06eab2b90c0aae216b6e1d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
@@ -846,7 +834,7 @@ GameObject:
   - component: {fileID: 3132585721568901396}
   - component: {fileID: 9121634267931705074}
   m_Layer: 5
-  m_Name: possibleActionsText
+  m_Name: PossibleActionsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -897,8 +885,6 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
     m_Font: {fileID: 12800000, guid: a9dce12d5ec0e034db10c480e3c02c94, type: 3}
     m_FontSize: 20

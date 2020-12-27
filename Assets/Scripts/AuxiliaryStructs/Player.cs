@@ -101,7 +101,7 @@ namespace AuxiliaryStructs
             
             
             this.info = info;
-            this.trackCanvas = GameObject.Find("Track/playerMarkers").gameObject;
+            this.trackCanvas = GameObject.Find("Track/PlayerMarkers").gameObject;
 
             
             //init colors
@@ -134,21 +134,38 @@ namespace AuxiliaryStructs
                 Destroy(gameObject.transform.Find("UICanvas/LeftPlayerUI").gameObject);
             }
             
-            wordPanel.transform.Find("panel/Layout").GetComponent<SpriteRenderer>().color = backgroundColor;
+            wordPanel.transform.Find("Panel/Layout").GetComponent<SpriteRenderer>().color = backgroundColor;
             
 
             wordPanel.SetActive(true);
             statePanel.SetActive(true);
 
-            scoreUpdateUIup = statePanel.transform.Find("scoreUpdateUI/up").gameObject;
+            scoreUpdateUIup = statePanel.transform.Find("ScoreUpdateUI/Up").gameObject;
             scoreUpdateUIup.SetActive(false);
-            scoreUpdateUIdown = statePanel.transform.Find("scoreUpdateUI/down").gameObject;
+            scoreUpdateUIdown = statePanel.transform.Find("ScoreUpdateUI/Down").gameObject;
             scoreUpdateUIdown.SetActive(false);
 
-            possibleActionsText = statePanel.transform.Find("possibleActionsText").GetComponent<Text>();
-            scoreText = statePanel.transform.Find("scoreText").GetComponent<Text>();
+            possibleActionsText = statePanel.transform.Find("PossibleActionsText").GetComponent<Text>();
+            scoreText = statePanel.transform.Find("ScoreText").GetComponent<Text>();
 
-            buttonColor = SetColor(backgroundColor);
+            
+            statePanel.GetComponentInChildren<Image>().color = backgroundColor;
+            ui.GetComponentInChildren<Image>().color = backgroundColor;
+
+            List<Image> imgs = new List<Image>(ui.GetComponentsInChildren<Image>());
+            imgs.RemoveAt(0);
+            
+            buttonColor = CalcButtonColor(backgroundColor);
+            
+            //for the state display
+            scoreText.color = buttonColor;
+            possibleActionsText.color = buttonColor;
+
+            //for player buttons
+            foreach (Image img in imgs)
+            {
+                img.color = buttonColor;
+            }
             
             
             //init marker upon track set. Transform prefab in instance
@@ -159,32 +176,30 @@ namespace AuxiliaryStructs
                 mesh.material.color = backgroundColor;
             }
 
-            gameButton = marker.GetComponentInChildren<GameButton>();
+            gameButton = marker.transform.Find("GameButton").GetComponent<GameButton>();
             
             //update marker sides
             maskedHalf = new List<GameObject>();
             maskedHalf.Add((isTopMask)
-                ? marker.transform.Find("Button/BackgroundTH").gameObject
-                : marker.transform.Find("Button/BackgroundBH").gameObject);
+                ? marker.transform.Find("GameButton/BackgroundTH").gameObject
+                : marker.transform.Find("GameButton/BackgroundBH").gameObject);
             maskedHalf.Add((isTopMask)
-                ? marker.transform.Find("trackTH").gameObject
-                : marker.transform.Find("trackBH").gameObject);
+                ? marker.transform.Find("TrackTH").gameObject
+                : marker.transform.Find("TrackBH").gameObject);
             
             activeHalf = new List<GameObject>();
             activeHalf.Add((!isTopMask)
-                ? marker.transform.Find("Button/BackgroundTH").gameObject
-                : marker.transform.Find("Button/BackgroundBH").gameObject);
+                ? marker.transform.Find("GameButton/BackgroundTH").gameObject
+                : marker.transform.Find("GameButton/BackgroundBH").gameObject);
             activeHalf.Add((!isTopMask)
-                ? marker.transform.Find("trackTH").gameObject
-                : marker.transform.Find("trackBH").gameObject);
+                ? marker.transform.Find("TrackTH").gameObject
+                : marker.transform.Find("TrackBH").gameObject);
             
             displayedHalf = new List<GameObject>();
             displayedHalf.Clear();
             displayedHalf.AddRange(activeHalf);
             displayedHalf.AddRange(maskedHalf);
 
-            activeHalf[1].SetActive(false); //lets init it to hidden
-            
             
             foreach (Button button in ui.GetComponentsInChildren<Button>())
             {
@@ -194,6 +209,7 @@ namespace AuxiliaryStructs
             {
                 image.color = this.backgroundColor;
             }
+            activeHalf[1].SetActive(false); //lets init it to hidden
             
             score = -1;
             currNumPossibleActionsPerLevel = 0;
@@ -219,7 +235,14 @@ namespace AuxiliaryStructs
             //init ui buttons
             GameObject playerUI = ui;
             //set buttons for touch screen
-            playerButtons = playerUI.GetComponentsInChildren<Button>();
+            playerButtons = new []
+            {
+                ui.transform.Find("Button(1)").GetComponent<Button>(),
+                ui.transform.Find("Button(2)").GetComponent<Button>(),
+                ui.transform.Find("Button(3)").GetComponent<Button>(),
+                ui.transform.Find("Button(4)").GetComponent<Button>(),
+                ui.transform.Find("Button(5)").GetComponent<Button>()
+            };
 
             //only set buttons for local player, the others get "computer said no"
             if (isLocalPlayer)
@@ -240,20 +263,19 @@ namespace AuxiliaryStructs
                     }
                     else
                     {
+                        int innerButtonI = buttonI; //for coroutine to save the iterated values
                         EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
                         EventTrigger.Entry pointerDown = new EventTrigger.Entry();
                         pointerDown.eventID = EventTriggerType.PointerDown;
-                        pointerDown.callback.AddListener(delegate(BaseEventData eventData) { ActionStart(buttonI); });
+                        pointerDown.callback.AddListener(delegate(BaseEventData eventData) { ActionStart(innerButtonI); });
                         trigger.triggers.Add(pointerDown);
                         EventTrigger.Entry pointerUp = new EventTrigger.Entry();
                         pointerUp.eventID = EventTriggerType.PointerUp;
-                        pointerUp.callback.AddListener(delegate (BaseEventData eventData) { ActionFinish(buttonI); });
+                        pointerUp.callback.AddListener(delegate (BaseEventData eventData) { ActionFinish(innerButtonI); });
                         trigger.triggers.Add(pointerUp);
                     }
                 }
             }
-            
-            
             
             initted = true;
         }
@@ -345,27 +367,10 @@ namespace AuxiliaryStructs
             scoreText.gameObject.SetActive(false);
         }
         
-        private Color SetColor(Color newColor)
+        private Color CalcButtonColor(Color newColor)
         {
-            statePanel.GetComponentInChildren<Image>().color = newColor;
-            ui.GetComponentInChildren<Image>().color = newColor;
-
             float g = 1.0f - newColor.grayscale * 0.8f;
-            List<Image> imgs = new List<Image>(ui.GetComponentsInChildren<Image>());
-            imgs.RemoveAt(0);
-
             Color dualColor = new Color(g, g, g);
-
-            //for the state display
-            scoreText.color = dualColor;
-            possibleActionsText.color = dualColor;
-
-            //for player buttons
-            foreach (Image img in imgs)
-            {
-                img.color = dualColor;
-            }
-            
             return dualColor;
         }
 
@@ -464,8 +469,10 @@ namespace AuxiliaryStructs
         public void SetActiveTrackButton(int activeButtonIndex, Vector3 activeButtonPos)
         {
             //updateUI
-            foreach (Button button in playerButtons)
+            int i = 0;
+            while(i < 3)
             {
+                Button button = playerButtons[i++];
                 button.GetComponent<Image>().color = GetButtonColor();
             }
             playerButtons[activeButtonIndex].GetComponent<Image>().color =
@@ -595,11 +602,11 @@ namespace AuxiliaryStructs
             return this.currNumPossibleActionsPerLevel;
         }
 
+        [ClientRpc]
         public void PressGameButton()
         {
             this.pressingButton = true;
             this.gameButton.RegisterButtonDown();
-            UpdateActiveHalf(true);
         }
 
         [ClientRpc]
@@ -607,7 +614,6 @@ namespace AuxiliaryStructs
         {
             this.pressingButton = false;
             this.gameButton.RegisterButtonUp();
-            UpdateActiveHalf(false);
 
         }
 
@@ -616,6 +622,14 @@ namespace AuxiliaryStructs
             return this.ui;
         }
 
+        public void SetAllUIButtonsColor(Color color)
+        {
+            foreach (Button button in ui.GetComponentsInChildren<Button>())
+            {
+                button.GetComponent<Image>().color = color;
+            }
+        }
+        
         public bool IsPressingButton()
         {
             return pressingButton;

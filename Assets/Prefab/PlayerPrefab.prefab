@@ -158,9 +158,8 @@ GameObject:
   - component: {fileID: 7094324602208661695}
   - component: {fileID: 7846066203423709115}
   - component: {fileID: 4064497296504051131}
-  - component: {fileID: 4187610764923819279}
   m_Layer: 0
-  m_Name: button (1)
+  m_Name: Button(1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -265,22 +264,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &4187610764923819279
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 320059023442643665}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!1 &930438162091962341
 GameObject:
   m_ObjectHideFlags: 0
@@ -293,9 +276,8 @@ GameObject:
   - component: {fileID: 404920838235943936}
   - component: {fileID: 8723324125533095639}
   - component: {fileID: 8980784831627001618}
-  - component: {fileID: 1103157748444066186}
   m_Layer: 0
-  m_Name: button (2)
+  m_Name: Button(5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -400,22 +382,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &1103157748444066186
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 930438162091962341}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!1 &1079194858553747930
 GameObject:
   m_ObjectHideFlags: 0
@@ -501,7 +467,7 @@ GameObject:
   - component: {fileID: 5736627582219602283}
   - component: {fileID: 1905929122125844109}
   m_Layer: 5
-  m_Name: possibleActionsText
+  m_Name: PossibleActionsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -578,9 +544,8 @@ GameObject:
   - component: {fileID: 8590483307375608660}
   - component: {fileID: 8764372158483358800}
   - component: {fileID: 3252834159367104080}
-  - component: {fileID: 3769007382788845859}
   m_Layer: 0
-  m_Name: button (1)
+  m_Name: Button(4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -685,22 +650,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &3769007382788845859
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1239209333632858426}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!1 &1259113915411643825
 GameObject:
   m_ObjectHideFlags: 0
@@ -805,7 +754,7 @@ GameObject:
   - component: {fileID: 1325032221157947529}
   - component: {fileID: 1165988818438066437}
   m_Layer: 0
-  m_Name: movingObjects
+  m_Name: MovingObjects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -862,7 +811,7 @@ GameObject:
   - component: {fileID: 1324459987110305865}
   - component: {fileID: 1327266517975924875}
   m_Layer: 0
-  m_Name: down
+  m_Name: Down
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -909,7 +858,7 @@ GameObject:
   - component: {fileID: 1218696568232652485}
   - component: {fileID: 1165068464281812189}
   m_Layer: 0
-  m_Name: arrow
+  m_Name: Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1002,7 +951,7 @@ GameObject:
   - component: {fileID: 2572334596838315392}
   - component: {fileID: 8604856303192759094}
   m_Layer: 5
-  m_Name: currState
+  m_Name: CurrState
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1103,9 +1052,8 @@ GameObject:
   - component: {fileID: 1215141724352481259}
   - component: {fileID: 7803863751907816764}
   - component: {fileID: 7629578901599685881}
-  - component: {fileID: 2311917817013774028}
   m_Layer: 0
-  m_Name: button (2)
+  m_Name: Button(2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1210,22 +1158,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &2311917817013774028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1849300743883365390}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!1 &2119414982898331686
 GameObject:
   m_ObjectHideFlags: 0
@@ -1330,7 +1262,7 @@ GameObject:
   - component: {fileID: 2194269057778709790}
   - component: {fileID: 2035210844668894354}
   m_Layer: 0
-  m_Name: movingObjects
+  m_Name: MovingObjects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1389,7 +1321,7 @@ GameObject:
   - component: {fileID: 2087778859312849746}
   - component: {fileID: 2034446454718853450}
   m_Layer: 0
-  m_Name: arrow
+  m_Name: Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1480,7 +1412,7 @@ GameObject:
   - component: {fileID: 2193680224740879838}
   - component: {fileID: 2196503176355417372}
   m_Layer: 0
-  m_Name: up
+  m_Name: Up
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1524,7 +1456,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7409949615404289302}
   m_Layer: 5
-  m_Name: scoreUpdateUI
+  m_Name: ScoreUpdateUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1563,9 +1495,8 @@ GameObject:
   - component: {fileID: 8268680904739536649}
   - component: {fileID: 870280332099224059}
   - component: {fileID: 2320229574071947000}
-  - component: {fileID: 7550397690955209737}
   m_Layer: 0
-  m_Name: button (3)
+  m_Name: Button(3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1670,22 +1601,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &7550397690955209737
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2186082717168520178}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!1 &2518750708121278570
 GameObject:
   m_ObjectHideFlags: 0
@@ -1844,7 +1759,7 @@ GameObject:
   - component: {fileID: 6998534193628666566}
   - component: {fileID: 2353852823219013137}
   m_Layer: 5
-  m_Name: scoreText
+  m_Name: ScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2059,7 +1974,7 @@ GameObject:
   - component: {fileID: 3653625052254107697}
   - component: {fileID: 3653625052254107696}
   m_Layer: 5
-  m_Name: currState
+  m_Name: CurrState
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2161,7 +2076,7 @@ GameObject:
   - component: {fileID: 3653625052746100386}
   - component: {fileID: 3653625052746100385}
   m_Layer: 5
-  m_Name: word
+  m_Name: Word
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2951,7 +2866,7 @@ GameObject:
   - component: {fileID: 1859255184571898693}
   - component: {fileID: 5486165726496316579}
   m_Layer: 5
-  m_Name: possibleActionsText
+  m_Name: PossibleActionsText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3120,7 +3035,7 @@ GameObject:
   - component: {fileID: 4914143052367309479}
   - component: {fileID: 5079939975077315371}
   m_Layer: 0
-  m_Name: movingObjects
+  m_Name: MovingObjects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3179,7 +3094,7 @@ GameObject:
   - component: {fileID: 5095911813051120875}
   - component: {fileID: 5078610405045612275}
   m_Layer: 0
-  m_Name: arrow
+  m_Name: Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3270,7 +3185,7 @@ GameObject:
   - component: {fileID: 4913589432683328103}
   - component: {fileID: 4916412387527479973}
   m_Layer: 0
-  m_Name: down
+  m_Name: Down
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3390,7 +3305,7 @@ GameObject:
   - component: {fileID: 1893398806315943072}
   - component: {fileID: 4091951625723082343}
   m_Layer: 5
-  m_Name: word
+  m_Name: Word
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3552,7 +3467,7 @@ GameObject:
   - component: {fileID: 5300373015804204606}
   - component: {fileID: 5300373015804204601}
   m_Layer: 5
-  m_Name: food
+  m_Name: Food
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3633,7 +3548,7 @@ GameObject:
   - component: {fileID: 5300373015808073191}
   - component: {fileID: 5300373015808073184}
   m_Layer: 5
-  m_Name: food
+  m_Name: Food
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4041,7 +3956,7 @@ GameObject:
   - component: {fileID: 5197825548710684464}
   - component: {fileID: 5363641625096310460}
   m_Layer: 0
-  m_Name: movingObjects
+  m_Name: MovingObjects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4098,7 +4013,7 @@ GameObject:
   - component: {fileID: 5197288470034579440}
   - component: {fileID: 5200094997687361330}
   m_Layer: 0
-  m_Name: up
+  m_Name: Up
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4145,7 +4060,7 @@ GameObject:
   - component: {fileID: 5379753261571502460}
   - component: {fileID: 5362151755088896868}
   m_Layer: 0
-  m_Name: arrow
+  m_Name: Arrow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4235,7 +4150,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3496081059817807672}
   m_Layer: 5
-  m_Name: scoreUpdateUI
+  m_Name: ScoreUpdateUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4470,9 +4385,8 @@ GameObject:
   - component: {fileID: 866880846607094229}
   - component: {fileID: 8274341398591680295}
   - component: {fileID: 6842263545673883684}
-  - component: {fileID: 2217622966926750178}
   m_Layer: 0
-  m_Name: button (3)
+  m_Name: Button(3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4577,22 +4491,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &2217622966926750178
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6958343270156363054}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!1 &7270417807605172585
 GameObject:
   m_ObjectHideFlags: 0
@@ -4737,9 +4635,8 @@ GameObject:
   - component: {fileID: 7933805449984092471}
   - component: {fileID: 1336269793482120160}
   - component: {fileID: 1668077226026803749}
-  - component: {fileID: 6911388539624782679}
   m_Layer: 0
-  m_Name: button (2)
+  m_Name: Button(2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4844,22 +4741,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &6911388539624782679
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7452771059446428370}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!1 &8067363801548052454
 GameObject:
   m_ObjectHideFlags: 0
@@ -4872,9 +4753,8 @@ GameObject:
   - component: {fileID: 716074529132047752}
   - component: {fileID: 533334584728504972}
   - component: {fileID: 6044927597043779724}
-  - component: {fileID: 5285970127601365234}
   m_Layer: 0
-  m_Name: button (1)
+  m_Name: Button(4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4979,22 +4859,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &5285970127601365234
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8067363801548052454}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!1 &8087784272109438726
 GameObject:
   m_ObjectHideFlags: 0
@@ -5080,9 +4944,8 @@ GameObject:
   - component: {fileID: 8888161363363486428}
   - component: {fileID: 560979502795843595}
   - component: {fileID: 172736337320006094}
-  - component: {fileID: 8476374530534427600}
   m_Layer: 0
-  m_Name: button (2)
+  m_Name: Button(5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5187,22 +5050,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &8476374530534427600
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8227533791776751929}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!1 &8277060780670797868
 GameObject:
   m_ObjectHideFlags: 0
@@ -5214,7 +5061,7 @@ GameObject:
   - component: {fileID: 8277060780670797869}
   - component: {fileID: 2881599545907318012}
   m_Layer: 5
-  m_Name: panel
+  m_Name: Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5274,7 +5121,7 @@ GameObject:
   - component: {fileID: 8277060780674663412}
   - component: {fileID: 2881599545910134565}
   m_Layer: 5
-  m_Name: panel
+  m_Name: Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5335,7 +5182,7 @@ GameObject:
   - component: {fileID: 3985183321829607656}
   - component: {fileID: 8573567755500606527}
   m_Layer: 5
-  m_Name: scoreText
+  m_Name: ScoreText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5485,9 +5332,8 @@ GameObject:
   - component: {fileID: 2068168534984433251}
   - component: {fileID: 1307545086352013671}
   - component: {fileID: 5089199734673767271}
-  - component: {fileID: 8556890093661370685}
   m_Layer: 0
-  m_Name: button (1)
+  m_Name: Button(1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5592,22 +5438,6 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &8556890093661370685
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8842418797896803341}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sceneId: 0
-  serverOnly: 0
-  m_AssetId: 
-  hasSpawned: 0
 --- !u!1 &9042375485816097583
 GameObject:
   m_ObjectHideFlags: 0
