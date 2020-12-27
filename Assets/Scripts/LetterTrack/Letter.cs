@@ -1,41 +1,53 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
+using Mirror;
 using UnityEngine;
 
-public class Letter : MonoBehaviour {
+public class Letter : NetworkBehaviour {
 
     public float speed;
     public char letterText;
 
-    public bool isTranslationEnabled;
     private bool isLocked;
 
     void Awake() {
-        isTranslationEnabled = true;
         isLocked = false;
         //speed = 10.5f;
     }
 	
-	// Update is called once per frame
 	void FixedUpdate () {
-        if (isTranslationEnabled)
+        if (!isLocked)
         {
             float translation = Time.deltaTime * speed;
             transform.Translate(translation, 0, 0);
         }
     }
 
+    [ClientRpc]
     public void Lock()
     {
         isLocked = true;
     }
+    [ClientRpc]
+    public void Unlock()
+    {
+        isLocked = false;
+    }
+    
     public bool IsLocked()
     {
         return isLocked;
     }
-
-    void DestroyLetter() {
+    
+    
+    private IEnumerator AnimateLetter(Vector3 position)
+    {
+        yield return Globals.LerpAnimation(this.gameObject, position, 1.0f);
         Destroy(this.gameObject);
     }
-    
+
+    [ClientRpc]
+    public void AnimateAndDestroy(Vector3 position)
+    {
+        StartCoroutine(AnimateLetter(position));
+    }
 }

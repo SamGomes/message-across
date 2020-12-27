@@ -62,6 +62,7 @@ public class LetterSpawner : NetworkBehaviour
 
     }
 
+    [ClientRpc]
     public void UpdateCurrStarredWord(string currTargetWord)
     {
         this.currStarredWord = currTargetWord;
@@ -100,7 +101,6 @@ public class LetterSpawner : NetworkBehaviour
         letterText.text =  currLetter.ToString();
 
         newLetter.transform.position = gameObject.transform.position;
-        //newLetter.transform.GetChild(0).LookAt(gameManager.camera.transform.position);
         
     }
 

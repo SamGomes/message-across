@@ -41,12 +41,12 @@ namespace AuxiliaryStructs
 
         private GameObject marker;
         public GameObject markerPrefab;
+        private GameButton gameButton;
         
         private List<GameObject> maskedHalf;
         private List<GameObject> activeHalf;
         private List<GameObject> displayedHalf;
         
-        private GameButton gameButton;
 
         private GameObject trackCanvas;
 
@@ -70,6 +70,8 @@ namespace AuxiliaryStructs
        
         //used to sync with game manager
         private bool changedLane;
+        private bool actionStarted;
+        private bool actionFinished;
         private int currPressedButtonI;
 
         
@@ -87,6 +89,8 @@ namespace AuxiliaryStructs
             
             //force change to the first lane at start
             changedLane = true;
+            actionStarted = false;
+            actionFinished = false;
             currPressedButtonI = 0;
             ChangedLane();
             
@@ -154,6 +158,8 @@ namespace AuxiliaryStructs
             {
                 mesh.material.color = backgroundColor;
             }
+
+            gameButton = marker.GetComponentInChildren<GameButton>();
             
             //update marker sides
             maskedHalf = new List<GameObject>();
@@ -232,65 +238,18 @@ namespace AuxiliaryStructs
                         currButton.onClick.AddListener(delegate() { ChangeLane(innerButtonI); });
 
                     }
-//                    else
-//                    {
-//                        int j = buttonI - markerPlaceholders.childCount + 1;
-//                        Globals.KeyInteractionType iType = (Globals.KeyInteractionType)j;
-//                        EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
-//                        EventTrigger.Entry pointerDown = new EventTrigger.Entry();
-//                        pointerDown.eventID = EventTriggerType.PointerDown;
-//                        pointerDown.callback.AddListener(delegate (BaseEventData eventData)
-//                        {
-//                            currButton.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
-//                
-//                            //verify if button should be pressed
-//                            bool playerOverlappedAndPressing = false;
-//                            foreach (Player innerPlayer in players)
-//                            {
-//                                if (innerPlayer != player && player.IsPressingButton())
-//                                {
-//                                    playerOverlappedAndPressing = true;
-//                                    break;
-//                                }
-//                            }
-//                
-//                            if (player.GetCurrNumPossibleActionsPerLevel() < 1 ||
-//                                (isButtonOverlap && playerOverlappedAndPressing))
-//                            {
-//                                Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-//                                currButton.GetComponent<Image>().color = Color.red;
-//                                return;
-//                            }
-//                
-//                            Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
-//                            player.SetActiveInteraction(iType);
-//                
-//                            foreach (Player innerPlayer in players)
-//                            {
-//                                if (innerPlayer != player && player.IsPressingButton() &&
-//                                    player.GetActivebuttonIndex() == player.GetActivebuttonIndex())
-//                                {
-//                                    return;
-//                                }
-//                            }
-//                            player.PressGameButton();
-//                        });
-//                        trigger.triggers.Add(pointerDown);
-//                        EventTrigger.Entry pointerUp = new EventTrigger.Entry();
-//                        pointerUp.eventID = EventTriggerType.PointerUp;
-//                        pointerUp.callback.AddListener(delegate (BaseEventData eventData)
-//                        {
-//                            Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
-//                            //verify if button should be pressed
-//                            if (player.GetCurrNumPossibleActionsPerLevel() > 0)
-//                            {
-//                                currButton.GetComponent<Image>().color = player.GetButtonColor();
-//                            }
-//                            player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
-//                            player.ReleaseGameButton();
-//                        });
-//                        trigger.triggers.Add(pointerUp);
-//                    }
+                    else
+                    {
+                        EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
+                        EventTrigger.Entry pointerDown = new EventTrigger.Entry();
+                        pointerDown.eventID = EventTriggerType.PointerDown;
+                        pointerDown.callback.AddListener(delegate(BaseEventData eventData) { ActionStart(buttonI); });
+                        trigger.triggers.Add(pointerDown);
+                        EventTrigger.Entry pointerUp = new EventTrigger.Entry();
+                        pointerUp.eventID = EventTriggerType.PointerUp;
+                        pointerUp.callback.AddListener(delegate (BaseEventData eventData) { ActionFinish(buttonI); });
+                        trigger.triggers.Add(pointerUp);
+                    }
                 }
             }
             
@@ -299,7 +258,46 @@ namespace AuxiliaryStructs
             initted = true;
         }
         
-        //executed in server
+        
+        //start action request and ack from server
+        [Command]
+        public void ActionStart(int buttonI)
+        {
+            actionStarted = true;
+            currPressedButtonI = buttonI;
+        }
+        public bool ActionStarted()
+        {
+            return actionStarted;
+        }
+        
+        [ClientRpc] 
+        public void AckActionStarted()
+        {
+            actionStarted = false;
+        }
+        
+        
+        //finished action request and ack from server
+        [Command]
+        public void ActionFinish(int buttonI)
+        {
+            actionFinished = true;
+            currPressedButtonI = buttonI;
+        }
+        public bool ActionFinished()
+        {
+            return actionFinished;
+        }
+        
+        [ClientRpc] 
+        public void AckActionFinished()
+        {
+            actionFinished = false;
+        }
+        
+        
+        //change lane request and ack from server
         [Command]
         public void ChangeLane(int buttonI)
         {
@@ -463,15 +461,15 @@ namespace AuxiliaryStructs
         }
 
         [ClientRpc]
-        public void SetActiveButton(int activeButtonIndex, Vector3 activeButtonPos)
+        public void SetActiveTrackButton(int activeButtonIndex, Vector3 activeButtonPos)
         {
             //updateUI
             foreach (Button button in playerButtons)
             {
-//                button.GetComponent<Image>().color = new Color(1.0f, 0.82f, 0.0f);
+                button.GetComponent<Image>().color = GetButtonColor();
             }
             playerButtons[activeButtonIndex].GetComponent<Image>().color =
-                GetButtonColor();
+                new Color(1.0f, 0.82f, 0.0f);
             
             //updateTrack
             if (currButtonLerp != null)
@@ -530,6 +528,7 @@ namespace AuxiliaryStructs
             }
         }
 
+        [ClientRpc]
         public void SetActiveInteraction(Globals.KeyInteractionType activeInteraction)
         {
             this.activeInteraction = activeInteraction;
@@ -540,6 +539,12 @@ namespace AuxiliaryStructs
             return activeInteraction;
         }
 
+        [ClientRpc]
+        public void ChangeButtonColor(int buttonI, Color color)
+        {
+            playerButtons[currPressedButtonI].GetComponent<Image>().color = color;
+        }
+        
         public int GetActiveButtonIndex()
         {
             return this.activeButtonIndex;
@@ -597,6 +602,7 @@ namespace AuxiliaryStructs
             UpdateActiveHalf(true);
         }
 
+        [ClientRpc]
         public void ReleaseGameButton()
         {
             this.pressingButton = false;
@@ -615,9 +621,9 @@ namespace AuxiliaryStructs
             return pressingButton;
         }
 
-        public GameObject GetStatePanel()
+        public GameButton GetGameButton()
         {
-            return this.statePanel;
+            return this.gameButton;
         }
     }
 }
