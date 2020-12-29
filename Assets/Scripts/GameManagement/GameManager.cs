@@ -50,6 +50,8 @@ public class GameManager : NetworkManager
 
 
     public ClientMainGameElements cmge;
+
+    public GameObject letterPit;
     
     public void PauseGame()
     {
@@ -254,6 +256,8 @@ public class GameManager : NetworkManager
             //TODO: receive acknowledgements instead of waiting a bit
             StartCoroutine(StartAfterInit());
         }
+//        StartCoroutine(StartAfterInit());
+
     }
 
 
@@ -303,6 +307,7 @@ public class GameManager : NetworkManager
             //special condition also removes the score
             player.HideScoreText();
         }
+        
     }
 
    
@@ -325,7 +330,7 @@ public class GameManager : NetworkManager
             return;
         }
         PlayerTrackChanges();
-//        CheckMarkerCollisions();
+        CheckMarkerCollisions();
 
         PlayerActionChanges();
     }
@@ -698,22 +703,46 @@ public class GameManager : NetworkManager
         player.UpdateActiveHalf(true);
     }
     
+    public GameObject bufferedFirstLetter; //so that server syncs clients properly
+                                           //(avoids removing the same letter multiple times)
     [Server]
     public void CheckMarkerCollisions()
     {
+        
+        //verify collision letter-marker and letter-pit
         foreach (Player player in players)
         {
-            GameButton button = player.GetGameButton();
-            //TODO see how can it be nullable instead of calling button.GetCollidingLetter() 2 times
-            if (button.IsClicked() && button.GetCollidingLetter()!=null)
+            GameButton playerButton = player.GetGameButton();
+            foreach (LetterSpawner spawner in letterSpawners)
             {
-                GameObject currCollidingLetterObject = button.GetCollidingLetter();
-                RecordHit(currCollidingLetterObject, player);
-                button.ResetCollidingLetter();
+                GameObject firstLetter = spawner.GetCurrSpawnedLetterObjects().FirstOrDefault();
+                if(firstLetter && firstLetter!=bufferedFirstLetter)
+                {
+                    if (letterPit.GetComponent<Collider>().bounds.Intersects(
+                        firstLetter.GetComponent<Collider>().bounds
+                    ))
+                    {
+                        spawner.DestroyFirstLetter();
+                        bufferedFirstLetter = firstLetter;
+                    }else
+                    if (playerButton.IsClicked() && 
+                        playerButton.GetComponent<Collider>().bounds.Intersects(
+                            firstLetter.GetComponent<Collider>().bounds
+                    ))
+                    {
+                        RecordHit(firstLetter, player);
+                        spawner.DestroyFirstLetter();
+                        bufferedFirstLetter = firstLetter;
+
+                    }
+                }
             }
         }
-        
+
     }
+    
+     
+    
     
     
     [Server]

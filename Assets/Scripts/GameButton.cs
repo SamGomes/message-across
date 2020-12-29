@@ -11,11 +11,7 @@ public class GameButton : NetworkBehaviour {
     private AudioManager buttonAudioManager;
 
     private bool isBeingPressed;
-
-    private GameObject currCollidingLetter;
-
-    private Player owner;
-
+    
     public void RegisterButtonDown()
     {
         this.keyPressed = true;
@@ -31,29 +27,7 @@ public class GameButton : NetworkBehaviour {
     {
         return isClicked;
     }
-
-    public GameObject GetCollidingLetter()
-    {
-        return currCollidingLetter;
-    }
     
-    [ClientRpc]
-    public void SetCollidingLetter(GameObject otherObject)
-    {
-        currCollidingLetter = otherObject;
-    }
-    [ClientRpc]
-    public void ResetCollidingLetter()
-    {
-        currCollidingLetter = null;
-    }
-
-    
-    void Start()
-    {
-        currCollidingLetter = null;
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -68,24 +42,6 @@ public class GameButton : NetworkBehaviour {
         }
         if(!isBeingPressed)
             this.keyPressed = false;
-
-        
     }
-    
-    [Server]
-    void OnTriggerEnter(Collider letterCollider)
-    {
-        if (letterCollider.GetComponent<Letter>() == null){
-            return;
-        }
-        SetCollidingLetter(letterCollider.gameObject);
-    }
-    
-    [Server]
-    void OnTriggerExit(Collider otherObject)
-    {
-        this.currCollidingLetter = null;
-    }
-
    
 }

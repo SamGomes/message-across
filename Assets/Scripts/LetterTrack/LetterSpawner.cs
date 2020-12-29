@@ -9,8 +9,7 @@ using UnityEngine.UI;
 public class LetterSpawner : NetworkBehaviour
 {
     public GameObject letterPrefab;
-    public GameManager gameManager;
-
+    
     public float minIntervalRange;
     public float maxIntervalRange;
 
@@ -19,8 +18,6 @@ public class LetterSpawner : NetworkBehaviour
 
     private string currStarredWord;
 
-    
-    private List<char> lettersPool;
     private List<GameObject> currLetters;
 
     private int id;
@@ -28,7 +25,6 @@ public class LetterSpawner : NetworkBehaviour
 
     private void Awake()
     {
-        lettersPool = new List<char>();
         currLetters = new List<GameObject>();
     }
 
@@ -68,9 +64,20 @@ public class LetterSpawner : NetworkBehaviour
         this.currStarredWord = currTargetWord;
     }
 
-    public void DestroyCurrLetters()
+    [ClientRpc]
+    public void DestroyFirstLetter()
     {
-        foreach (GameObject letter in currLetters)
+        GameObject firstLetter = currLetters.First();
+        currLetters.RemoveAt(0);
+        Destroy(firstLetter);
+    }
+    
+    [ClientRpc]
+    public void DestroyAllLetters()
+    {
+        List<GameObject> letters = new List<GameObject>(currLetters);
+        currLetters.Clear();
+        foreach (GameObject letter in letters)
         {
             Destroy(letter);
         }
@@ -104,7 +111,10 @@ public class LetterSpawner : NetworkBehaviour
         
     }
 
-    
+    public List<GameObject> GetCurrSpawnedLetterObjects()
+    {
+        return currLetters;
+    }
 
 
 }
