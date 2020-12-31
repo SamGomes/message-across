@@ -85,7 +85,7 @@ public class GameManager : NetworkManager
 
     public void EndGame()
     {
-        Globals.backgroundAudioManager.PlayClip("Audio/backgroundLoop");
+        cmge.PlayAudioClip(0, "Audio/backgroundLoop");
         //SceneManager.LoadScene("gameover");
     }
 
@@ -224,8 +224,10 @@ public class GameManager : NetworkManager
         exerciseGroupIndex = Random.Range(0, Globals.settings.exercisesGroups.exerciseGroups.Count);
         Shuffle(Globals.settings.exercisesGroups.exerciseGroups);
 
-        Globals.backgroundAudioManager.StopCurrentClip();
-        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
+        cmge.StopCurrentAudioClip(0);
+        cmge.PlayInfiniteAudioClip(0, Globals.backgroundMusicPath, Globals.backgroundMusicPath);
+//        Globals.backgroundAudioManager.StopCurrentClip();
+//        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
         //init letter spawner stuff
         int spawnerId = 0;
@@ -409,7 +411,7 @@ public class GameManager : NetworkManager
 //        }
         if (activeButtonI != pressedButtonI)
         {
-            Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
+            cmge.PlayAudioClip(2, "Audio/trackChange");
         }
 
         //update player state and marker in track
@@ -553,7 +555,7 @@ public class GameManager : NetworkManager
             spawner.StopSpawning();
         }
 
-        Globals.effectsAudioManager.PlayClip("Audio/wordChange");
+        cmge.PlayAudioClip(1, "Audio/wordChange");
 
         if (recordMetrics)
         {
@@ -590,7 +592,7 @@ public class GameManager : NetworkManager
         cmge.DisplayCountdownText(false, "");
 
         cmge.StartEmojiAnim();
-        Globals.effectsAudioManager.PlayClip("Audio/snap");
+        cmge.PlayAudioClip(1, "Audio/snap");
         foreach (LetterSpawner spawner in letterSpawners)
         {
             spawner.StartSpawning();
@@ -671,7 +673,7 @@ public class GameManager : NetworkManager
     [Server]
     public void FinishPlayerAction(Player player, int pressedButtonI)
     {
-        Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
+        cmge.PlayAudioClip(2, "Audio/clickUp");
 
         player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
         player.ReleaseGameButton();
@@ -703,7 +705,7 @@ public class GameManager : NetworkManager
         if (player.GetCurrNumPossibleActionsPerLevel() < 1 ||
             (isLaneOverlap && playerOverlappedAndPressing))
         {
-            Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
+            cmge.PlayAudioClip(2, "Audio/badMove");
             player.ChangeButtonColor(pressedButtonI, Color.red);
             return;
         }
@@ -711,12 +713,9 @@ public class GameManager : NetworkManager
         int j = pressedButtonI - 2;
         Globals.KeyInteractionType iType = (Globals.KeyInteractionType) j;
         
-        Debug.Log(iType);
-        
-        Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
+        cmge.PlayAudioClip(2, "Audio/clickDown");
         player.SetActiveInteraction(iType);
                 
-       
         player.PressGameButton();
         player.UpdateActiveHalf(true);
     }
@@ -884,12 +883,12 @@ public class GameManager : NetworkManager
 
         if (usefulForMe || usefulForOther)
         {
-            Globals.effectsAudioManager.PlayClip("Audio/snap");
+            cmge.PlayAudioClip(1, "Audio/snap");
             cmge.SetEmojiAnim("Nice");
         }
         else
         {
-            Globals.effectsAudioManager.PlayClip("Audio/badMove");
+            cmge.PlayAudioClip(1, "Audio/badMove");
         }
 
         float otherPlayersCompletionMean = 0;

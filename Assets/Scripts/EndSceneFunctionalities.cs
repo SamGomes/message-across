@@ -8,6 +8,7 @@ public class EndSceneFunctionalities : MonoBehaviour
 {
     public Button quitButton;
     public Button restartButton;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -22,8 +23,11 @@ public class EndSceneFunctionalities : MonoBehaviour
             Globals.InitGlobals();
             SceneManager.LoadScene("paramsSetup");
         });
-        Globals.backgroundAudioManager.StopCurrentClip();
-        Globals.backgroundAudioManager.GetSource().pitch = 1.1f;
-        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
+        
+        Globals.audioManagers[0].StopCurrentClip();
+        Globals.audioManagers[0].PlayInfiniteClip(
+            Globals.backgroundMusicPath,
+            Globals.backgroundMusicPath);
+        
     }
 }

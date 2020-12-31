@@ -185,9 +185,10 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         
         
         
-
-        Globals.backgroundAudioManager.StopCurrentClip();
-        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
+        Globals.audioManagers[0].StopCurrentClip();
+        Globals.audioManagers[0].PlayInfiniteClip(
+            Globals.backgroundMusicPath,
+            Globals.backgroundMusicPath);
     }
 
 }

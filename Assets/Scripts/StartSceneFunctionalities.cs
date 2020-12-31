@@ -55,9 +55,7 @@ public static class Globals
     public static ExercisesConfig gameParam;
     public static List<GameObject> savedObjects;
 
-    public static AudioManager backgroundAudioManager;
-    public static AudioManager effectsAudioManager;
-    public static AudioManager trackEffectsAudioManager;
+    public static List<AudioManager> audioManagers;
 
     public static LogManager logManager;
 
@@ -99,9 +97,10 @@ public static class Globals
             Globals.savedObjects = new List<GameObject>();
         }
 
-        Globals.backgroundAudioManager = new AudioManager(true);
-        Globals.effectsAudioManager = new AudioManager(false);
-        Globals.trackEffectsAudioManager = new AudioManager(false);
+        Globals.audioManagers = new List<AudioManager>();
+        Globals.audioManagers.Add(new AudioManager(true));
+        Globals.audioManagers.Add(new AudioManager(false));
+        Globals.audioManagers.Add(new AudioManager(false));
 
         if(Globals.bufferedPlayerIds == null)
         {
@@ -116,8 +115,7 @@ public class StartSceneFunctionalities : MonoBehaviour
 {
     public Button localButton;
     public Button onlineButton;
-
-
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -128,7 +126,11 @@ public class StartSceneFunctionalities : MonoBehaviour
             SceneManager.LoadScene("startOnline");
         });
         Globals.InitGlobals();
-        Globals.backgroundAudioManager.StopCurrentClip();
-        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath,Globals.backgroundMusicPath);
+        
+        Globals.audioManagers[0].StopCurrentClip();
+        Globals.audioManagers[0].PlayInfiniteClip(
+            Globals.backgroundMusicPath,
+            Globals.backgroundMusicPath);
+        Globals.audioManagers[0].GetSource().pitch = 1.1f;
     }
 }

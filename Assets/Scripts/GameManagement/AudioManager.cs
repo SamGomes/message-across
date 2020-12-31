@@ -32,7 +32,7 @@ public class AudioManager{
         return this.loopSource;
     }
 
-    public void PlayInfinitClip(string introClipPath, string loopClipPath)
+    public void PlayInfiniteClip(string introClipPath, string loopClipPath)
     {
         //play theme song
         source.clip = Resources.Load<AudioClip>(introClipPath);

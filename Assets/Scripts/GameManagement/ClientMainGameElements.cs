@@ -2,7 +2,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ClientMainGameElements : NetworkBehaviour
+//wrapper class for broadcasted GameManager calls
+public class ClientMainGameElements : NetworkBehaviour 
 {
     public Text countdownText;
     public GameObject emoji;
@@ -32,4 +33,23 @@ public class ClientMainGameElements : NetworkBehaviour
     {
         emoji.GetComponent<Animator>().speed = 0;
     }
+
+    [ClientRpc]
+    public void PlayAudioClip(int managerIndex, string clipPath)
+    {
+        Globals.audioManagers[managerIndex].PlayClip(clipPath);
+    }
+    
+    [ClientRpc]
+    public void StopCurrentAudioClip(int managerIndex)
+    {
+        Globals.audioManagers[managerIndex].StopCurrentClip();
+    }
+    
+    [ClientRpc]
+    public void PlayInfiniteAudioClip(int managerIndex, string introClipPath, string loopClipPath)
+    {
+        Globals.audioManagers[managerIndex].PlayInfiniteClip(introClipPath, loopClipPath);
+    }
+    
 }

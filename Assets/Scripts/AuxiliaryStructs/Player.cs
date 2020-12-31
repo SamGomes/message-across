@@ -551,7 +551,6 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void ChangeButtonColor(int buttonI, Color color)
         {
-            Debug.Log("button I: " + buttonI);
             playerButtons[buttonI].GetComponent<Image>().color = color;
         }
 

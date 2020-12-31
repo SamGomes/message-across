@@ -231,6 +231,7 @@ MonoBehaviour:
   buttonPrefab: {fileID: 2350397367177531922, guid: 357aaa9b275d309428d641bde70f735a,
     type: 3}
   paramsButtonsObject: {fileID: 954223516}
+  cmge: {fileID: 0}
 --- !u!4 &521378540
 Transform:
   m_ObjectHideFlags: 0
