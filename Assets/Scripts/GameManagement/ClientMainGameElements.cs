@@ -27,6 +27,7 @@ public class ClientMainGameElements : NetworkBehaviour
         emoji.GetComponent<Animator>().speed = 1;
     }
 
+    [ClientRpc]
     public void StopEmojiAnim()
     {
         emoji.GetComponent<Animator>().speed = 0;

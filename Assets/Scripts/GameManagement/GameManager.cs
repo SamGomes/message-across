@@ -86,7 +86,7 @@ public class GameManager : NetworkManager
     public void EndGame()
     {
         Globals.backgroundAudioManager.PlayClip("Audio/backgroundLoop");
-        SceneManager.LoadScene("gameover");
+        //SceneManager.LoadScene("gameover");
     }
 
     public void ResetGame()
@@ -264,6 +264,15 @@ public class GameManager : NetworkManager
     IEnumerator StartAfterInit()
     {
         yield return new WaitForSeconds(1.0f);
+        
+        //start spawners update cycle
+        foreach (LetterSpawner spawner in letterSpawners)
+        {
+            StartCoroutine(UpdateSpawner(spawner));
+            spawner.StopSpawning();
+        }
+        
+        //start first level
         StartCoroutine(ChangeLevel(false,false));
     }
     
@@ -299,7 +308,7 @@ public class GameManager : NetworkManager
         player.Init(currPlayerInfo, orderNum);
 
         player.SetScore(0, 0, 0);
-        player.SetNumPossibleActions(4);
+        player.ResetNumPossibleActions();
         
         
         if (Globals.gameParam == Globals.ExercisesConfig.TUTORIAL)
@@ -397,8 +406,14 @@ public class GameManager : NetworkManager
         {
             Globals.trackEffectsAudioManager.PlayClip("Audio/trackChange");
         }
-               
+
+        //update player state and marker in track
         player.SetActiveTrackButton(pressedButtonI, player.markerPlaceholders.GetChild(pressedButtonI).transform.position);
+        
+        //update client player UIs after commands are executed on client
+        player.ChangeAllButtonsColor(player.GetButtonColor());
+        player.ChangeButtonColor(pressedButtonI, new Color(1.0f, 0.82f, 0.0f));
+
     }
     
 
@@ -436,15 +451,6 @@ public class GameManager : NetworkManager
         
         StartCoroutine(UpdateSpawner(spawner));
     }
-
-    [Server]
-    void InitSpawner(LetterSpawner spawner)
-    {
-        if (playersLettersSpawnP == 0.0f)
-        {
-            playersLettersSpawnP = 0.8f;
-        }
-    }
     
     [Server]
     private void ResetPool(LetterSpawner spawner)
@@ -476,6 +482,12 @@ public class GameManager : NetworkManager
         }
         
         letterPools[spawner.GetId()] = letterPool;
+    }
+
+    [Server]
+    private void ClearPool(LetterSpawner spawner)
+    {
+        letterPools[spawner.GetId()].Clear();
     }
     
     
@@ -533,7 +545,6 @@ public class GameManager : NetworkManager
 
         foreach (LetterSpawner spawner in letterSpawners)
         {
-            StartCoroutine(UpdateSpawner(spawner));
             spawner.StopSpawning();
         }
 
@@ -544,13 +555,13 @@ public class GameManager : NetworkManager
             yield return RecordMetrics();
         }
 
+        ChangeTargetWords();
         foreach (LetterSpawner spawner in letterSpawners)
         {
+            ClearPool(spawner); //risky-> exercise may not have been synced yet
             spawner.UpdateCurrStarredWord("");
         }
-
-        ChangeTargetWords();
-
+        
 
         if (areWordsUnfinished)
         {
@@ -560,13 +571,13 @@ public class GameManager : NetworkManager
         {
             cmge.SetEmojiAnim("Smiling");
         }
-
         cmge.StopEmojiAnim();
 
         foreach (Player player in players)
         {
-            player.ChangeLane(0);
-            player.SetAllUIButtonsColor(Color.red);
+//            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
+            player.ResetButtonStates();
+            player.EnableAllButtons();
         }
 
 
@@ -621,9 +632,6 @@ public class GameManager : NetworkManager
         {
             player.SetCurrExercise(newExercise.playerExercises[(i++) % newExercise.playerExercises.Count]);
             player.InitCurrWordState();
-
-            //animate transition
-            player.GetWordPanel().GetComponentInChildren<Animator>().Play(0);
         }
     }
 
@@ -644,21 +652,26 @@ public class GameManager : NetworkManager
             
             if (player.ActionFinished())
             {
-                FinishPlayerAction(player, player.GetPressedButtonIndex());
+                FinishPlayerAction(player);
                 player.AckActionFinished();
             }
         }
     }
     
     [Server]
-    public void FinishPlayerAction(Player player, int pressedButtonI)
+    public void FinishPlayerAction(Player player)
     {
         Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
         //verify if button should be pressed
-        if (player.GetCurrNumPossibleActionsPerLevel() > 0)
-        {
-            player.ChangeButtonColor(pressedButtonI, player.GetButtonColor());
-        }
+//        if (player.GetCurrNumPossibleActionsPerLevel() > 0) 
+//        {
+//            player.ChangeButtonColor(pressedButtonI, player.GetButtonColor());
+//        }
+//        else
+//        {
+//            //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
+//            player.DisableAllButtons(Color.red);
+//        }
         player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
         player.ReleaseGameButton();
         player.UpdateActiveHalf(false);
@@ -708,7 +721,6 @@ public class GameManager : NetworkManager
     [Server]
     public void CheckMarkerCollisions()
     {
-        
         //verify collision letter-marker and letter-pit
         foreach (Player player in players)
         {
@@ -716,23 +728,25 @@ public class GameManager : NetworkManager
             foreach (LetterSpawner spawner in letterSpawners)
             {
                 GameObject firstLetter = spawner.GetCurrSpawnedLetterObjects().FirstOrDefault();
-                if(firstLetter && firstLetter!=bufferedFirstLetter)
+                if(firstLetter) 
                 {
-                    if (letterPit.GetComponent<Collider>().bounds.Intersects(
+                    if (firstLetter!=bufferedFirstLetter && 
+                        letterPit.GetComponent<Collider>().bounds.Intersects(
                         firstLetter.GetComponent<Collider>().bounds
                     ))
                     {
-                        spawner.DestroyFirstLetter();
                         bufferedFirstLetter = firstLetter;
+                        spawner.DestroyFirstLetter();
                     }else
-                    if (playerButton.IsClicked() && 
+                    if (firstLetter!=bufferedFirstLetter && 
+                        playerButton.IsClicked() && 
                         playerButton.GetComponent<Collider>().bounds.Intersects(
                             firstLetter.GetComponent<Collider>().bounds
                     ))
                     {
+                        bufferedFirstLetter = firstLetter;
                         RecordHit(firstLetter, player);
                         spawner.DestroyFirstLetter();
-                        bufferedFirstLetter = firstLetter;
 
                     }
                 }
@@ -921,24 +935,30 @@ public class GameManager : NetworkManager
         }
 
 
-        if (currHitter.GetCurrNumPossibleActionsPerLevel() < 1)
-        {
-            foreach (Button button in currHitter.GetUI().GetComponentsInChildren<Button>())
-            {
-                button.GetComponent<Image>().color = Color.red;
-            }
-
-            currHitter.ReleaseGameButton();
-        }
+//        if (currHitter.GetCurrNumPossibleActionsPerLevel() < 1)
+//        {
+//            foreach (Button button in currHitter.GetUI().GetComponentsInChildren<Button>())
+//            {
+//                button.GetComponent<Image>().color = Color.red;
+//            }
+//
+//            currHitter.ReleaseGameButton();
+//        }
 
 
         bool areWordsUnfinished = false;
         bool arePlayersWithoutActions = true;
         foreach (Player player in players)
         {
-            if (player.GetCurrNumPossibleActionsPerLevel() > 0)
+            if (player.GetCurrNumPossibleActionsPerLevel() > 1)
             {
                 arePlayersWithoutActions = false;
+            }
+            else
+            {
+                FinishPlayerAction(player);
+                //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
+                player.DisableAllButtons(Color.red);
             }
 
             string currWordState = player.GetCurrWordState();

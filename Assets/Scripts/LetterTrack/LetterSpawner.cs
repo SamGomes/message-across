@@ -67,6 +67,10 @@ public class LetterSpawner : NetworkBehaviour
     [ClientRpc]
     public void DestroyFirstLetter()
     {
+        if (currLetters.Count == 0) //no letters to destroy
+        {
+            return;
+        }
         GameObject firstLetter = currLetters.First();
         currLetters.RemoveAt(0);
         Destroy(firstLetter);
@@ -75,6 +79,10 @@ public class LetterSpawner : NetworkBehaviour
     [ClientRpc]
     public void DestroyAllLetters()
     {
+        if (currLetters.Count == 0)
+        {
+            return;
+        }
         List<GameObject> letters = new List<GameObject>(currLetters);
         currLetters.Clear();
         foreach (GameObject letter in letters)

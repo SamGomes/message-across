@@ -92,7 +92,6 @@ namespace AuxiliaryStructs
             actionStarted = false;
             actionFinished = false;
             currPressedButtonI = 0;
-            ChangedLane();
             
             if (initted)
             {
@@ -227,13 +226,11 @@ namespace AuxiliaryStructs
                 playerPlaceholders.Add(child.gameObject);
             }
             
-            Debug.Log("orderI: "+((orderNum +1) % 2));
             playerPlaceholders[(orderNum +1) % 2].SetActive(false);
             
-            this.markerPlaceholders = GameObject.Find("Track/MarkerPlaceholders").transform;
+            markerPlaceholders = GameObject.Find("Track/MarkerPlaceholders").transform;
 
-            //init ui buttons
-            GameObject playerUI = ui;
+            //init ui
             //set buttons for touch screen
             playerButtons = new []
             {
@@ -244,7 +241,7 @@ namespace AuxiliaryStructs
                 ui.transform.Find("Button(5)").GetComponent<Button>()
             };
 
-            //only set buttons for local player, the others get "computer said no"
+            //only set buttons actions for local player
             if (isLocalPlayer)
             {
                 for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
@@ -252,13 +249,11 @@ namespace AuxiliaryStructs
                     Button currButton = playerButtons[buttonI];
                     currButton.interactable = true;
                     
-                    currButton.GetComponent<Image>().color = new Color(0.0f, 0.0f, 1.0f);
-                    
+                    currButton.GetComponent<Image>().color = GetButtonColor();
                     if (buttonI < markerPlaceholders.childCount)
                     {
-                        currButton.GetComponent<Image>().color = GetButtonColor();
                         int innerButtonI = buttonI; //for coroutine to save the iterated values
-                        currButton.onClick.AddListener(delegate() { ChangeLane(innerButtonI); });
+                        currButton.onClick.AddListener(delegate() { ChangeLaneRequest(innerButtonI); });
 
                     }
                     else
@@ -267,11 +262,11 @@ namespace AuxiliaryStructs
                         EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
                         EventTrigger.Entry pointerDown = new EventTrigger.Entry();
                         pointerDown.eventID = EventTriggerType.PointerDown;
-                        pointerDown.callback.AddListener(delegate(BaseEventData eventData) { ActionStart(innerButtonI); });
+                        pointerDown.callback.AddListener(delegate(BaseEventData eventData) { ActionStartRequest(innerButtonI); });
                         trigger.triggers.Add(pointerDown);
                         EventTrigger.Entry pointerUp = new EventTrigger.Entry();
                         pointerUp.eventID = EventTriggerType.PointerUp;
-                        pointerUp.callback.AddListener(delegate (BaseEventData eventData) { ActionFinish(innerButtonI); });
+                        pointerUp.callback.AddListener(delegate (BaseEventData eventData) { ActionFinishRequest(innerButtonI); });
                         trigger.triggers.Add(pointerUp);
                     }
                 }
@@ -283,7 +278,7 @@ namespace AuxiliaryStructs
         
         //start action request and ack from server
         [Command]
-        public void ActionStart(int buttonI)
+        public void ActionStartRequest(int buttonI)
         {
             actionStarted = true;
             currPressedButtonI = buttonI;
@@ -302,7 +297,7 @@ namespace AuxiliaryStructs
         
         //finished action request and ack from server
         [Command]
-        public void ActionFinish(int buttonI)
+        public void ActionFinishRequest(int buttonI)
         {
             actionFinished = true;
             currPressedButtonI = buttonI;
@@ -317,11 +312,19 @@ namespace AuxiliaryStructs
         {
             actionFinished = false;
         }
-        
+
+        [ClientRpc]
+        public void ResetButtonStates()
+        {
+            changedLane = true;
+            actionStarted = false;
+            actionFinished = false;
+            currPressedButtonI = 0;
+        }
         
         //change lane request and ack from server
         [Command]
-        public void ChangeLane(int buttonI)
+        public void ChangeLaneRequest(int buttonI)
         {
             changedLane = true;
             currPressedButtonI = buttonI;
@@ -405,6 +408,9 @@ namespace AuxiliaryStructs
             TextMesh[] playerDisplayTexts = wordPanel.GetComponentsInChildren<TextMesh>();
             playerDisplayTexts[0].text = currExercise.displayMessage;
             playerDisplayTexts[1].text = currWordState;
+            
+            //animate transition
+            GetWordPanel().GetComponentInChildren<Animator>().Play(0);
         }
 
         [ClientRpc]
@@ -423,6 +429,7 @@ namespace AuxiliaryStructs
             return currWordState;
         }
 
+//        [also as ClientRpc, called from SetScore]
         public IEnumerator DelayedScoreDisplay(float score, float delay)
         {
             yield return new WaitForSeconds(delay);
@@ -437,9 +444,9 @@ namespace AuxiliaryStructs
                 this.score = score;
 
                 //update UI
-                StartCoroutine(DelayedScoreDisplay(score, delay));
+//                StartCoroutine(DelayedScoreDisplay(score, delay));
+                scoreText.text = "Score: " + score;
                 statePanel.GetComponent<Animator>().Play(0);
-                Color newColor = backgroundColor;
                 if (increase > 0)
                 {
                     scoreUpdateUIup.GetComponentInChildren<Text>().text = "+" + increase;
@@ -468,15 +475,6 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void SetActiveTrackButton(int activeButtonIndex, Vector3 activeButtonPos)
         {
-            //updateUI
-            int i = 0;
-            while(i < 3)
-            {
-                Button button = playerButtons[i++];
-                button.GetComponent<Image>().color = GetButtonColor();
-            }
-            playerButtons[activeButtonIndex].GetComponent<Image>().color =
-                new Color(1.0f, 0.82f, 0.0f);
             
             //updateTrack
             if (currButtonLerp != null)
@@ -549,17 +547,46 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void ChangeButtonColor(int buttonI, Color color)
         {
+            Debug.Log("button I: " + buttonI);
             playerButtons[currPressedButtonI].GetComponent<Image>().color = color;
+        }
+        
+        [ClientRpc]
+        public void ChangeAllButtonsColor(Color color)
+        {
+            foreach (Button button in ui.GetComponentsInChildren<Button>())
+            {
+                button.GetComponent<Image>().color = color;
+            }
+        }
+        
+        [ClientRpc]
+        public void DisableAllButtons(Color disabledColor)
+        {
+            foreach (Button button in ui.GetComponentsInChildren<Button>())
+            {
+                button.interactable = false;
+                button.GetComponent<Image>().color = disabledColor;
+            }
+        }
+        [ClientRpc]
+        public void EnableAllButtons()
+        {
+            foreach (Button button in ui.GetComponentsInChildren<Button>())
+            {
+                button.interactable = true;
+                button.GetComponent<Image>().color = GetButtonColor();
+            }
         }
         
         public int GetActiveButtonIndex()
         {
-            return this.activeButtonIndex;
+            return activeButtonIndex;
         }
 
         public int GetPressedButtonIndex()
         {
-            return this.currPressedButtonI;
+            return currPressedButtonI;
         }
 
         public Color GetButtonColor()
@@ -586,6 +613,9 @@ namespace AuxiliaryStructs
         public void ResetNumPossibleActions()
         {
             this.currNumPossibleActionsPerLevel = info.numPossibleActionsPerLevel;
+            //update UI
+            possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
+            statePanel.GetComponent<Animator>().Play(0);
         }
 
         [ClientRpc]
@@ -621,14 +651,7 @@ namespace AuxiliaryStructs
         {
             return this.ui;
         }
-
-        public void SetAllUIButtonsColor(Color color)
-        {
-            foreach (Button button in ui.GetComponentsInChildren<Button>())
-            {
-                button.GetComponent<Image>().color = color;
-            }
-        }
+        
         
         public bool IsPressingButton()
         {
