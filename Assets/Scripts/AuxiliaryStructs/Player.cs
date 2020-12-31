@@ -550,6 +550,11 @@ namespace AuxiliaryStructs
             Debug.Log("button I: " + buttonI);
             playerButtons[currPressedButtonI].GetComponent<Image>().color = color;
         }
+
+        public bool CheckButtonInteractivity(int buttonI)
+        {
+            return playerButtons[currPressedButtonI].interactable;
+        }
         
         [ClientRpc]
         public void ChangeAllButtonsColor(Color color)

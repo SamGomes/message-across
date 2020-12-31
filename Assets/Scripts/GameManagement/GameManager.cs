@@ -272,6 +272,14 @@ public class GameManager : NetworkManager
             spawner.StopSpawning();
         }
         
+        //start player buttons
+        foreach (Player player in players)
+        {
+            FinishPlayerAction(player, player.GetPressedButtonIndex());
+            //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
+            player.DisableAllButtons(Color.red);
+        }
+
         //start first level
         StartCoroutine(ChangeLevel(false,false));
     }
@@ -358,8 +366,6 @@ public class GameManager : NetworkManager
                 ChangeLane(player);
                 UpdateButtonOverlaps(player, player.GetPressedButtonIndex());
                 player.AckChangedLane();
-                
-                
             }
         }
     }
@@ -573,14 +579,7 @@ public class GameManager : NetworkManager
         }
         cmge.StopEmojiAnim();
 
-        foreach (Player player in players)
-        {
-//            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
-            player.ResetButtonStates();
-            player.EnableAllButtons();
-        }
-
-
+        
         int i = startingLevelDelayInSeconds;
         yield return new WaitForSeconds(2.0f);
         for (i = startingLevelDelayInSeconds; i > 0; i--)
@@ -602,7 +601,9 @@ public class GameManager : NetworkManager
         {
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
             {
-                button.GetComponent<Image>().color = player.GetButtonColor();
+  //            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
+                player.ResetButtonStates();
+                player.EnableAllButtons();
             }
 
             player.ResetNumPossibleActions();
@@ -644,22 +645,32 @@ public class GameManager : NetworkManager
     {
         foreach (Player player in players)
         {
-            if (player.ActionStarted())
+            if (player.ActionStarted() || player.ActionFinished())
             {
-                StartPlayerAction(player, player.GetPressedButtonIndex());
-                player.AckActionStarted();
-            }
-            
-            if (player.ActionFinished())
-            {
-                FinishPlayerAction(player);
-                player.AckActionFinished();
+                int pressedButtonI = player.GetPressedButtonIndex();
+                if (!player.CheckButtonInteractivity(pressedButtonI))
+                {
+                    Debug.Log("here");
+                    continue;
+                }
+
+                if (player.ActionStarted())
+                {
+                    StartPlayerAction(player, pressedButtonI);
+                    player.AckActionStarted();
+                }
+
+                if (player.ActionFinished())
+                {
+                    FinishPlayerAction(player, pressedButtonI);
+                    player.AckActionFinished();
+                }
             }
         }
     }
     
     [Server]
-    public void FinishPlayerAction(Player player)
+    public void FinishPlayerAction(Player player, int pressedButtonI)
     {
         Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
         //verify if button should be pressed
@@ -674,6 +685,8 @@ public class GameManager : NetworkManager
 //        }
         player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
         player.ReleaseGameButton();
+        
+        player.ChangeButtonColor(pressedButtonI, player.GetButtonColor());
         player.UpdateActiveHalf(false);
     }
 
@@ -956,7 +969,7 @@ public class GameManager : NetworkManager
             }
             else
             {
-                FinishPlayerAction(player);
+                FinishPlayerAction(player, player.GetPressedButtonIndex());
                 //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
                 player.DisableAllButtons(Color.red);
             }
