@@ -552,7 +552,7 @@ namespace AuxiliaryStructs
         public void ChangeButtonColor(int buttonI, Color color)
         {
             Debug.Log("button I: " + buttonI);
-            playerButtons[currPressedButtonI].GetComponent<Image>().color = color;
+            playerButtons[buttonI].GetComponent<Image>().color = color;
         }
 
         public bool IsButtonEnabled(int buttonI)

@@ -30,7 +30,7 @@ public class GameManager : NetworkManager
     public bool isGameplayPaused;
     public bool isGameplayStarted;
 
-    public bool isButtonOverlap;
+    public bool isLaneOverlap;
 
 
     public LetterSpawner[] letterSpawners;
@@ -222,7 +222,6 @@ public class GameManager : NetworkManager
         isGameplayStarted = true;
 
         exerciseGroupIndex = Random.Range(0, Globals.settings.exercisesGroups.exerciseGroups.Count);
-//        cmge.DisplayCountdownText(false, "");
         Shuffle(Globals.settings.exercisesGroups.exerciseGroups);
 
         Globals.backgroundAudioManager.StopCurrentClip();
@@ -245,6 +244,7 @@ public class GameManager : NetworkManager
     {
         CreatePlayer(conn);
 
+        cmge.DisplayCountdownText(false, ""); //disable countdown text in lobby
         int orderNum = 0;
         foreach(Player player in players)
         {
@@ -254,10 +254,8 @@ public class GameManager : NetworkManager
         if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
         {
             //TODO: receive acknowledgements instead of waiting a bit
-            //StartCoroutine(StartAfterInit());
+            StartCoroutine(StartAfterInit());
         }
-//        StartCoroutine(StartAfterInit());
-
     }
 
 
@@ -279,6 +277,7 @@ public class GameManager : NetworkManager
             //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
             player.DisableAllButtons(Color.red);
         }
+        cmge.DisplayCountdownText(true, "Get Ready...");
 
         //start first level
         StartCoroutine(ChangeLevel(false,false));
@@ -373,19 +372,19 @@ public class GameManager : NetworkManager
     [Server]
     public void UpdateButtonOverlaps(Player currPlayer, int potentialIndex)
     {
-        isButtonOverlap = false;
+        isLaneOverlap = false;
         foreach (Player player in players)
         {
             if (player != currPlayer && player.GetActiveButtonIndex() == potentialIndex)
             {
-                isButtonOverlap = true;
+                isLaneOverlap = true;
                 break;
             }
         }
         
         foreach (Player player in players)
         {
-            if(isButtonOverlap)
+            if(isLaneOverlap)
             {
                 player.HideHalfMarker();
             }
@@ -673,16 +672,7 @@ public class GameManager : NetworkManager
     public void FinishPlayerAction(Player player, int pressedButtonI)
     {
         Globals.trackEffectsAudioManager.PlayClip("Audio/clickUp");
-        //verify if button should be pressed
-//        if (player.GetCurrNumPossibleActionsPerLevel() > 0) 
-//        {
-//            player.ChangeButtonColor(pressedButtonI, player.GetButtonColor());
-//        }
-//        else
-//        {
-//            //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
-//            player.DisableAllButtons(Color.red);
-//        }
+
         player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
         player.ReleaseGameButton();
         
@@ -698,33 +688,35 @@ public class GameManager : NetworkManager
                 
         //verify if button should be pressed
         bool playerOverlappedAndPressing = false;
-        foreach (Player innerPlayer in players)
+        if (isLaneOverlap)
         {
-            if (innerPlayer != player && player.IsPressingButton())
+            foreach (Player innerPlayer in players)
             {
-                playerOverlappedAndPressing = true;
-                break;
+                if (innerPlayer != player && player.IsPressingButton())
+                {
+                    playerOverlappedAndPressing = true;
+                    break;
+                }
             }
         }
-                
+        
         if (player.GetCurrNumPossibleActionsPerLevel() < 1 ||
-            (isButtonOverlap && playerOverlappedAndPressing))
+            (isLaneOverlap && playerOverlappedAndPressing))
         {
             Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
             player.ChangeButtonColor(pressedButtonI, Color.red);
             return;
         }
-                
-        int j = pressedButtonI - 4;
-        Globals.KeyInteractionType iType = (Globals.KeyInteractionType)j;
+
+        int j = pressedButtonI - 2;
+        Globals.KeyInteractionType iType = (Globals.KeyInteractionType) j;
+        
+        Debug.Log(iType);
         
         Globals.trackEffectsAudioManager.PlayClip("Audio/clickDown");
         player.SetActiveInteraction(iType);
                 
-        if (isButtonOverlap)
-        {
-            return;
-        }
+       
         player.PressGameButton();
         player.UpdateActiveHalf(true);
     }
