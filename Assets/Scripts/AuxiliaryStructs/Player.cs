@@ -67,6 +67,7 @@ namespace AuxiliaryStructs
 
 
         private Button[] playerButtons;
+        private bool[] isButtonEnabled;
        
         //used to sync with game manager
         private bool changedLane;
@@ -240,6 +241,10 @@ namespace AuxiliaryStructs
                 ui.transform.Find("Button(4)").GetComponent<Button>(),
                 ui.transform.Find("Button(5)").GetComponent<Button>()
             };
+            isButtonEnabled= new []
+            {
+                true,true,true,true,true
+            };
 
             //only set buttons actions for local player
             if (isLocalPlayer)
@@ -349,7 +354,6 @@ namespace AuxiliaryStructs
             {
                 return;
             }
-            
             this.activeLayout = leftIfTrue;
         }
         
@@ -551,9 +555,9 @@ namespace AuxiliaryStructs
             playerButtons[currPressedButtonI].GetComponent<Image>().color = color;
         }
 
-        public bool CheckButtonInteractivity(int buttonI)
+        public bool IsButtonEnabled(int buttonI)
         {
-            return playerButtons[currPressedButtonI].interactable;
+            return isButtonEnabled[currPressedButtonI];
         }
         
         [ClientRpc]
@@ -568,18 +572,22 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void DisableAllButtons(Color disabledColor)
         {
-            foreach (Button button in ui.GetComponentsInChildren<Button>())
+            for (int i=0; i<playerButtons.Length; i++)
             {
+                Button button = playerButtons[i];
                 button.interactable = false;
+                isButtonEnabled[i] = false;
                 button.GetComponent<Image>().color = disabledColor;
             }
         }
         [ClientRpc]
         public void EnableAllButtons()
         {
-            foreach (Button button in ui.GetComponentsInChildren<Button>())
+            for (int i=0; i<playerButtons.Length; i++)
             {
+                Button button = playerButtons[i];
                 button.interactable = true;
+                isButtonEnabled[i] = true;
                 button.GetComponent<Image>().color = GetButtonColor();
             }
         }

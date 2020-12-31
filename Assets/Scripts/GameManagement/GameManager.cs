@@ -254,7 +254,7 @@ public class GameManager : NetworkManager
         if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
         {
             //TODO: receive acknowledgements instead of waiting a bit
-            StartCoroutine(StartAfterInit());
+            //StartCoroutine(StartAfterInit());
         }
 //        StartCoroutine(StartAfterInit());
 
@@ -648,7 +648,7 @@ public class GameManager : NetworkManager
             if (player.ActionStarted() || player.ActionFinished())
             {
                 int pressedButtonI = player.GetPressedButtonIndex();
-                if (!player.CheckButtonInteractivity(pressedButtonI))
+                if (!player.IsButtonEnabled(pressedButtonI))
                 {
                     Debug.Log("here");
                     continue;
