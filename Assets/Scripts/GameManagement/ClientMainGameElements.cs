@@ -1,7 +1,5 @@
 ﻿using Mirror;
-using UnityEditor.MemoryProfiler;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 //wrapper class for broadcasted GameManager calls
