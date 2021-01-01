@@ -58,10 +58,8 @@ namespace AuxiliaryStructs
         public bool currExerciseFinished;
         private string currWordState;
         
-
         public bool pressingButton;
-        private bool allowInteraction;
-
+        
         private bool isTopMask;
         private bool activeLayout; //parameterize the side of the board player will play in, true if left
 
@@ -201,10 +199,6 @@ namespace AuxiliaryStructs
             displayedHalf.AddRange(maskedHalf);
 
             
-            foreach (Button button in ui.GetComponentsInChildren<Button>())
-            {
-                button.interactable = allowInteraction;
-            }
             foreach (SpriteRenderer image in marker.GetComponentsInChildren<SpriteRenderer>())
             {
                 image.color = this.backgroundColor;

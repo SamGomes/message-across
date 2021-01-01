@@ -76,7 +76,6 @@ public class GameManager : NetworkManager
             {
                 letter.Unlock();
             }
-
             ls.enabled = true;
         }
 
@@ -115,7 +114,7 @@ public class GameManager : NetworkManager
 
     
 
-    public void Start()
+    public override void Start()
     {
         players = new List<Player>();
         
@@ -146,8 +145,8 @@ public class GameManager : NetworkManager
                 }
                 else if (Globals.settings.networkSettings.currOnlineOption == "CLIENT")
                 {
+                    this.networkAddress = Globals.settings.networkSettings.serverIP;
                     this.StartClient();
-                    this.networkAddress = "localhost";//Globals.settings.networkSettings.serverIP;
                 }
             }
         }
@@ -240,10 +239,23 @@ public class GameManager : NetworkManager
         playersLettersSpawnP = Globals.settings.generalSettings.playersLettersSpawnP;
     }
 
-
+    public override void OnClientDisconnect(NetworkConnection conn)
+    {
+        base.OnClientDisconnect(conn);
+        
+        //TODO build notifications prefab
+        SceneManager.LoadScene("startOnline");
+    }
 
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
+        //check if room is full
+        if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
+        {
+            conn.Disconnect();
+            return;
+        }
+        
         CreatePlayer(conn);
 
         cmge.DisplayCountdownText(false, ""); //disable countdown text in lobby

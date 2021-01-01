@@ -531,6 +531,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerName: {fileID: 1867719691}
+  serverIP: {fileID: 1935573879}
   hostButton: {fileID: 1930825952}
   joinButton: {fileID: 491744614}
 --- !u!4 &521378540

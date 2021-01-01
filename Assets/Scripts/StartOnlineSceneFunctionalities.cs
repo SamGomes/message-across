@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class StartOnlineSceneFunctionalities : MonoBehaviour
 {
     public InputField playerName;
+    public InputField serverIP;
     public Button hostButton;
     public Button joinButton;
 
@@ -20,6 +21,7 @@ public class StartOnlineSceneFunctionalities : MonoBehaviour
         
         joinButton.onClick.AddListener(delegate () {
             Globals.settings.networkSettings.currOnlineOption = "CLIENT";
+            Globals.settings.networkSettings.serverIP = serverIP.text;
             SceneManager.LoadScene("mainScene");
         });
     }

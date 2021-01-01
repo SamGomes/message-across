@@ -82,6 +82,7 @@ public class ParamsSceneFunctionalities : MonoBehaviour
             catch (FileNotFoundException e)
             {
                 generalConfigText = "";
+                Debug.Log("Caught FileNotFoundException exception: " + e.Message);
             }
         }
 
@@ -101,6 +102,7 @@ public class ParamsSceneFunctionalities : MonoBehaviour
             catch (FileNotFoundException e)
             {
                 exercisesConfigText = "";
+                Debug.Log("Caught FileNotFoundException exception: " + e.Message);
             }
         }
         
@@ -120,6 +122,7 @@ public class ParamsSceneFunctionalities : MonoBehaviour
             catch (FileNotFoundException e)
             {
                 networkConfigText = "";
+                Debug.Log("Caught FileNotFoundException exception: " + e.Message);
             }
         }
 

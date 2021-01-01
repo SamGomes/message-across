@@ -1,5 +1,7 @@
 ﻿using Mirror;
+using UnityEditor.MemoryProfiler;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 //wrapper class for broadcasted GameManager calls
@@ -34,6 +36,7 @@ public class ClientMainGameElements : NetworkBehaviour
         emoji.GetComponent<Animator>().speed = 0;
     }
 
+    
     [ClientRpc]
     public void PlayAudioClip(int managerIndex, string clipPath)
     {
@@ -51,5 +54,6 @@ public class ClientMainGameElements : NetworkBehaviour
     {
         Globals.audioManagers[managerIndex].PlayInfiniteClip(introClipPath, loopClipPath);
     }
+
     
 }
