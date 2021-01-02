@@ -1,5 +1,6 @@
 ﻿using Mirror;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 //wrapper class for broadcasted GameManager calls
@@ -53,5 +54,10 @@ public class ClientMainGameElements : NetworkBehaviour
         Globals.audioManagers[managerIndex].PlayInfiniteClip(introClipPath, loopClipPath);
     }
 
+    [ClientRpc]
+    public void EndGameInAllClients()
+    {
+        SceneManager.LoadScene("gameover");
+    }
     
 }

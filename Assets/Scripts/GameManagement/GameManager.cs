@@ -17,11 +17,14 @@ using Random = UnityEngine.Random;
 public class GameManager : NetworkManager
 {
     public List<Player> players;
+    public List<GameObject> playerGameObjects;
 
     private int startingLevelDelayInSeconds;
 
+    public GameObject serverDebugUI;
     public Button quitButton;
     public Button resetButton;
+    public Button pauseButton;
     private int numLevelsLeft;
 
     private int exerciseGroupIndex;
@@ -53,6 +56,7 @@ public class GameManager : NetworkManager
 
     public GameObject letterPit;
     
+    [Server]
     public void PauseGame()
     {
         foreach (LetterSpawner ls in letterSpawners)
@@ -68,6 +72,7 @@ public class GameManager : NetworkManager
         isGameplayPaused = true;
     }
 
+    [Server]
     public void ResumeGame()
     {
         foreach (LetterSpawner ls in letterSpawners)
@@ -81,16 +86,11 @@ public class GameManager : NetworkManager
 
         isGameplayPaused = false;
     }
-
-    public void EndGame()
-    {
-        cmge.PlayAudioClip(0, "Audio/backgroundLoop");
-        //SceneManager.LoadScene("gameover");
-    }
-
+    
+    [Server]
     public void ResetGame()
     {
-        EndGame();
+        cmge.EndGameInAllClients();
         foreach (var obj in Globals.savedObjects)
         {
             Destroy(obj);
@@ -98,6 +98,18 @@ public class GameManager : NetworkManager
 
         Globals.InitGlobals();
         SceneManager.LoadScene("paramsSetup");
+    }
+    
+    [Server]
+    public void EndGame()
+    {
+        cmge.EndGameInAllClients();
+        foreach (var obj in Globals.savedObjects)
+        {
+            Destroy(obj);
+        }
+        Globals.InitGlobals();
+        isGameplayStarted = false;
     }
 
     private void Shuffle<T>(IList<T> list)
@@ -182,19 +194,28 @@ public class GameManager : NetworkManager
         scoreSystemPath = Globals.settings.scoreSystem.path;
 
         isGameplayStarted = false;
+        isGameplayPaused = false;
 
         startingLevelDelayInSeconds = 5;
 
+        serverDebugUI.SetActive(true);
         quitButton.onClick.AddListener(delegate() { EndGame(); });
         resetButton.onClick.AddListener(delegate() { ResetGame(); });
+        pauseButton.onClick.AddListener(delegate() {
+            if (isGameplayPaused)
+            {
+                ResumeGame();
+            }
+            else
+            {
+                PauseGame();
+            }
+        });
 
         if (Globals.savedObjects == null)
         {
             Globals.InitGlobals();
         }
-
-        isGameplayPaused = false;
-        
 
         switch (Globals.settings.generalSettings.logMode)
         {
@@ -225,8 +246,6 @@ public class GameManager : NetworkManager
 
         cmge.StopCurrentAudioClip(0);
         cmge.PlayInfiniteAudioClip(0, Globals.backgroundMusicPath, Globals.backgroundMusicPath);
-//        Globals.backgroundAudioManager.StopCurrentClip();
-//        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
         //init letter spawner stuff
         int spawnerId = 0;
@@ -237,6 +256,12 @@ public class GameManager : NetworkManager
             letterPools.Add(new List<char>());
         }
         playersLettersSpawnP = Globals.settings.generalSettings.playersLettersSpawnP;
+    }
+
+    public override void OnClientConnect(NetworkConnection conn)
+    {
+        base.OnClientConnect(conn);
+        serverDebugUI.SetActive(false);
     }
 
     public override void OnClientDisconnect(NetworkConnection conn)
@@ -259,10 +284,9 @@ public class GameManager : NetworkManager
         CreatePlayer(conn);
 
         cmge.DisplayCountdownText(false, ""); //disable countdown text in lobby
-        int orderNum = 0;
-        foreach(Player player in players)
+        for(int i=0; i< players.Count; i++)
         {
-            InitPlayer(conn, player, orderNum++);
+            InitPlayer(conn, i);
         }
         
         if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
@@ -305,8 +329,11 @@ public class GameManager : NetworkManager
         EndGame();
     }
 
-    void InitPlayer(NetworkConnection conn, Player player, int orderNum)
+    void InitPlayer(NetworkConnection conn, int orderNum)
     {
+        Player player = players[orderNum];
+        GameObject playerInstance = playerGameObjects[orderNum];
+        
         //setup player after instantiation
         //clients do not have local players' info created
         PlayerInfo currPlayerInfo = Globals.settings.generalSettings.playersParams[orderNum];
@@ -326,7 +353,7 @@ public class GameManager : NetworkManager
         //all these methods are broadcasted to each client
         player.SetActiveLayout(orderNum % 2 == 0);
         player.SetTopMask(orderNum % 2 == 0);
-        player.Init(currPlayerInfo, orderNum);
+        player.Init(currPlayerInfo, playerInstance, orderNum);
 
         player.SetScore(0, 0, 0);
         player.ResetNumPossibleActions();
@@ -349,6 +376,7 @@ public class GameManager : NetworkManager
         NetworkServer.AddPlayerForConnection(conn, playerGameObject);
         Player player = playerGameObject.GetComponent<Player>();
         players.Add(player);
+        playerGameObjects.Add(playerGameObject);
     }
 
 
@@ -415,12 +443,6 @@ public class GameManager : NetworkManager
     {
         int activeButtonI = player.GetActiveButtonIndex();
         int pressedButtonI = player.GetPressedButtonIndex();
-        //verify if button should be pressed
-//        if (activeButtonI < 1)
-//        {
-//            Globals.trackEffectsAudioManager.PlayClip("Audio/badMove");
-//            return;
-//        }
         if (activeButtonI != pressedButtonI)
         {
             cmge.PlayAudioClip(2, "Audio/trackChange");
@@ -857,7 +879,6 @@ public class GameManager : NetworkManager
                     usefulForOther = TestAndExecuteHit(true, letterText, letterObj, usefulTargetPlayer);
                     if (usefulForOther)
                     {
-                        //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
                         break;
                     }
 
@@ -868,10 +889,6 @@ public class GameManager : NetworkManager
                 break;
             case Globals.KeyInteractionType.TAKE:
                 usefulForMe = TestAndExecuteHit(true, letterText, letterObj, currHitter);
-                if (usefulForMe)
-                {
-                    //letter.GetComponentInChildren<SpriteRenderer>().color = player.GetButtonColor();
-                }
 
                 foreach (Player usefulTargetPlayer in players)
                 {

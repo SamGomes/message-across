@@ -82,7 +82,7 @@ namespace AuxiliaryStructs
 
         // public void Init(bool allowInteraction, string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
         [ClientRpc]
-        public void Init(PlayerInfo info, int orderNum)
+        public void Init(PlayerInfo info, GameObject playerPrefabInstance, int orderNum)
         {
             Debug.Log("init player "+orderNum);
             
@@ -224,7 +224,8 @@ namespace AuxiliaryStructs
             playerPlaceholders[(orderNum +1) % 2].SetActive(false);
             
             markerPlaceholders = GameObject.Find("Track/MarkerPlaceholders").transform;
-
+                
+            playerPrefabInstance.SetActive(true);
             //init ui
             //set buttons for touch screen
             playerButtons = new []
