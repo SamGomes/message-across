@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using AuxiliaryStructs;
 using Mirror;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace AuxiliaryStructs
@@ -16,7 +14,6 @@ namespace AuxiliaryStructs
         public Transform markerPlaceholders;
         
         private bool initted;
-//        private int orderNum;
         
         public PlayerInfo info;
 
@@ -409,7 +406,7 @@ namespace AuxiliaryStructs
             playerDisplayTexts[1].text = currWordState;
             
             //animate transition
-            GetWordPanel().GetComponentInChildren<Animator>().Play(0);
+            wordPanel.GetComponentInChildren<Animator>().Play(0);
         }
 
         [ClientRpc]
