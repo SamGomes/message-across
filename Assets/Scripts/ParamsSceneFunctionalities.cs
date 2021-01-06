@@ -62,7 +62,7 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         string networkConfigText = "";
 
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
-        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
+        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfigTest.cfg";
         
         string networkConfigPath = Application.streamingAssetsPath + "/networkConfig.cfg";
 

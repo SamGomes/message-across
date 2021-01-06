@@ -416,7 +416,7 @@ namespace AuxiliaryStructs
 
             //Update UI
             TextMesh[] playerDisplayTexts = wordPanel.GetComponentsInChildren<TextMesh>();
-            playerDisplayTexts[0].text = currExercise.targetWord;
+            playerDisplayTexts[0].text = currExercise.displayMessage;
             playerDisplayTexts[1].text = currWordState;
         }
 

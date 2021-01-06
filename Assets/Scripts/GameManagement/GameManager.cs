@@ -22,6 +22,7 @@ public class GameManager : NetworkManager
     private int startingLevelDelayInSeconds;
 
     public GameObject serverDebugUI;
+    
     public Button quitButton;
     public Button resetButton;
     public Button pauseButton;
@@ -157,7 +158,14 @@ public class GameManager : NetworkManager
                 }
                 else if (Globals.settings.networkSettings.currOnlineOption == "CLIENT")
                 {
-                    this.networkAddress = Globals.settings.networkSettings.serverIP;
+                    if (Globals.settings.networkSettings.serverIP == "")
+                    {
+                        this.networkAddress = "localhost";
+                    }
+                    else
+                    {
+                        this.networkAddress = Globals.settings.networkSettings.serverIP;
+                    }
                     this.StartClient();
                 }
             }
