@@ -16,7 +16,6 @@ public class ParamsSceneFunctionalities : MonoBehaviour
     public GameObject paramsButtonsObject;
     private string scoreConfigPath;
 
-
     void Start()
     {
         StartCoroutine(YieldedStart());
@@ -49,6 +48,7 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         {
             scoreConfigText = File.ReadAllText(scoreConfigPath);
         }
+        
         Globals.settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
         Globals.settings.scoreSystem.path = scoreConfigPath;
     }
@@ -56,13 +56,13 @@ public class ParamsSceneFunctionalities : MonoBehaviour
     // Start is called before the first frame update
     IEnumerator YieldedStart()
     {
-        scoreConfigPath =  Application.streamingAssetsPath + "/scoreSystemConfigTutorial.cfg";
+        scoreConfigPath =  "";
         string generalConfigText = "";
         string exercisesConfigText = "";
         string networkConfigText = "";
 
         string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
-        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfigTest.cfg";
+        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
         
         string networkConfigPath = Application.streamingAssetsPath + "/networkConfig.cfg";
 
@@ -143,6 +143,42 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         }
 
 
+        
+        
+        
+        string lobbyScoreConfigPath = Application.streamingAssetsPath + "/scoreSystemConfigLobby.cfg";
+        string lobbyExercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfigLobby.cfg";
+
+        string lobbyScoreConfigText = "";
+        if (scoreConfigPath.Contains("://") || lobbyScoreConfigPath.Contains(":///")) //url instead of path
+        {
+            UnityWebRequest www = UnityWebRequest.Get(lobbyScoreConfigPath);
+            yield return www.SendWebRequest();
+            lobbyScoreConfigText = www.downloadHandler.text;
+        }
+        else
+        {
+            lobbyScoreConfigText = File.ReadAllText(lobbyScoreConfigPath);
+        }
+        Globals.settings.lobbyScoreSystem = JsonUtility.FromJson<ScoreSystem>(lobbyScoreConfigText);
+
+        
+        string lobbyExercisesConfigText = "";
+        if (scoreConfigPath.Contains("://") || lobbyScoreConfigPath.Contains(":///")) //url instead of path
+        {
+            UnityWebRequest www = UnityWebRequest.Get(lobbyScoreConfigPath);
+            yield return www.SendWebRequest();
+            lobbyExercisesConfigText = www.downloadHandler.text;
+        }
+        else
+        {
+            lobbyExercisesConfigText = File.ReadAllText(lobbyExercisesConfigPath);
+        }
+        Globals.settings.lobbyExercisesGroups = JsonUtility.FromJson<ExerciseGroupsWrapper>(lobbyExercisesConfigText);
+
+        
+        
+        
         
         
         

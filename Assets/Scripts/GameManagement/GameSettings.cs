@@ -68,7 +68,7 @@ public struct MANetworkSettings
 
     //for online games
     public string currOnlineOption;
-    public string serverIP;
+    public string serverCode;
 }
 
 [Serializable]
@@ -78,5 +78,9 @@ public struct GameSettings
     public ExerciseGroupsWrapper exercisesGroups;
     public GeneralSettings generalSettings;
     public ScoreSystem scoreSystem;
+    
+    public ScoreSystem lobbyScoreSystem;
+    public ExerciseGroupsWrapper lobbyExercisesGroups;
+
 }
 

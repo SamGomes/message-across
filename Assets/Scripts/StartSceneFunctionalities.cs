@@ -63,7 +63,7 @@ public static class Globals
 
     public static string backgroundMusicPath;
 
-    public static bool tryNewInterface;
+    public static bool activeInfoPopups;
     
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
     {
@@ -131,13 +131,22 @@ public class StartSceneFunctionalities : MonoBehaviour
         Popup popup = new Popup(false);
         popup.SetMessage("Welcome to MessageAcross ver 2.1! This version contemplates the new online mode " +
                          "(offline is not currently working in this version), and a new word display interface, " +
-                         "focused on the game application for learning. Enjoy!");
-//        popup.AddButton("Sure!", delegate
-//        {
-//            popup.HidePopupPanel();
-//            return 0;
-//        });
-//        popup.HasCloseButton(false);
+                         "focused on the game application for learning. Enjoy!" +
+                         "\n\n" +
+                         "Would you like to enable messages explaining the game screens?");
+        popup.AddButton("Sure!", delegate
+        {
+            Globals.activeInfoPopups = true;
+            popup.HidePopupPanel();
+            return 0;
+        });
+        popup.AddButton("No", delegate
+        {
+            Globals.activeInfoPopups = false;
+            popup.HidePopupPanel();
+            return 0;
+        });
+        popup.HasCloseButton(false);
         popup.DisplayPopup();
         
         Globals.audioManagers[0].StopCurrentClip();

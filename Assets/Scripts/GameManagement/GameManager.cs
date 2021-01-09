@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using AuxiliaryStructs;
 using UnityEngine;
@@ -10,6 +11,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 using Mirror;
+using Telepathy;
 using Object = System.Object;
 using Random = UnityEngine.Random;
 
@@ -22,6 +24,7 @@ public class GameManager : NetworkManager
     private int startingLevelDelayInSeconds;
 
     public GameObject serverDebugUI;
+    public GameObject gameCodeUI;
     
     public Button quitButton;
     public Button resetButton;
@@ -45,7 +48,7 @@ public class GameManager : NetworkManager
     private float timeLeft;
 
     private string scoreSystemPath; //to be able to recover condition
-
+    
     
     private List<char> letters = new List<char>(){ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
     private List<List<char>> letterPools;
@@ -56,7 +59,12 @@ public class GameManager : NetworkManager
     public ClientMainGameElements cmge;
 
     public GameObject letterPit;
-    
+
+    private bool inLobby;
+
+    private ScoreSystem currScoreSystem;
+//    public Dictionary<string, string> codesAndIPs; 
+
     [Server]
     public void PauseGame()
     {
@@ -125,14 +133,22 @@ public class GameManager : NetworkManager
     }
 
 
+    [Server]
+    public string RandomString(int length)
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        return new string(Enumerable.Repeat(chars, length)
+            .Select(s => s[UnityEngine.Random.Range(0, s.Length)]).ToArray());
+    }
     
 
     public override void Start()
     {
+        inLobby = true;
         players = new List<Player>();
         
         //setup net code
-        // autoCreatePlayer = false;
+//        codesAndIPs = new Dictionary<string, string>();
 
         //check connection type
         if (!NetworkClient.active)
@@ -152,22 +168,61 @@ public class GameManager : NetworkManager
             }
             else if (Globals.settings.networkSettings.currMultiplayerOption == "ONLINE")
             {
+                if (Globals.activeInfoPopups)
+                {
+                    Popup popup = new Popup(false);
+                    popup.SetMessage("Welcome to the wait lobby. This is where you wait for the all players to join." +
+                                     "The host IP is included at the top left of the screen. " +
+                                     "The wait lobby spawns some letters for you to train." +
+                                     "When you are ready to begin," +
+                                     " simply click on the \"Ready\" button. ");
+                    popup.DisplayPopup();
+                }
+
+                
                 if (Globals.settings.networkSettings.currOnlineOption == "HOST")
                 {
-                    this.StartHost();
+                    StartHost();
+//                    string randomStr = RandomString(5);
+//                    while (codesAndIPs.ContainsValue(randomStr))
+//                    {
+//                        randomStr = RandomString(5);
+//                    }
+//                    codesAndIPs.Add(networkAddress, randomStr);
+
+                    foreach(NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+                    {
+                        if(ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                        {
+                            foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
+                            {
+                                if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                                {
+                                    //do what you want with the IP here... add it to a list, just get the first and break out. Whatever.
+//                                    Debug.Log(ip.Address.ToString());
+                                    Globals.settings.networkSettings.serverCode = ip.Address.ToString();
+                                }
+                            }
+                        }  
+                    }
+
+
                 }
                 else if (Globals.settings.networkSettings.currOnlineOption == "CLIENT")
                 {
-                    if (Globals.settings.networkSettings.serverIP == "")
+                    if (Globals.settings.networkSettings.serverCode == "")
                     {
                         this.networkAddress = "localhost";
                     }
                     else
                     {
-                        this.networkAddress = Globals.settings.networkSettings.serverIP;
+                        this.networkAddress = Globals.settings.networkSettings.serverCode;
                     }
                     this.StartClient();
+                    serverDebugUI.SetActive(false);
                 }
+                gameCodeUI.GetComponentInChildren<Text>().text = "Host IP: " + 
+                                                                 Globals.settings.networkSettings.serverCode;
             }
         }
         else
@@ -255,29 +310,20 @@ public class GameManager : NetworkManager
         cmge.StopCurrentAudioClip(0);
         cmge.PlayInfiniteAudioClip(0, Globals.backgroundMusicPath, Globals.backgroundMusicPath);
 
-        //init letter spawner stuff
-        int spawnerId = 0;
-        letterPools = new List<List<char>>();
-        foreach (LetterSpawner spawner in letterSpawners)
-        {
-            spawner.SetId(spawnerId++);
-            letterPools.Add(new List<char>());
-        }
-        playersLettersSpawnP = Globals.settings.generalSettings.playersLettersSpawnP;
     }
 
-    public override void OnClientConnect(NetworkConnection conn)
-    {
-        base.OnClientConnect(conn);
-        serverDebugUI.SetActive(false);
-    }
 
     public override void OnClientDisconnect(NetworkConnection conn)
     {
         base.OnClientDisconnect(conn);
-        
-        //TODO build notifications prefab
-        SceneManager.LoadScene("startOnline");
+        StopClient();
+        Popup popup = new Popup(false);
+        popup.SetMessage("Disconnected by host or game not found. Returning to Menu...");
+        popup.AddButton("OK", delegate { 
+            SceneManager.LoadScene("startOnline");
+            return 0; 
+        });
+        popup.DisplayPopup();
     }
 
     public override void OnServerAddPlayer(NetworkConnection conn)
@@ -289,6 +335,7 @@ public class GameManager : NetworkManager
             return;
         }
         
+        
         CreatePlayer(conn);
 
         cmge.DisplayCountdownText(false, ""); //disable countdown text in lobby
@@ -296,9 +343,42 @@ public class GameManager : NetworkManager
         {
             InitPlayer(conn, i);
         }
+
+        //create lobby levels on first player entry
+        if (numPlayers == 1)
+        {
+            currScoreSystem = Globals.settings.lobbyScoreSystem;
+            
+            //init letter spawner stuff
+            int spawnerId = 0;
+            letterPools = new List<List<char>>();
+            playersLettersSpawnP = Globals.settings.generalSettings.playersLettersSpawnP;
+
+            foreach (LetterSpawner spawner in letterSpawners)
+            {
+                spawner.SetId(spawnerId++);
+                letterPools.Add(new List<char>());
+            
+                //start spawners update cycle
+                StartCoroutine(UpdateSpawner(spawner));
+                spawner.StartSpawning();
+            }
+            ChangeLobbyLevel();
+        }
         
         if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
         {
+            inLobby = false;
+            currScoreSystem = Globals.settings.scoreSystem;
+            //special condition removes the score
+            if (Globals.gameParam == Globals.ExercisesConfig.CUSTOM)
+            {
+                foreach (Player player in players)
+                {
+                    //special condition also removes the score
+                    player.ShowScoreText();
+                }
+            }
             //TODO: receive acknowledgements instead of waiting a bit
             StartCoroutine(StartAfterInit());
         }
@@ -309,10 +389,10 @@ public class GameManager : NetworkManager
     {
         yield return new WaitForSeconds(1.0f);
         
-        //start spawners update cycle
+        //start spawners
         foreach (LetterSpawner spawner in letterSpawners)
         {
-            StartCoroutine(UpdateSpawner(spawner));
+            //update cycle started in lobby
             spawner.StopSpawning();
         }
         
@@ -366,13 +446,7 @@ public class GameManager : NetworkManager
         player.SetScore(0, 0, 0);
         player.ResetNumPossibleActions();
         
-        
-        if (Globals.gameParam == Globals.ExercisesConfig.TUTORIAL)
-        {
-            //special condition also removes the score
-            player.HideScoreText();
-        }
-        
+        player.HideScoreText();
     }
 
    
@@ -483,7 +557,6 @@ public class GameManager : NetworkManager
         yield return new WaitForSeconds(Random.Range(spawner.minIntervalRange, spawner.maxIntervalRange));
         
         //pick new letter
-        
         if (letterPools[spawner.GetId()].Count == 0)
         {
             ResetPool(spawner);
@@ -509,7 +582,16 @@ public class GameManager : NetworkManager
         List<char> allLetters = new List<char>();
         foreach (Player player in players)
         {
-            currWordsLetters = currWordsLetters.Union(player.GetCurrExercise().targetWord.ToCharArray()).ToList<char>();
+            //verify if the player has a word. If not, push random leters
+            string currWord = player.GetCurrExercise().targetWord;
+            if (currWord != null)
+            {
+                currWordsLetters = currWordsLetters.Union(currWord.ToCharArray()).ToList();
+            }
+            else
+            {
+                currWordsLetters.Add(letters[Random.Range(0, letters.Count)]);
+            }
         }
 
         float total = currWordsLetters.Count / playersLettersSpawnP;
@@ -655,23 +737,27 @@ public class GameManager : NetworkManager
 
         Globals.currLevelId++;
     }
-
+    
+    
+    
     [Server]
     private void ChangeTargetWords()
     {
+        Exercise newExercise = new Exercise();
+        
         List<Exercise> selectedExerciseGroup = new List<Exercise>(Globals.settings.exercisesGroups
-            .exerciseGroups[exerciseGroupIndex++ % Globals.settings.exercisesGroups.exerciseGroups.Count].exercises);
+            .exerciseGroups[exerciseGroupIndex++ % Globals.settings.exercisesGroups.exerciseGroups.Count]
+            .exercises);
         if (selectedExerciseGroup.Count <= 0)
         {
             Debug.Log("No exercises available");
         }
 
-        int random = UnityEngine.Random.Range(0, selectedExerciseGroup.Count);
-        Exercise newExercise = selectedExerciseGroup[random];
+        int random = Random.Range(0, selectedExerciseGroup.Count);
+        newExercise = selectedExerciseGroup[random];
         selectedExerciseGroup.RemoveAt(random);
-
-
-        int i = UnityEngine.Random.Range(0, 1);
+    
+        int i = Random.Range(0, 1);
         foreach (Player player in players)
         {
             player.SetCurrExercise(newExercise.playerExercises[(i++) % newExercise.playerExercises.Count]);
@@ -679,7 +765,76 @@ public class GameManager : NetworkManager
         }
     }
 
+    
+    
+    
+    
+    
+    
+    [Server]
+    private void ChangeLobbyLevel()
+    {
+        foreach (LetterSpawner spawner in letterSpawners)
+        {
+            spawner.StopSpawning();
+        }
+        
+        ChangeLobbyTargetWords();
+        foreach (LetterSpawner spawner in letterSpawners)
+        {
+            ClearPool(spawner); //risky-> exercise may not have been synced yet
+            spawner.UpdateCurrStarredWord("");
+        }
+        
+        cmge.DisplayCountdownText(false, "");
 
+        foreach (LetterSpawner spawner in letterSpawners)
+        {
+            spawner.StartSpawning();
+        }
+
+        foreach (Player player in players)
+        {
+            if (player.GetUI() == null)
+            {
+                continue;
+            }
+            foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
+            {
+                //            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
+                player.ResetButtonStates();
+                player.EnableAllButtons();
+            }
+            
+            player.ResetNumPossibleActions();
+            player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
+        }
+    }
+
+    [Server]
+    private void ChangeLobbyTargetWords()
+    {
+        Exercise newExercise = new Exercise();
+        
+        List<Exercise> selectedExerciseGroup = new List<Exercise>(Globals.settings.lobbyExercisesGroups
+            .exerciseGroups[exerciseGroupIndex++ % Globals.settings.lobbyExercisesGroups.exerciseGroups.Count]
+            .exercises);
+        if (selectedExerciseGroup.Count <= 0)
+        {
+            Debug.Log("No exercises available");
+        }
+
+        int random = Random.Range(0, selectedExerciseGroup.Count);
+        newExercise = selectedExerciseGroup[random];
+    
+        int i = Random.Range(0, 1);
+        foreach (Player player in players)
+        {
+            player.SetCurrExercise(newExercise.playerExercises[(i++) % newExercise.playerExercises.Count]);
+            player.InitCurrWordState();
+        }
+    }
+    
     
     
     
@@ -744,7 +899,7 @@ public class GameManager : NetworkManager
             }
         }
         
-        if (player.GetCurrNumPossibleActionsPerLevel() < 1 ||
+        if (player.GetCurrNumPossibleActionsPerLevel() == 0 ||
             (isLaneOverlap && playerOverlappedAndPressing))
         {
             cmge.PlayAudioClip(2, "Audio/badMove");
@@ -839,8 +994,8 @@ public class GameManager : NetworkManager
             currWordState = sb.ToString();
 
             player.SetCurrWordState(currWordState);
-            letter.Lock();
-            letter.AnimateAndDestroy(player.GetWordPanel().transform.position);
+//            letter.Lock();
+//            letter.AnimateAndDestroy(player.GetWordPanel().transform.position);
         }
 
         return usefulForMe;
@@ -857,7 +1012,7 @@ public class GameManager : NetworkManager
             return;
         }
 
-        letter.Lock();
+//        letter.Lock();
         char letterText = letter.letterText;
         letterObj.transform.localScale *= 1.2f;
 
@@ -891,8 +1046,8 @@ public class GameManager : NetworkManager
                     }
 
                 }
-
-                scores = Globals.settings.scoreSystem.giveScores;
+                
+                scores = currScoreSystem.giveScores;
                 currHitter.info.numGives++;
                 break;
             case Globals.KeyInteractionType.TAKE:
@@ -913,7 +1068,7 @@ public class GameManager : NetworkManager
                     usefulForOther = TestAndExecuteHit(false, letterText, letterObj, usefulTargetPlayer);
                 }
 
-                scores = Globals.settings.scoreSystem.takeScores;
+                scores = currScoreSystem.takeScores;
                 currHitter.info.numTakes++;
                 break;
         }
@@ -1015,8 +1170,8 @@ public class GameManager : NetworkManager
             else
             {
                 if (!player.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
-                    player.SetScore(player.GetScore() + Globals.settings.scoreSystem.completeWordMyScore,
-                        Globals.settings.scoreSystem.completeWordMyScore, 1.3f);
+                    player.SetScore(player.GetScore() + currScoreSystem.completeWordMyScore,
+                        currScoreSystem.completeWordMyScore, 1.3f);
                 foreach (Player innerPlayer in players)
                 {
                     if (player == innerPlayer)
@@ -1026,15 +1181,22 @@ public class GameManager : NetworkManager
 
                     if (!innerPlayer.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
                         innerPlayer.SetScore(
-                            innerPlayer.GetScore() + Globals.settings.scoreSystem.completeWordOtherScore,
-                            Globals.settings.scoreSystem.completeWordOtherScore, 1.3f);
+                            innerPlayer.GetScore() + currScoreSystem.completeWordOtherScore,
+                            currScoreSystem.completeWordOtherScore, 1.3f);
                 }
             }
         }
 
         if (!areWordsUnfinished || arePlayersWithoutActions)
         {
-            StartCoroutine(ChangeLevel(true, areWordsUnfinished));
+            if (inLobby)
+            {
+                ChangeLobbyLevel();
+            }
+            else
+            {
+                StartCoroutine(ChangeLevel(true, areWordsUnfinished));
+            }
         }
 
     }

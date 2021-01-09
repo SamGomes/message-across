@@ -71,6 +71,8 @@ namespace AuxiliaryStructs
         private int currPressedButtonI;
 
         
+        
+        
         public void Awake()
         {
             initted = false;
@@ -366,6 +368,13 @@ namespace AuxiliaryStructs
             scoreText.gameObject.SetActive(false);
         }
         
+        [ClientRpc]
+        public void ShowScoreText()
+        {
+            scoreText.gameObject.SetActive(true);
+        }
+
+        
         private Color CalcButtonColor(Color newColor)
         {
             float g = 1.0f - newColor.grayscale * 0.8f;
@@ -605,7 +614,7 @@ namespace AuxiliaryStructs
 
 
         [ClientRpc]
-        public void SetNumPossibleActions(int currNumPossibleActionsPerLevel)
+        public void SetTempNumPossibleActions(int currNumPossibleActionsPerLevel)
         {
             this.currNumPossibleActionsPerLevel = currNumPossibleActionsPerLevel;
             //update UI
@@ -616,7 +625,7 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void ResetNumPossibleActions()
         {
-            this.currNumPossibleActionsPerLevel = info.numPossibleActionsPerLevel;
+            currNumPossibleActionsPerLevel = info.numPossibleActionsPerLevel;
             //update UI
             possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
             statePanel.GetComponent<Animator>().Play(0);
