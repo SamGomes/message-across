@@ -121,11 +121,8 @@ namespace AuxiliaryStructs
             readyButton = activeLayout
                 ? gameObject.transform.Find("UICanvas/LeftPlayerUI/ReadyButton/Button").GetComponent<Button>()
                 : gameObject.transform.Find("UICanvas/RightPlayerUI/ReadyButton/Button").GetComponent<Button>();
-
-            readyButton.onClick.AddListener(delegate() { 
-                GetReady();
-            });
             readyButton.transform.parent.gameObject.SetActive(false);
+            readyButton.interactable = false;
             
             
             if (activeLayout)
@@ -247,9 +244,18 @@ namespace AuxiliaryStructs
                 true,true,true,true,true
             };
 
+            
+            readyButton.onClick.AddListener(delegate() { 
+                Debug.Log("readyButton");
+                GetReady();
+            });
+            readyButton.interactable = true;
+            
             //only set buttons actions for local player
             if (isLocalPlayer)
             {
+                
+                
                 for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
                 {
                     Button currButton = playerButtons[buttonI];
@@ -284,6 +290,11 @@ namespace AuxiliaryStructs
         public bool IsInitted()
         {
             return initted;
+        }
+        
+        public bool IsReady()
+        {
+            return amIReady;
         }
 
         //start action request and ack from server
@@ -321,10 +332,6 @@ namespace AuxiliaryStructs
         {
             amIReady = true;
             readyButton.interactable = false;
-        }
-        public bool IsReady()
-        {
-            return amIReady;
         }
         
         //finished action request and ack from server
@@ -461,32 +468,24 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void SetScore(int score, int increase, float delay)
         {
-            if (increase != 0)
-            {
-                //update UI
+            //update UI
 //                StartCoroutine(DelayedScoreDisplay(score, delay));
-                scoreText.text = "Score: " + score;
-                statePanel.GetComponent<Animator>().Play(0);
-                if (increase > 0)
-                {
-                    scoreUpdateUIup.GetComponentInChildren<Text>().text = "+" + increase;
-                    scoreUpdateUIup.SetActive(false);
-                    scoreUpdateUIup.SetActive(true);
-                }
-                else if (increase < 0)
-                {
-                    scoreUpdateUIdown.GetComponentInChildren<Text>().text = "-" + Math.Abs(increase);
-                    scoreUpdateUIdown.SetActive(false);
-                    scoreUpdateUIdown.SetActive(true);
-                }
+            scoreText.text = "Score: " + score;
+            statePanel.GetComponent<Animator>().Play(0);
+            if (increase > 0)
+            {
+                scoreUpdateUIup.GetComponentInChildren<Text>().text = "+" + increase;
+                scoreUpdateUIup.SetActive(false);
+                scoreUpdateUIup.SetActive(true);
+            }
+            else if (increase < 0)
+            {
+                scoreUpdateUIdown.GetComponentInChildren<Text>().text = "-" + Math.Abs(increase);
+                scoreUpdateUIdown.SetActive(false);
+                scoreUpdateUIdown.SetActive(true);
             }
         }
         
-
-        public GameObject GetWordPanel()
-        {
-            return this.wordPanel;
-        }
 
         [ClientRpc]
         public void SetActiveTrackButton(int activeButtonIndex, Vector3 activeButtonPos)
@@ -502,12 +501,6 @@ namespace AuxiliaryStructs
             StartCoroutine(currButtonLerp);
 
             this.activeButtonIndex = activeButtonIndex;
-        }
-
-
-        public List<GameObject> GetMaskedHalf()
-        {
-            return this.maskedHalf;
         }
 
 
@@ -618,12 +611,6 @@ namespace AuxiliaryStructs
             return buttonColor;
         }
 
-        public GameObject GetMarker()
-        {
-            return this.marker;
-        }
-
-
         [ClientRpc]
         public void UpdateNumPossibleActions(int currNumPossibleActionsPerLevel)
         {
@@ -652,21 +639,21 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void PressGameButton()
         {
-            this.pressingButton = true;
-            this.gameButton.RegisterButtonDown();
+            pressingButton = true;
+            gameButton.RegisterButtonDown();
         }
 
         [ClientRpc]
         public void ReleaseGameButton()
         {
-            this.pressingButton = false;
-            this.gameButton.RegisterButtonUp();
+            pressingButton = false;
+            gameButton.RegisterButtonUp();
 
         }
 
         public GameObject GetUI()
         {
-            return this.ui;
+            return ui;
         }
         
         
@@ -677,7 +664,7 @@ namespace AuxiliaryStructs
 
         public GameButton GetGameButton()
         {
-            return this.gameButton;
+            return gameButton;
         }
     }
 }

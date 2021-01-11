@@ -420,6 +420,8 @@ public class GameManager : NetworkManager
             FinishPlayerAction(pss, player.GetPressedButtonIndex());
             //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
             player.DisableAllButtons(Color.red);
+            pss.score = 0;
+            player.SetScore(0,0,0);
         }
         cmge.DisplayCountdownText(true, "Get Ready...");
 
@@ -458,13 +460,13 @@ public class GameManager : NetworkManager
 
         currPlayerInfo.id = bufferedPlayerId;
 
-        
+        //only add one server state per player
         if (!player.IsInitted())
         {
             //reset player actions in server (maintains order implicitly)
             PlayerServerState newPlayerState = new PlayerServerState();
             newPlayerState.currNumPossibleActionsPerLevel = currPlayerInfo.numPossibleActionsPerLevel;
-            newPlayerState.score = -1;
+            newPlayerState.score = 0;
             newPlayerState.currExercise = new PlayerExercise();
             newPlayerState.currExerciseFinished = false;
             newPlayerState.currWordState = "";
@@ -472,7 +474,6 @@ public class GameManager : NetworkManager
             playerServerStates.Add(newPlayerState);
         
         }
-        
         
         //all these methods are broadcasted to each client
         player.SetActiveLayout(orderNum % 2 == 0);
@@ -507,25 +508,25 @@ public class GameManager : NetworkManager
             return;
         }
 
-//        if (inLobby)
-//        {
-//            bool allReady = true;
-//            foreach (Player player in players)
-//            {
-//                if (!player.IsReady())
-//                {
-//                    allReady = false;
-//                    break;
-//                }
-//            }
-//
-//            if (allReady)
-//            {
-//                inLobby = false;
-//                //TODO: receive acknowledgements instead of waiting a bit
-//                StartCoroutine(StartAfterInit());
-//            }
-//        }
+        if (inLobby && players.Count > 0)
+        {
+            bool allReady = true;
+            foreach (Player player in players)
+            {
+                if (!player.IsReady())
+                {
+                    allReady = false;
+                    break;
+                }
+            }
+
+            if (allReady)
+            {
+                inLobby = false;
+                //TODO: receive acknowledgements instead of waiting a bit
+                StartCoroutine(StartAfterInit());
+            }
+        }
         
         PlayerTrackChanges();
         CheckMarkerCollisions();
@@ -879,6 +880,8 @@ public class GameManager : NetworkManager
             player.UpdateNumPossibleActions(pss.currNumPossibleActionsPerLevel);
             
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
+            
+            player.HideReadyButton();
         }
     }
 
