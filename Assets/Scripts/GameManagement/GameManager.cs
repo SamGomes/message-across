@@ -397,7 +397,7 @@ public class GameManager : NetworkManager
     IEnumerator StartAfterInit()
     {
         cmge.HideInLobbyIndicator();
-        cmge.HideInLobbyIndicato;
+        yield return new WaitForSeconds(1.0f);
         
         currScoreSystem = Globals.settings.scoreSystem;
         //special condition removes the score
@@ -512,7 +512,7 @@ public class GameManager : NetworkManager
             return;
         }
 
-        if (inLobby && players.Count > 0)
+        if (inLobby && isGameReady && players.Count > 0)
         {
             bool allReady = true;
             foreach (Player player in players)
@@ -1109,7 +1109,7 @@ public class GameManager : NetworkManager
         currHitter.UpdateNumPossibleActions(currHitterSS.currNumPossibleActionsPerLevel);
             
         currHitter.HideReadyButton();
-        if (inLobby && currHitterSS.currNumPossibleActionsPerLevel == 0)
+        if (inLobby && isGameReady && currHitterSS.currNumPossibleActionsPerLevel == 0)
         {
             currHitter.ShowReadyButton();
         }

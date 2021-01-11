@@ -247,14 +247,14 @@ namespace AuxiliaryStructs
             
             readyButton.onClick.AddListener(delegate() { 
 //                Debug.Log("readyButton");
-                GetReady();fds
+                GetReady();
+                readyButton.interactable = false;
             });
             readyButton.interactable = true;
             
             //only set buttons actions for local player
             if (isLocalPlayer)
             {
-                
                 
                 for (int buttonI = 0; buttonI < playerButtons.Length; buttonI++)
                 {
@@ -331,7 +331,6 @@ namespace AuxiliaryStructs
         public void GetReady()
         {
             amIReady = true;
-            readyButton.interactable = false;
         }
         
         //finished action request and ack from server
