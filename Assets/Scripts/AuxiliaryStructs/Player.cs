@@ -8,8 +8,11 @@ using UnityEngine.UI;
 
 namespace AuxiliaryStructs
 {
+    
     public class Player : NetworkBehaviour
     {
+        private int orderNum;
+        
         public List<GameObject> playerPlaceholders;
         public Transform markerPlaceholders;
         
@@ -19,9 +22,7 @@ namespace AuxiliaryStructs
 
         public Color backgroundColor;
 
-        private int currNumPossibleActionsPerLevel;
 
-        private int score;
         private int activeButtonIndex;
 
         private Globals.KeyInteractionType activeInteraction;
@@ -51,10 +52,7 @@ namespace AuxiliaryStructs
 
         private IEnumerator currButtonLerp;
 
-        private PlayerExercise currExercise;
-        public bool currExerciseFinished;
-        private string currWordState;
-        
+       
         public bool pressingButton;
         
         private bool isTopMask;
@@ -70,11 +68,14 @@ namespace AuxiliaryStructs
         private bool actionFinished;
         private int currPressedButtonI;
 
-        
+        private Button readyButton;
+        private bool amIReady;
+
         
         
         public void Awake()
         {
+            amIReady = false;
             initted = false;
             playerButtons = new Button[]{};
         }
@@ -84,6 +85,7 @@ namespace AuxiliaryStructs
         public void Init(PlayerInfo info, GameObject playerPrefabInstance, int orderNum)
         {
             Debug.Log("init player "+orderNum);
+            this.orderNum = orderNum;
             
             //force change to the first lane at start
             changedLane = true;
@@ -117,6 +119,16 @@ namespace AuxiliaryStructs
                 ? gameObject.transform.Find("UICanvas/LeftPlayerUI").gameObject
                 : gameObject.transform.Find("UICanvas/RightPlayerUI").gameObject;
 
+            
+            readyButton = activeLayout
+                ? gameObject.transform.Find("UICanvas/LeftPlayerUI/ReadyButton/Button").GetComponent<Button>()
+                : gameObject.transform.Find("UICanvas/RightPlayerUI/ReadyButton/Button").GetComponent<Button>();
+
+            readyButton.onClick.AddListener(delegate() { 
+                GetReady();
+            });
+            readyButton.transform.parent.gameObject.SetActive(false);
+            
             
             if (activeLayout)
             {
@@ -204,10 +216,7 @@ namespace AuxiliaryStructs
             }
             activeHalf[1].SetActive(false); //lets init it to hidden
             
-            score = -1;
-            currNumPossibleActionsPerLevel = 0;
             pressingButton = false;
-            
             
             //update ui placeholders after updating the order num
             playerPlaceholders =
@@ -273,6 +282,11 @@ namespace AuxiliaryStructs
             
             initted = true;
         }
+
+        public int GetOrderNum()
+        {
+            return orderNum;
+        }
         
         
         //start action request and ack from server
@@ -292,7 +306,29 @@ namespace AuxiliaryStructs
         {
             actionStarted = false;
         }
+
+        [ClientRpc] 
+        public void ShowReadyButton()
+        {
+            readyButton.transform.parent.gameObject.SetActive(true);
+        }
+
+        [ClientRpc] 
+        public void HideReadyButton()
+        {
+            readyButton.transform.parent.gameObject.SetActive(false);
+        }            
         
+        [Command]
+        public void GetReady()
+        {
+            amIReady = true;
+            readyButton.interactable = false;
+        }
+        public bool IsReady()
+        {
+            return amIReady;
+        }
         
         //finished action request and ack from server
         [Command]
@@ -387,20 +423,10 @@ namespace AuxiliaryStructs
         {
             return info.id;
         }
+        
 
         [ClientRpc]
-        public void SetCurrExercise(PlayerExercise newExercise)
-        {
-            currExercise = newExercise;
-        }
-
-        public PlayerExercise GetCurrExercise()
-        {
-            return currExercise;
-        }
-
-        [ClientRpc]
-        public void InitCurrWordState()
+        public void InitCurrWordState(string currWordState, PlayerExercise currExercise)
         {
             currWordState = "";
             int missingLength = currExercise.targetWord.Length;
@@ -419,21 +445,15 @@ namespace AuxiliaryStructs
         }
 
         [ClientRpc]
-        public void SetCurrWordState(string newCurrWordState)
+        public void SetCurrWordState(string currWordState, PlayerExercise currExercise)
         {
-            currWordState = newCurrWordState;
-
             //Update UI
             TextMesh[] playerDisplayTexts = wordPanel.GetComponentsInChildren<TextMesh>();
             playerDisplayTexts[0].text = currExercise.displayMessage;
             playerDisplayTexts[1].text = currWordState;
         }
 
-        public string GetCurrWordState()
-        {
-            return currWordState;
-        }
-
+        
 //        [also as ClientRpc, called from SetScore]
         public IEnumerator DelayedScoreDisplay(float score, float delay)
         {
@@ -444,10 +464,8 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void SetScore(int score, int increase, float delay)
         {
-            if (this.score != score)
+            if (increase != 0)
             {
-                this.score = score;
-
                 //update UI
 //                StartCoroutine(DelayedScoreDisplay(score, delay));
                 scoreText.text = "Score: " + score;
@@ -466,11 +484,7 @@ namespace AuxiliaryStructs
                 }
             }
         }
-
-        public int GetScore()
-        {
-            return this.score;
-        }
+        
 
         public GameObject GetWordPanel()
         {
@@ -614,36 +628,29 @@ namespace AuxiliaryStructs
 
 
         [ClientRpc]
-        public void SetTempNumPossibleActions(int currNumPossibleActionsPerLevel)
+        public void UpdateNumPossibleActions(int currNumPossibleActionsPerLevel)
         {
-            this.currNumPossibleActionsPerLevel = currNumPossibleActionsPerLevel;
-            //update UI
             possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
             statePanel.GetComponent<Animator>().Play(0);
         }
 
-        [ClientRpc]
-        public void ResetNumPossibleActions()
-        {
-            currNumPossibleActionsPerLevel = info.numPossibleActionsPerLevel;
-            //update UI
-            possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
-            statePanel.GetComponent<Animator>().Play(0);
-        }
-
-        [ClientRpc]
-        public void DecreasePossibleActionsPerLevel()
-        {
-            currNumPossibleActionsPerLevel--;
-            //update UI
-            possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
-            statePanel.GetComponent<Animator>().Play(0);
-        }
-
-        public int GetCurrNumPossibleActionsPerLevel()
-        {
-            return this.currNumPossibleActionsPerLevel;
-        }
+//        [ClientRpc]
+//        public void ResetNumPossibleActions()
+//        {
+//            currNumPossibleActionsPerLevel = info.numPossibleActionsPerLevel;
+//            //update UI
+//            possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
+//            statePanel.GetComponent<Animator>().Play(0);
+//        }
+//
+//        [ClientRpc]
+//        public void DecreasePossibleActionsPerLevel()
+//        {
+//            currNumPossibleActionsPerLevel--;
+//            //update UI
+//            possibleActionsText.text = "Actions: " + currNumPossibleActionsPerLevel;
+//            statePanel.GetComponent<Animator>().Play(0);
+//        }
 
         [ClientRpc]
         public void PressGameButton()

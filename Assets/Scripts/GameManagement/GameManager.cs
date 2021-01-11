@@ -11,15 +11,29 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 using Mirror;
+using NUnit.Framework.Constraints;
 using Telepathy;
 using Object = System.Object;
 using Random = UnityEngine.Random;
 
+public class PlayerServerState
+{
+    public int orderNum;
+    public int currNumPossibleActionsPerLevel;
+    public int score;
+        
+    public PlayerExercise currExercise;
+    public bool currExerciseFinished;
+    public string currWordState;
 
+} 
+
+//mainly implements the server
 public class GameManager : NetworkManager
 {
     public List<Player> players;
     public List<GameObject> playerGameObjects;
+    public List<PlayerServerState> playerServerStates;
 
     private int startingLevelDelayInSeconds;
 
@@ -42,8 +56,6 @@ public class GameManager : NetworkManager
 
     public LetterSpawner[] letterSpawners;
 
-    //placeholders for track markers
-    public List<GameObject> pointerPlaceholders;
 
     private float timeLeft;
 
@@ -65,6 +77,9 @@ public class GameManager : NetworkManager
     private ScoreSystem currScoreSystem;
 //    public Dictionary<string, string> codesAndIPs; 
 
+
+    private bool isGameReady;
+        
     [Server]
     public void PauseGame()
     {
@@ -146,6 +161,7 @@ public class GameManager : NetworkManager
     {
         inLobby = true;
         players = new List<Player>();
+        playerServerStates = new List<PlayerServerState>();
         
         //setup net code
 //        codesAndIPs = new Dictionary<string, string>();
@@ -254,6 +270,8 @@ public class GameManager : NetworkManager
     {
         base.OnStartServer();
 
+        isGameReady = false;
+        
         scoreSystemPath = Globals.settings.scoreSystem.path;
 
         isGameplayStarted = false;
@@ -363,24 +381,12 @@ public class GameManager : NetworkManager
                 StartCoroutine(UpdateSpawner(spawner));
                 spawner.StartSpawning();
             }
-            ChangeLobbyLevel();
+            StartCoroutine(ChangeLobbyLevel());
         }
         
         if (numPlayers == Globals.settings.generalSettings.playersParams.Count)
         {
-            inLobby = false;
-            currScoreSystem = Globals.settings.scoreSystem;
-            //special condition removes the score
-            if (Globals.gameParam == Globals.ExercisesConfig.CUSTOM)
-            {
-                foreach (Player player in players)
-                {
-                    //special condition also removes the score
-                    player.ShowScoreText();
-                }
-            }
-            //TODO: receive acknowledgements instead of waiting a bit
-            StartCoroutine(StartAfterInit());
+            isGameReady = true;
         }
     }
 
@@ -388,6 +394,17 @@ public class GameManager : NetworkManager
     IEnumerator StartAfterInit()
     {
         yield return new WaitForSeconds(1.0f);
+        
+        currScoreSystem = Globals.settings.scoreSystem;
+        //special condition removes the score
+        if (Globals.gameParam == Globals.ExercisesConfig.CUSTOM)
+        {
+            foreach (Player player in players)
+            {
+                //special condition also removes the score
+                player.ShowScoreText();
+            }
+        }
         
         //start spawners
         foreach (LetterSpawner spawner in letterSpawners)
@@ -397,9 +414,10 @@ public class GameManager : NetworkManager
         }
         
         //start player buttons
-        foreach (Player player in players)
+        foreach (PlayerServerState pss in playerServerStates)
         {
-            FinishPlayerAction(player, player.GetPressedButtonIndex());
+            Player player = players[pss.orderNum];
+            FinishPlayerAction(pss, player.GetPressedButtonIndex());
             //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
             player.DisableAllButtons(Color.red);
         }
@@ -444,8 +462,18 @@ public class GameManager : NetworkManager
         player.Init(currPlayerInfo, playerInstance, orderNum);
 
         player.SetScore(0, 0, 0);
-        player.ResetNumPossibleActions();
         
+        //reset player actions in server (maintains order implicitly)
+        PlayerServerState newPlayerState = new PlayerServerState();
+        newPlayerState.currNumPossibleActionsPerLevel = currPlayerInfo.numPossibleActionsPerLevel;
+        newPlayerState.score = -1;
+        newPlayerState.currExercise = new PlayerExercise();
+        newPlayerState.currExerciseFinished = false;
+        newPlayerState.currWordState = "";
+        newPlayerState.orderNum = orderNum;
+        playerServerStates.Add(newPlayerState);
+        player.UpdateNumPossibleActions(playerServerStates[orderNum].currNumPossibleActionsPerLevel);
+
         player.HideScoreText();
     }
 
@@ -469,6 +497,27 @@ public class GameManager : NetworkManager
         {
             return;
         }
+
+//        if (inLobby)
+//        {
+//            bool allReady = true;
+//            foreach (Player player in players)
+//            {
+//                if (!player.IsReady())
+//                {
+//                    allReady = false;
+//                    break;
+//                }
+//            }
+//
+//            if (allReady)
+//            {
+//                inLobby = false;
+//                //TODO: receive acknowledgements instead of waiting a bit
+//                StartCoroutine(StartAfterInit());
+//            }
+//        }
+        
         PlayerTrackChanges();
         CheckMarkerCollisions();
 
@@ -583,7 +632,7 @@ public class GameManager : NetworkManager
         foreach (Player player in players)
         {
             //verify if the player has a word. If not, push random leters
-            string currWord = player.GetCurrExercise().targetWord;
+            string currWord = playerServerStates[player.GetOrderNum()].currExercise.targetWord;
             if (currWord != null)
             {
                 currWordsLetters = currWordsLetters.Union(currWord.ToCharArray()).ToList();
@@ -633,8 +682,9 @@ public class GameManager : NetworkManager
     private IEnumerator RecordMetrics()
     {
         //spawn questionnaires before changing word
-        foreach (Player player in players)
+        foreach (PlayerServerState pss in playerServerStates)
         {
+            Player player = players[pss.orderNum];
             yield return StartCoroutine(Globals.logManager.WriteToLog(Globals.settings.generalSettings.databaseName,
                 "logs",
                 new Dictionary<string, string>()
@@ -642,11 +692,10 @@ public class GameManager : NetworkManager
                     {"gameId", Globals.gameId.ToString()},
                     {"levelId", Globals.currLevelId.ToString()},
                     {"playerId", player.GetId().ToString()},
-                    {"color", player.GetButtonColor().ToString()},
-                    {"levelWord", player.GetCurrExercise().targetWord},
-                    {"wordState", player.GetCurrWordState()},
+                    {"levelWord", pss.currExercise.targetWord},
+                    {"wordState", pss.currWordState},
                     {"scoreSystem", scoreSystemPath},
-                    {"score", player.GetScore().ToString()},
+                    {"score", pss.score.ToString()},
                     {"numberOfGives", player.info.numGives.ToString()},
                     {"numberOfTakes", player.info.numTakes.ToString()}
                 }));
@@ -722,8 +771,9 @@ public class GameManager : NetworkManager
             spawner.StartSpawning();
         }
 
-        foreach (Player player in players)
+        foreach (PlayerServerState pss in playerServerStates)
         {
+            Player player = players[pss.orderNum];
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
             {
   //            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
@@ -731,7 +781,11 @@ public class GameManager : NetworkManager
                 player.EnableAllButtons();
             }
 
-            player.ResetNumPossibleActions();
+            
+            //reset player actions in server
+            pss.currNumPossibleActionsPerLevel = player.info.numPossibleActionsPerLevel;
+            player.UpdateNumPossibleActions(pss.currNumPossibleActionsPerLevel);
+            
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
         }
 
@@ -758,10 +812,11 @@ public class GameManager : NetworkManager
         selectedExerciseGroup.RemoveAt(random);
     
         int i = Random.Range(0, 1);
-        foreach (Player player in players)
+        foreach (PlayerServerState pss in playerServerStates)
         {
-            player.SetCurrExercise(newExercise.playerExercises[(i++) % newExercise.playerExercises.Count]);
-            player.InitCurrWordState();
+            Player player = players[pss.orderNum];
+            pss.currExercise = newExercise.playerExercises[(i++) % newExercise.playerExercises.Count];
+            player.InitCurrWordState("", pss.currExercise);
         }
     }
 
@@ -772,7 +827,7 @@ public class GameManager : NetworkManager
     
     
     [Server]
-    private void ChangeLobbyLevel()
+    private IEnumerator ChangeLobbyLevel()
     {
         foreach (LetterSpawner spawner in letterSpawners)
         {
@@ -788,17 +843,16 @@ public class GameManager : NetworkManager
         
         cmge.DisplayCountdownText(false, "");
 
+        yield return new WaitForSeconds(5);
+        
         foreach (LetterSpawner spawner in letterSpawners)
         {
             spawner.StartSpawning();
         }
 
-        foreach (Player player in players)
+        foreach (PlayerServerState pss in playerServerStates)
         {
-            if (player.GetUI() == null)
-            {
-                continue;
-            }
+            Player player = players[pss.orderNum];
             foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
             {
                 //            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
@@ -806,7 +860,10 @@ public class GameManager : NetworkManager
                 player.EnableAllButtons();
             }
             
-            player.ResetNumPossibleActions();
+            //reset player actions in server
+            pss.currNumPossibleActionsPerLevel = player.info.numPossibleActionsPerLevel;
+            player.UpdateNumPossibleActions(pss.currNumPossibleActionsPerLevel);
+            
             player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
         }
     }
@@ -828,10 +885,11 @@ public class GameManager : NetworkManager
         newExercise = selectedExerciseGroup[random];
     
         int i = Random.Range(0, 1);
-        foreach (Player player in players)
+        foreach (PlayerServerState pss in playerServerStates)
         {
-            player.SetCurrExercise(newExercise.playerExercises[(i++) % newExercise.playerExercises.Count]);
-            player.InitCurrWordState();
+            Player player = players[pss.orderNum];
+            pss.currExercise = newExercise.playerExercises[(i++) % newExercise.playerExercises.Count];
+            player.InitCurrWordState("", pss.currExercise);
         }
     }
     
@@ -841,26 +899,26 @@ public class GameManager : NetworkManager
     //--------------------- player actions ------------------------
     public void PlayerActionChanges()
     {
-        foreach (Player player in players)
+        foreach (PlayerServerState pss in playerServerStates)
         {
+            Player player = players[pss.orderNum];
             if (player.ActionStarted() || player.ActionFinished())
             {
                 int pressedButtonI = player.GetPressedButtonIndex();
                 if (!player.IsButtonEnabled(pressedButtonI))
                 {
-                    Debug.Log("here");
                     continue;
                 }
 
                 if (player.ActionStarted())
                 {
-                    StartPlayerAction(player, pressedButtonI);
+                    StartPlayerAction(pss, pressedButtonI);
                     player.AckActionStarted();
                 }
 
                 if (player.ActionFinished())
                 {
-                    FinishPlayerAction(player, pressedButtonI);
+                    FinishPlayerAction(pss, pressedButtonI);
                     player.AckActionFinished();
                 }
             }
@@ -868,8 +926,9 @@ public class GameManager : NetworkManager
     }
     
     [Server]
-    public void FinishPlayerAction(Player player, int pressedButtonI)
+    public void FinishPlayerAction(PlayerServerState pss, int pressedButtonI)
     {
+        Player player = players[pss.orderNum];
         cmge.PlayAudioClip(2, "Audio/clickUp");
 
         player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
@@ -881,8 +940,9 @@ public class GameManager : NetworkManager
 
 
     [Server]
-    public void StartPlayerAction(Player player, int pressedButtonI)
+    public void StartPlayerAction(PlayerServerState pss, int pressedButtonI)
     {
+        Player player = players[pss.orderNum];
         player.ChangeButtonColor(pressedButtonI, new Color(1.0f, 0.82f, 0.0f));
                 
         //verify if button should be pressed
@@ -899,11 +959,12 @@ public class GameManager : NetworkManager
             }
         }
         
-        if (player.GetCurrNumPossibleActionsPerLevel() == 0 ||
+        if (pss.currNumPossibleActionsPerLevel == 0 ||
             (isLaneOverlap && playerOverlappedAndPressing))
         {
             cmge.PlayAudioClip(2, "Audio/badMove");
             player.ChangeButtonColor(pressedButtonI, Color.red);
+            
             return;
         }
 
@@ -923,8 +984,9 @@ public class GameManager : NetworkManager
     public void CheckMarkerCollisions()
     {
         //verify collision letter-marker and letter-pit
-        foreach (Player player in players)
+        foreach (PlayerServerState pss in playerServerStates)
         {
+            Player player = players[pss.orderNum];
             GameButton playerButton = player.GetGameButton();
             foreach (LetterSpawner spawner in letterSpawners)
             {
@@ -946,7 +1008,7 @@ public class GameManager : NetworkManager
                     ))
                     {
                         bufferedFirstLetter = firstLetter;
-                        RecordHit(firstLetter, player);
+                        RecordHit(firstLetter, pss);
                         spawner.DestroyFirstLetter();
 
                     }
@@ -961,12 +1023,11 @@ public class GameManager : NetworkManager
     
     
     [Server]
-    private bool TestAndExecuteHit(bool execute, char letterText, GameObject letterObj, Player player)
+    private bool TestAndExecuteHit(bool execute, char letterText, GameObject letterObj, PlayerServerState pss)
     {
-        Letter letter = letterObj.GetComponent<Letter>();
-        
-        string currWordState = player.GetCurrWordState();
-        string currTargetWord = player.GetCurrExercise().targetWord;
+        Player player = players[pss.orderNum];
+        string currWordState = pss.currWordState;
+        string currTargetWord = pss.currExercise.targetWord;
 
         //check the utility of word
         bool usefulForMe = (currWordState.Length <= currTargetWord.Length && currTargetWord.Contains(letterText));
@@ -993,7 +1054,7 @@ public class GameManager : NetworkManager
             sb[changeIndex] = letterText;
             currWordState = sb.ToString();
 
-            player.SetCurrWordState(currWordState);
+            pss.currWordState = currWordState;
 //            letter.Lock();
 //            letter.AnimateAndDestroy(player.GetWordPanel().transform.position);
         }
@@ -1003,9 +1064,10 @@ public class GameManager : NetworkManager
 
    
     [Server]
-    public void RecordHit(GameObject letterObj, Player currHitter)
+    public void RecordHit(GameObject letterObj, PlayerServerState currHitterSS)
     {
-
+        Player currHitter = players[currHitterSS.orderNum];
+        
         Letter letter = letterObj.gameObject.GetComponent<Letter>();
         if (letter.IsLocked())
         {
@@ -1015,13 +1077,16 @@ public class GameManager : NetworkManager
 //        letter.Lock();
         char letterText = letter.letterText;
         letterObj.transform.localScale *= 1.2f;
-
-
-        //verify if button should be pressed
-        currHitter.DecreasePossibleActionsPerLevel();
-
-
-
+        
+        currHitterSS.currNumPossibleActionsPerLevel--;
+        currHitter.UpdateNumPossibleActions(currHitterSS.currNumPossibleActionsPerLevel);
+            
+        currHitter.HideReadyButton();
+        if (inLobby && currHitterSS.currNumPossibleActionsPerLevel == 0)
+        {
+            currHitter.ShowReadyButton();
+        }
+        
         //different rewards in different utility conditions
         bool usefulForMe = false;
         bool usefulForOther = false;
@@ -1031,15 +1096,15 @@ public class GameManager : NetworkManager
         switch (playerIT)
         {
             case Globals.KeyInteractionType.GIVE:
-                usefulForMe = TestAndExecuteHit(false, letterText, letterObj, currHitter);
-                foreach (Player usefulTargetPlayer in players)
+                usefulForMe = TestAndExecuteHit(false, letterText, letterObj, currHitterSS);
+                foreach (PlayerServerState usefulTargetPlayerSS in playerServerStates)
                 {
-                    if (usefulTargetPlayer == currHitter)
+                    if (usefulTargetPlayerSS.orderNum == currHitterSS.orderNum)
                     {
                         continue;
                     }
 
-                    usefulForOther = TestAndExecuteHit(true, letterText, letterObj, usefulTargetPlayer);
+                    usefulForOther = TestAndExecuteHit(true, letterText, letterObj, usefulTargetPlayerSS);
                     if (usefulForOther)
                     {
                         break;
@@ -1051,11 +1116,11 @@ public class GameManager : NetworkManager
                 currHitter.info.numGives++;
                 break;
             case Globals.KeyInteractionType.TAKE:
-                usefulForMe = TestAndExecuteHit(true, letterText, letterObj, currHitter);
+                usefulForMe = TestAndExecuteHit(true, letterText, letterObj, currHitterSS);
 
-                foreach (Player usefulTargetPlayer in players)
+                foreach (PlayerServerState usefulTargetPlayerSS in playerServerStates)
                 {
-                    if (usefulTargetPlayer == currHitter)
+                    if (usefulTargetPlayerSS.orderNum == currHitterSS.orderNum)
                     {
                         continue;
                     }
@@ -1065,7 +1130,7 @@ public class GameManager : NetworkManager
                         break;
                     }
 
-                    usefulForOther = TestAndExecuteHit(false, letterText, letterObj, usefulTargetPlayer);
+                    usefulForOther = TestAndExecuteHit(false, letterText, letterObj, usefulTargetPlayerSS);
                 }
 
                 scores = currScoreSystem.takeScores;
@@ -1085,15 +1150,15 @@ public class GameManager : NetworkManager
 
         float otherPlayersCompletionMean = 0;
         int otherPlayersCount = players.Count() - 1;
-        float currPlayerCompletion = currHitter.GetCurrWordState().Count();
-        foreach (Player innerPlayer in players)
+        float currPlayerCompletion = currHitterSS.currWordState.Count();
+        foreach (PlayerServerState innerPlayerSS in playerServerStates)
         {
-            if (innerPlayer == currHitter)
+            if (innerPlayerSS.orderNum == currHitterSS.orderNum)
             {
                 continue;
             }
 
-            otherPlayersCompletionMean += (float) innerPlayer.GetCurrWordState().Count() / otherPlayersCount;
+            otherPlayersCompletionMean += (float) innerPlayerSS.currWordState.Count() / otherPlayersCount;
         }
 
         Globals.DiffLetters playerDiff = (currPlayerCompletion > otherPlayersCompletionMean)
@@ -1108,15 +1173,16 @@ public class GameManager : NetworkManager
             if (score.usefulForMe == usefulForMe && score.usefulForOther == usefulForOther && playerDiff ==
                 (Globals.DiffLetters) Enum.Parse(typeof(Globals.DiffLetters), score.diffLetters))
             {
-                currHitter.SetScore(currHitter.GetScore() + score.myValue, score.myValue, 1.3f);
-                foreach (Player innerPlayer in players)
+                currHitterSS.score += score.myValue;
+                currHitter.SetScore(currHitterSS.score, score.myValue, 1.3f);
+                foreach (PlayerServerState innerPlayerSS in playerServerStates)
                 {
-                    if (innerPlayer == currHitter)
+                    if (innerPlayerSS.orderNum == currHitterSS.orderNum)
                     {
                         continue;
                     }
-
-                    innerPlayer.SetScore(innerPlayer.GetScore() + score.otherValue, score.otherValue, 1.3f);
+                    innerPlayerSS.score += score.otherValue;
+                    currHitter.SetScore(innerPlayerSS.score, score.otherValue, 1.3f);
                 }
 
                 scoreOptionFound = true;
@@ -1144,45 +1210,49 @@ public class GameManager : NetworkManager
 
         bool areWordsUnfinished = false;
         bool arePlayersWithoutActions = true;
-        foreach (Player player in players)
+        foreach (PlayerServerState pss in playerServerStates)
         {
-            if (player.GetCurrNumPossibleActionsPerLevel() > 1)
+            Player player = players[pss.orderNum];
+            if (pss.currNumPossibleActionsPerLevel > 0)
             {
                 arePlayersWithoutActions = false;
             }
             else
             {
-                FinishPlayerAction(player, player.GetPressedButtonIndex());
+                FinishPlayerAction(pss, player.GetPressedButtonIndex());
                 //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
                 player.DisableAllButtons(Color.red);
             }
 
-            string currWordState = player.GetCurrWordState();
-            string currTargetWord = player.GetCurrExercise().targetWord;
+            string currWordState = pss.currWordState;
+            string currTargetWord = pss.currExercise.targetWord;
             if (currWordState.CompareTo(currTargetWord) != 0)
             {
                 if (!areWordsUnfinished)
                     areWordsUnfinished = true;
 
-                if (!player.currExerciseFinished)
-                    player.currExerciseFinished = true;
+                if (!pss.currExerciseFinished)
+                    pss.currExerciseFinished = true;
             }
             else
             {
-                if (!player.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
-                    player.SetScore(player.GetScore() + currScoreSystem.completeWordMyScore,
-                        currScoreSystem.completeWordMyScore, 1.3f);
-                foreach (Player innerPlayer in players)
+                if (!pss.currExerciseFinished && pss.currNumPossibleActionsPerLevel >= 0)
                 {
-                    if (player == innerPlayer)
+                    pss.score += currScoreSystem.completeWordMyScore;
+                    player.SetScore(pss.score, currScoreSystem.completeWordMyScore, 1.3f);
+                }
+                foreach (PlayerServerState innerPlayerSS in playerServerStates)
+                {
+                    if (pss.orderNum == innerPlayerSS.orderNum)
                     {
                         continue;
                     }
 
-                    if (!innerPlayer.currExerciseFinished && currHitter.GetCurrNumPossibleActionsPerLevel() > -1)
-                        innerPlayer.SetScore(
-                            innerPlayer.GetScore() + currScoreSystem.completeWordOtherScore,
-                            currScoreSystem.completeWordOtherScore, 1.3f);
+                    if (!innerPlayerSS.currExerciseFinished && innerPlayerSS.currNumPossibleActionsPerLevel >= 0)
+                    {
+                        innerPlayerSS.score += currScoreSystem.completeWordOtherScore;
+                        player.SetScore(innerPlayerSS.score, currScoreSystem.completeWordOtherScore, 1.3f);
+                    }
                 }
             }
         }
@@ -1191,7 +1261,7 @@ public class GameManager : NetworkManager
         {
             if (inLobby)
             {
-                ChangeLobbyLevel();
+                StartCoroutine(ChangeLobbyLevel());
             }
             else
             {
