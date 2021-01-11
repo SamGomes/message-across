@@ -363,6 +363,7 @@ public class GameManager : NetworkManager
 
         //set game code for all players
         cmge.SetGameCodeText(Globals.settings.networkSettings.serverCode);
+        cmge.ShowInLobbyIndicator();
         
         //create lobby levels on first player entry
         if (numPlayers == 1)
@@ -395,7 +396,8 @@ public class GameManager : NetworkManager
 
     IEnumerator StartAfterInit()
     {
-        yield return new WaitForSeconds(1.0f);
+        cmge.HideInLobbyIndicator();
+        cmge.HideInLobbyIndicato;
         
         currScoreSystem = Globals.settings.scoreSystem;
         //special condition removes the score

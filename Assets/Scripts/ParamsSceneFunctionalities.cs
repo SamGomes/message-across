@@ -18,6 +18,15 @@ public class ParamsSceneFunctionalities : MonoBehaviour
 
     void Start()
     {
+        if (Globals.activeInfoPopups)
+        {
+            Popup popup = new Popup(false);
+            popup.SetMessage("Welcome to the version selection menu. " +
+                             "Here the host can select one of the game versions, " +
+                             "currently loaded into the game," +
+                             " and start a game session (open the game room).");
+            popup.DisplayPopup();
+        }
         StartCoroutine(YieldedStart());
     }
     

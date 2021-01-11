@@ -11,8 +11,21 @@ public class ClientMainGameElements : NetworkBehaviour
     public GameObject emoji;
 
     public GameObject gameCodeUI;
+    public GameObject inLobbyIndicator;
 
     //--------- client visual effects ------------
+    [ClientRpc]
+    public void HideInLobbyIndicator()
+    {
+        inLobbyIndicator.SetActive(false);
+    }
+    
+    [ClientRpc]
+    public void ShowInLobbyIndicator()
+    {
+        inLobbyIndicator.SetActive(true);
+    }
+    
     [ClientRpc]
     public void SetGameCodeText(string serverCode)
     {
