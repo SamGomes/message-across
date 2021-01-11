@@ -11,7 +11,6 @@ namespace AuxiliaryStructs
     
     public class Player : NetworkBehaviour
     {
-        private int orderNum;
         
         public List<GameObject> playerPlaceholders;
         public Transform markerPlaceholders;
@@ -85,7 +84,6 @@ namespace AuxiliaryStructs
         public void Init(PlayerInfo info, GameObject playerPrefabInstance, int orderNum)
         {
             Debug.Log("init player "+orderNum);
-            this.orderNum = orderNum;
             
             //force change to the first lane at start
             changedLane = true;
@@ -283,12 +281,11 @@ namespace AuxiliaryStructs
             initted = true;
         }
 
-        public int GetOrderNum()
+        public bool IsInitted()
         {
-            return orderNum;
+            return initted;
         }
-        
-        
+
         //start action request and ack from server
         [Command]
         public void ActionStartRequest(int buttonI)
@@ -445,7 +442,7 @@ namespace AuxiliaryStructs
         }
 
         [ClientRpc]
-        public void SetCurrWordState(string currWordState, PlayerExercise currExercise)
+        public void UpdateCurrWordState(string currWordState, PlayerExercise currExercise)
         {
             //Update UI
             TextMesh[] playerDisplayTexts = wordPanel.GetComponentsInChildren<TextMesh>();
