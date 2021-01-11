@@ -1,4 +1,5 @@
-﻿using Mirror;
+﻿using System;
+using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,7 +10,15 @@ public class ClientMainGameElements : NetworkBehaviour
     public Text countdownText;
     public GameObject emoji;
 
+    public GameObject gameCodeUI;
+
     //--------- client visual effects ------------
+    [ClientRpc]
+    public void SetGameCodeText(string serverCode)
+    {
+        gameCodeUI.GetComponentInChildren<Text>().text = "Host IP: " + serverCode;
+    }
+
     [ClientRpc]
     public void DisplayCountdownText(bool active, string text)
     {

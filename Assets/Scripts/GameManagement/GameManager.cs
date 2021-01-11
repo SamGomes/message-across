@@ -38,7 +38,6 @@ public class GameManager : NetworkManager
     private int startingLevelDelayInSeconds;
 
     public GameObject serverDebugUI;
-    public GameObject gameCodeUI;
     
     public Button quitButton;
     public Button resetButton;
@@ -191,7 +190,8 @@ public class GameManager : NetworkManager
                                      "The host IP is included at the top left of the screen. " +
                                      "The wait lobby spawns some letters for you to train." +
                                      "When you are ready to begin," +
-                                     " simply click on the \"Ready\" button. ");
+                                     " simply click on the \"Ready\" button, displayed whenever" +
+                                     " the players have no actions to perform. ");
                     popup.DisplayPopup();
                 }
 
@@ -237,8 +237,7 @@ public class GameManager : NetworkManager
                     this.StartClient();
                     serverDebugUI.SetActive(false);
                 }
-                gameCodeUI.GetComponentInChildren<Text>().text = "Host IP: " + 
-                                                                 Globals.settings.networkSettings.serverCode;
+
             }
         }
         else
@@ -362,6 +361,9 @@ public class GameManager : NetworkManager
             InitPlayer(conn, i);
         }
 
+        //set game code for all players
+        cmge.SetGameCodeText(Globals.settings.networkSettings.serverCode);
+        
         //create lobby levels on first player entry
         if (numPlayers == 1)
         {
@@ -1205,7 +1207,7 @@ public class GameManager : NetworkManager
                         continue;
                     }
                     innerPlayerSS.score += score.otherValue;
-                    currHitter.SetScore(innerPlayerSS.score, score.otherValue, 1.3f);
+                    players[innerPlayerSS.orderNum].SetScore(innerPlayerSS.score, score.otherValue, 1.3f);
                 }
 
                 scoreOptionFound = true;

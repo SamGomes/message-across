@@ -18,7 +18,7 @@ public class StartOnlineSceneFunctionalities : MonoBehaviour
             Popup popup = new Popup(false);
             popup.SetMessage("This is the online dashboard. On the left, you can select to host an online game. " +
                              "A game code is presented when you host a game." +
-                             "On the right, you can join a game given a code.");
+                             "On the right, you can join a game given a host IP address.");
 //        popup.AddButton("Sure!", delegate
 //        {
 //            popup.HidePopupPanel();

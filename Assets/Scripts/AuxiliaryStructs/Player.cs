@@ -246,7 +246,7 @@ namespace AuxiliaryStructs
 
             
             readyButton.onClick.AddListener(delegate() { 
-                Debug.Log("readyButton");
+//                Debug.Log("readyButton");
                 GetReady();
             });
             readyButton.interactable = true;
