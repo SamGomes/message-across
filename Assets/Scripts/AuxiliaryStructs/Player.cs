@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Mirror;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -28,6 +29,10 @@ namespace AuxiliaryStructs
 
         public GameObject ui;
         public GameObject wordPanel;
+
+        private TextMesh[] playerDisplayTexts;
+        private SpriteRenderer playerDisplayImage;
+        
         public GameObject statePanel;
 
         public GameObject scoreUpdateUIup;
@@ -140,6 +145,8 @@ namespace AuxiliaryStructs
             
             wordPanel.transform.Find("Panel/Layout").GetComponent<SpriteRenderer>().color = backgroundColor;
             
+            playerDisplayTexts = wordPanel.GetComponentsInChildren<TextMesh>();
+            playerDisplayImage = wordPanel.GetComponentsInChildren<SpriteRenderer>()[2];
 
             wordPanel.SetActive(true);
             statePanel.SetActive(true);
@@ -438,21 +445,31 @@ namespace AuxiliaryStructs
                 currWordState += ' ';
             }
 
+            
+            
             //Update UI
-            TextMesh[] playerDisplayTexts = wordPanel.GetComponentsInChildren<TextMesh>();
             playerDisplayTexts[0].text = currExercise.displayMessage;
             playerDisplayTexts[1].text = currWordState;
             
+            try
+            {
+                playerDisplayImage.sprite =
+                    Resources.Load<Sprite>("Textures/PlayerUI/ExerciseImages/" + currExercise.targetWord);
+            }
+            catch (FileNotFoundException e)
+            {
+                playerDisplayImage.sprite =
+                    Resources.Load<Sprite>("Textures/PlayerUI/ExerciseImages/placeholder");
+            }
+
             //animate transition
             wordPanel.GetComponentInChildren<Animator>().Play(0);
         }
 
         [ClientRpc]
-        public void UpdateCurrWordState(string currWordState, PlayerExercise currExercise)
+        public void UpdateCurrWordState(string currWordState)
         {
             //Update UI
-            TextMesh[] playerDisplayTexts = wordPanel.GetComponentsInChildren<TextMesh>();
-            playerDisplayTexts[0].text = currExercise.displayMessage;
             playerDisplayTexts[1].text = currWordState;
         }
 
@@ -468,8 +485,11 @@ namespace AuxiliaryStructs
         public void SetScore(int score, int increase, float delay)
         {
             //update UI
-//                StartCoroutine(DelayedScoreDisplay(score, delay));
             scoreText.text = "Score: " + score;
+            if (increase == 0)
+            {
+                return;
+            }
             statePanel.GetComponent<Animator>().Play(0);
             if (increase > 0)
             {

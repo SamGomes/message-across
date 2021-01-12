@@ -1081,7 +1081,7 @@ public class GameManager : NetworkManager
             currWordState = sb.ToString();
 
             pss.currWordState = currWordState;
-            players[pss.orderNum].UpdateCurrWordState(currWordState, pss.currExercise);
+            players[pss.orderNum].UpdateCurrWordState(currWordState);
 //            letter.Lock();
 //            letter.AnimateAndDestroy(player.GetWordPanel().transform.position);
         }
