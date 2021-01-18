@@ -19,18 +19,27 @@ using Random = UnityEngine.Random;
 public class PlayerServerState
 {
     public int orderNum;
+    public int numPossibleActionsPerLevel;
     public int currNumPossibleActionsPerLevel;
     public int score;
         
     public PlayerExercise currExercise;
     public bool currExerciseFinished;
     public string currWordState;
+    
+    
+    public Color bgdColor;
+    public Color buttonColor;
 
+    public int numGives;
+    public int numTakes;
 } 
 
 //mainly implements the server
 public class GameManager : NetworkManager
 {
+    public Transform markerPlaceholders;
+    
     public List<Player> players;
     public List<GameObject> playerGameObjects;
     public List<PlayerServerState> playerServerStates;
@@ -54,7 +63,7 @@ public class GameManager : NetworkManager
 
 
     public LetterSpawner[] letterSpawners;
-
+    private bool[] spawnersStates;
 
     private float timeLeft;
 
@@ -147,20 +156,33 @@ public class GameManager : NetworkManager
     }
 
 
-    [Server]
-    public string RandomString(int length)
+    private string GetMyIpAdress()
     {
-        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        return new string(Enumerable.Repeat(chars, length)
-            .Select(s => s[UnityEngine.Random.Range(0, s.Length)]).ToArray());
-    }
-    
+        foreach(NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+        {
+            if(ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+            {
+                foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
+                {
+                    if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        string ipAddress = ip.Address.ToString();
+                        return ipAddress;
+                    }
+                }
+            }  
+        }
 
+        return "-.-.-.-";
+    }
+
+    
     public override void Start()
     {
         inLobby = true;
         players = new List<Player>();
         playerServerStates = new List<PlayerServerState>();
+        spawnersStates = new bool[] {true, true, true};
         
         //setup net code
 //        codesAndIPs = new Dictionary<string, string>();
@@ -168,6 +190,7 @@ public class GameManager : NetworkManager
         //check connection type
         if (!NetworkClient.active)
         {
+            
             if (Globals.settings.networkSettings.currMultiplayerOption == "LOCAL")
             {
                 OnStartServer();
@@ -183,9 +206,9 @@ public class GameManager : NetworkManager
             }
             else if (Globals.settings.networkSettings.currMultiplayerOption == "ONLINE")
             {
+                Popup popup = new Popup(false);
                 if (Globals.activeInfoPopups)
                 {
-                    Popup popup = new Popup(false);
                     popup.SetMessage("Welcome to the wait lobby. This is where you wait for the all players to join." +
                                      "The host IP is included at the top left of the screen. " +
                                      "The wait lobby spawns some letters for you to train." +
@@ -195,49 +218,33 @@ public class GameManager : NetworkManager
                     popup.DisplayPopup();
                 }
 
+                if (Globals.settings.networkSettings.serverCode == "")
+                {
+                    this.networkAddress = "localhost";
+                }
+                else
+                {
+                    this.networkAddress = Globals.settings.networkSettings.serverCode;
+                }
+                Globals.settings.networkSettings.serverCode = GetMyIpAdress();
                 
                 if (Globals.settings.networkSettings.currOnlineOption == "HOST")
                 {
                     StartHost();
-//                    string randomStr = RandomString(5);
-//                    while (codesAndIPs.ContainsValue(randomStr))
-//                    {
-//                        randomStr = RandomString(5);
-//                    }
+                    Globals.settings.networkSettings.serverCode = GetMyIpAdress();
 //                    codesAndIPs.Add(networkAddress, randomStr);
 
-                    foreach(NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
-                    {
-                        if(ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
-                        {
-                            foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
-                            {
-                                if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                                {
-                                    //do what you want with the IP here... add it to a list, just get the first and break out. Whatever.
-//                                    Debug.Log(ip.Address.ToString());
-                                    Globals.settings.networkSettings.serverCode = ip.Address.ToString();
-                                }
-                            }
-                        }  
-                    }
-
-
                 }
-                else if (Globals.settings.networkSettings.currOnlineOption == "CLIENT")
+                else if (Globals.settings.networkSettings.currOnlineOption == "SERVER")
                 {
-                    if (Globals.settings.networkSettings.serverCode == "")
-                    {
-                        this.networkAddress = "localhost";
-                    }
-                    else
-                    {
-                        this.networkAddress = Globals.settings.networkSettings.serverCode;
-                    }
+                    StartServer();
+                }
+                else // if (Globals.settings.networkSettings.currOnlineOption == "CLIENT")
+                {
+                    
                     this.StartClient();
                     serverDebugUI.SetActive(false);
                 }
-
             }
         }
         else
@@ -382,7 +389,7 @@ public class GameManager : NetworkManager
             
                 //start spawners update cycle
                 StartCoroutine(UpdateSpawner(spawner));
-                spawner.StartSpawning();
+                StartSpawning(spawner);
             }
         }
         StartCoroutine(ChangeLobbyLevel());
@@ -414,7 +421,7 @@ public class GameManager : NetworkManager
         foreach (LetterSpawner spawner in letterSpawners)
         {
             //update cycle started in lobby
-            spawner.StopSpawning();
+            StopSpawning(spawner);
         }
         
         //start player buttons
@@ -440,6 +447,14 @@ public class GameManager : NetworkManager
         //when a player looses connection, the game ends immediately
         EndGame();
     }
+    
+    [Server]
+    private Color CalcButtonColor(Color newColor)
+    {
+        float g = 1.0f - newColor.grayscale * 0.8f;
+        Color dualColor = new Color(g, g, g);
+        return dualColor;
+    }
 
     void InitPlayer(NetworkConnection conn, int orderNum)
     {
@@ -452,29 +467,36 @@ public class GameManager : NetworkManager
         //clients do not have local players' info created
         PlayerInfo currPlayerInfo = Globals.settings.generalSettings.playersParams[orderNum];
 
-        string bufferedPlayerId = "";
-        if (numPlayers < Globals.bufferedPlayerIds.Count)
-        {
-            bufferedPlayerId = Globals.bufferedPlayerIds[orderNum];
-        }
-        else
-        {
-            bufferedPlayerId = "NO_NAME_" + orderNum;
-        }
-
-        currPlayerInfo.id = bufferedPlayerId;
-
+        // string bufferedPlayerId = "";
+        // if (numPlayers < Globals.bufferedPlayerIds.Count)
+        // {
+        //     bufferedPlayerId = Globals.bufferedPlayerIds[orderNum];
+        // }
+        // else
+        // {
+        //     bufferedPlayerId = "NO_NAME_" + orderNum;
+        // }
+        
+        Color bgdColor = new Color(currPlayerInfo.colorRGB[0],currPlayerInfo.colorRGB[1],currPlayerInfo.colorRGB[2], 0.8f);
+        Color buttonColor = CalcButtonColor(bgdColor);
         //only add one server state per player
         if (!player.IsInitted())
         {
             //reset player actions in server (maintains order implicitly)
             PlayerServerState newPlayerState = new PlayerServerState();
+            newPlayerState.numPossibleActionsPerLevel = currPlayerInfo.numPossibleActionsPerLevel;
             newPlayerState.currNumPossibleActionsPerLevel = currPlayerInfo.numPossibleActionsPerLevel;
             newPlayerState.score = 0;
             newPlayerState.currExercise = new PlayerExercise();
             newPlayerState.currExerciseFinished = false;
             newPlayerState.currWordState = "";
             newPlayerState.orderNum = orderNum;
+
+            newPlayerState.bgdColor = bgdColor;
+            newPlayerState.buttonColor = buttonColor;
+            
+            newPlayerState.numGives = 0;
+            newPlayerState.numTakes = 0;
             playerServerStates.Add(newPlayerState);
         
         }
@@ -482,7 +504,7 @@ public class GameManager : NetworkManager
         //all these methods are broadcasted to each client
         player.SetActiveLayout(orderNum % 2 == 0);
         player.SetTopMask(orderNum % 2 == 0);
-        player.Init(currPlayerInfo, playerInstance, orderNum);
+        player.Init(playerInstance, orderNum, bgdColor, buttonColor);
 
         player.SetScore(0, 0, 0);
      
@@ -545,11 +567,12 @@ public class GameManager : NetworkManager
     [Server]
     public void PlayerTrackChanges()
     {
-        foreach (Player player in players)
+        foreach (PlayerServerState pss in playerServerStates)
         {
+            Player player = players[pss.orderNum];
             if (player != null && player.ChangedLane())
             {
-                ChangeLane(player);
+                ChangeLane(pss, player);
                 UpdateButtonOverlaps(player, player.GetPressedButtonIndex());
                 player.AckChangedLane();
             }
@@ -584,7 +607,7 @@ public class GameManager : NetworkManager
     }
 
     [Server]
-    void ChangeLane(Player player)
+    void ChangeLane(PlayerServerState pss, Player player)
     {
         int activeButtonI = player.GetActiveButtonIndex();
         int pressedButtonI = player.GetPressedButtonIndex();
@@ -594,12 +617,11 @@ public class GameManager : NetworkManager
         }
 
         //update player state and marker in track
-        player.SetActiveTrackButton(pressedButtonI, player.markerPlaceholders.GetChild(pressedButtonI).transform.position);
+        player.SetActiveTrackButton(pressedButtonI, markerPlaceholders.GetChild(pressedButtonI).transform.position);
         
         //update client player UIs after commands are executed on client
-        player.ChangeAllButtonsColor(player.GetButtonColor());
+        player.ChangeAllButtonsColor(pss.buttonColor);
         player.ChangeButtonColor(pressedButtonI, new Color(1.0f, 0.82f, 0.0f));
-
     }
     
 
@@ -610,10 +632,22 @@ public class GameManager : NetworkManager
     
     
     //--------------------- spawners stuff ------------------------
+    
+    [Server]
+    private void StartSpawning(LetterSpawner spawner)
+    {
+        spawnersStates[spawner.GetId()] = true;
+    }
+    [Server]
+    private void StopSpawning(LetterSpawner spawner)
+    {
+        spawnersStates[spawner.GetId()] = false;
+    }
+    
     [Server]
     IEnumerator UpdateSpawner(LetterSpawner spawner)
     { 
-        while (spawner.IsStopped())
+        while (spawnersStates[spawner.GetId()])
         {
             yield return null;
         }
@@ -705,17 +739,17 @@ public class GameManager : NetworkManager
                 {
                     {"gameId", Globals.gameId.ToString()},
                     {"levelId", Globals.currLevelId.ToString()},
-                    {"playerId", player.GetId().ToString()},
+                    {"playerId", pss.orderNum.ToString()},
                     {"levelWord", pss.currExercise.targetWord},
                     {"wordState", pss.currWordState},
                     {"scoreSystem", scoreSystemPath},
                     {"score", pss.score.ToString()},
-                    {"numberOfGives", player.info.numGives.ToString()},
-                    {"numberOfTakes", player.info.numTakes.ToString()}
+                    {"numberOfGives", pss.numGives.ToString()},
+                    {"numberOfTakes", pss.numTakes.ToString()}
                 }));
 
-            player.info.numGives = 0;
-            player.info.numTakes = 0;
+            pss.numGives = 0;
+            pss.numTakes = 0;
         }
 
     }
@@ -739,7 +773,7 @@ public class GameManager : NetworkManager
 
         foreach (LetterSpawner spawner in letterSpawners)
         {
-            spawner.StopSpawning();
+            StopSpawning(spawner);
         }
 
         cmge.PlayAudioClip(1, "Audio/wordChange");
@@ -753,7 +787,7 @@ public class GameManager : NetworkManager
         foreach (LetterSpawner spawner in letterSpawners)
         {
             ClearPool(spawner); //risky-> exercise may not have been synced yet
-            spawner.UpdateCurrStarredWord("");
+            //spawner.UpdateCurrStarredWord("");
         }
         
 
@@ -782,25 +816,22 @@ public class GameManager : NetworkManager
         cmge.PlayAudioClip(1, "Audio/snap");
         foreach (LetterSpawner spawner in letterSpawners)
         {
-            spawner.StartSpawning();
+            StartSpawning(spawner);
         }
 
         foreach (PlayerServerState pss in playerServerStates)
         {
             Player player = players[pss.orderNum];
-            foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
-            {
-  //            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
-                player.ResetButtonStates();
-                player.EnableAllButtons();
-            }
+            
+//            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
+            player.ResetButtonStates();
+            player.EnableAllButtons();
+            
 
             
             //reset player actions in server
-            pss.currNumPossibleActionsPerLevel = player.info.numPossibleActionsPerLevel;
+            pss.currNumPossibleActionsPerLevel = pss.numPossibleActionsPerLevel;
             player.UpdateNumPossibleActions(pss.currNumPossibleActionsPerLevel);
-            
-            player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
         }
 
         Globals.currLevelId++;
@@ -850,7 +881,7 @@ public class GameManager : NetworkManager
     {
         foreach (LetterSpawner spawner in letterSpawners)
         {
-            spawner.StopSpawning();
+            StopSpawning(spawner);
         }
         
         ChangeLobbyTargetWords();
@@ -866,24 +897,22 @@ public class GameManager : NetworkManager
         
         foreach (LetterSpawner spawner in letterSpawners)
         {
-            spawner.StartSpawning();
+            StartSpawning(spawner);
         }
 
         foreach (PlayerServerState pss in playerServerStates)
         {
             Player player = players[pss.orderNum];
-            foreach (Button button in player.GetUI().GetComponentsInChildren<Button>())
-            {
-                //            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
-                player.ResetButtonStates();
-                player.EnableAllButtons();
-            }
+            //            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
+            player.ResetButtonStates();
+            player.EnableAllButtons();
+            // }
             
             //reset player actions in server
-            pss.currNumPossibleActionsPerLevel = player.info.numPossibleActionsPerLevel;
+            pss.currNumPossibleActionsPerLevel = pss.numPossibleActionsPerLevel;
             player.UpdateNumPossibleActions(pss.currNumPossibleActionsPerLevel);
             
-            player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
+            // player.GetUI().GetComponentInChildren<Button>().onClick.Invoke(); //set track positions
             
             player.HideReadyButton();
         }
@@ -921,7 +950,6 @@ public class GameManager : NetworkManager
     
     
     
-    
     //--------------------- player actions ------------------------
     public void PlayerActionChanges()
     {
@@ -931,11 +959,12 @@ public class GameManager : NetworkManager
             if (player.ActionStarted() || player.ActionFinished())
             {
                 int pressedButtonI = player.GetPressedButtonIndex();
-                if (!player.IsButtonEnabled(pressedButtonI))
-                {
-                    continue;
-                }
-
+                
+                // if (!player.IsButtonEnabled(pressedButtonI))
+                // {
+                //     continue;
+                // }
+                
                 if (player.ActionStarted())
                 {
                     StartPlayerAction(pss, pressedButtonI);
@@ -960,7 +989,7 @@ public class GameManager : NetworkManager
         player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
         player.ReleaseGameButton();
         
-        player.ChangeButtonColor(pressedButtonI, player.GetButtonColor());
+        player.ChangeButtonColor(pressedButtonI, pss.buttonColor);
         player.UpdateActiveHalf(false);
     }
 
@@ -1140,7 +1169,7 @@ public class GameManager : NetworkManager
                 }
                 
                 scores = currScoreSystem.giveScores;
-                currHitter.info.numGives++;
+                currHitterSS.numGives++;
                 break;
             case Globals.KeyInteractionType.TAKE:
                 usefulForMe = TestAndExecuteHit(true, letterText, currHitterSS);
@@ -1161,7 +1190,7 @@ public class GameManager : NetworkManager
                 }
 
                 scores = currScoreSystem.takeScores;
-                currHitter.info.numTakes++;
+                currHitterSS.numTakes++;
                 break;
         }
 

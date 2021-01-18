@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.43846127, g: 0.48654675, b: 0.56682056, a: 1}
+  m_IndirectSpecularColor: {r: 0.43846166, g: 0.48654705, b: 0.566821, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -312,6 +312,7 @@ MonoBehaviour:
   autoCreatePlayer: 1
   playerSpawnMethod: 0
   spawnPrefabs: []
+  markerPlaceholders: {fileID: 1553605807}
   players: []
   playerGameObjects: []
   serverDebugUI: {fileID: 2084888378}

@@ -14,7 +14,6 @@ public class LetterSpawner : NetworkBehaviour
     public float maxIntervalRange;
 
     private float randomInterval;
-    private bool isStopped;
 
     private string currStarredWord;
 
@@ -28,12 +27,6 @@ public class LetterSpawner : NetworkBehaviour
         currLetters = new List<GameObject>();
     }
 
-    // Use this for initialization
-    void Start()
-    {
-        isStopped = true;
-    }
-
     public void SetId(int id)
     {
         this.id = id;
@@ -42,20 +35,6 @@ public class LetterSpawner : NetworkBehaviour
     public int GetId()
     {
         return id;
-    }
-    
-    [ClientRpc]
-    public void StartSpawning()
-    {
-        isStopped = false;
-
-    }
-    
-    [ClientRpc]
-    public void StopSpawning()
-    {
-        isStopped = true;
-
     }
 
     [ClientRpc]
@@ -89,12 +68,6 @@ public class LetterSpawner : NetworkBehaviour
         {
             Destroy(letter);
         }
-    }
-
-
-    public bool IsStopped()
-    {
-        return isStopped;
     }
 
     [ClientRpc]

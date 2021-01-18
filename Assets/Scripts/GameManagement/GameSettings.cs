@@ -69,6 +69,9 @@ public struct MANetworkSettings
     //for online games
     public string currOnlineOption;
     public string serverCode;
+    
+    //for server
+    public string selectedScoreName;
 }
 
 [Serializable]

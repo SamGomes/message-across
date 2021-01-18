@@ -8,28 +8,9 @@ namespace AuxiliaryStructs
     public class PlayerInfo
     {
         [SerializeField]
-        public List<float> buttonRGB;
-    
-        [SerializeField]
-        public string id;
-
-        [SerializeField]
-        public List<KeyCode> myKeys;
-
-        [SerializeField]
-        public List<string> myButtons;
+        public List<float> colorRGB;
 
         [SerializeField]
         public int numPossibleActionsPerLevel;
-
-        //log stuff
-        public int numGives;
-        public int numTakes;
-
-        public PlayerInfo()
-        {
-            this.numGives = 0;
-            this.numTakes = 0;
-        }
     }
 }

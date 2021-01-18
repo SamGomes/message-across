@@ -14,14 +14,8 @@ namespace AuxiliaryStructs
     {
         
         public List<GameObject> playerPlaceholders;
-        public Transform markerPlaceholders;
         
         private bool initted;
-        
-        public PlayerInfo info;
-
-        public Color backgroundColor;
-
 
         private int activeButtonIndex;
 
@@ -64,7 +58,6 @@ namespace AuxiliaryStructs
 
 
         private Button[] playerButtons;
-        private bool[] isButtonEnabled;
        
         //used to sync with game manager
         private bool changedLane;
@@ -86,7 +79,7 @@ namespace AuxiliaryStructs
 
         // public void Init(bool allowInteraction, string id, GameManager gameManagerRef, GameObject markerPrefab, GameObject canvas, GameObject ui, GameObject wordPanel, GameObject statePanel, bool isTopMask)
         [ClientRpc]
-        public void Init(PlayerInfo info, GameObject playerPrefabInstance, int orderNum)
+        public void Init(GameObject playerPrefabInstance, int orderNum, Color backgroundColor, Color buttonColor)
         {
             Debug.Log("init player "+orderNum);
             
@@ -102,13 +95,8 @@ namespace AuxiliaryStructs
             }
             
             
-            this.info = info;
             this.trackCanvas = GameObject.Find("Track/PlayerMarkers").gameObject;
 
-            
-            //init colors
-            backgroundColor = new Color(info.buttonRGB[0], info.buttonRGB[1], info.buttonRGB[2], 0.8f);
-            
             //init active layout
             wordPanel = activeLayout
                 ? gameObject.transform.Find("WordPanels/LeftDisplay").gameObject
@@ -166,7 +154,6 @@ namespace AuxiliaryStructs
             List<Image> imgs = new List<Image>(ui.GetComponentsInChildren<Image>());
             imgs.RemoveAt(0);
             
-            buttonColor = CalcButtonColor(backgroundColor);
             
             //for the state display
             scoreText.color = buttonColor;
@@ -214,7 +201,7 @@ namespace AuxiliaryStructs
             
             foreach (SpriteRenderer image in marker.GetComponentsInChildren<SpriteRenderer>())
             {
-                image.color = this.backgroundColor;
+                image.color = backgroundColor;
             }
             activeHalf[1].SetActive(false); //lets init it to hidden
             
@@ -233,7 +220,6 @@ namespace AuxiliaryStructs
             
             playerPlaceholders[(orderNum +1) % 2].SetActive(false);
             
-            markerPlaceholders = GameObject.Find("Track/MarkerPlaceholders").transform;
                 
             playerPrefabInstance.SetActive(true);
             //init ui
@@ -246,12 +232,8 @@ namespace AuxiliaryStructs
                 ui.transform.Find("Button(4)").GetComponent<Button>(),
                 ui.transform.Find("Button(5)").GetComponent<Button>()
             };
-            isButtonEnabled= new []
-            {
-                true,true,true,true,true
-            };
 
-            
+
             readyButton.onClick.AddListener(delegate() { 
 //                Debug.Log("readyButton");
                 GetReady();
@@ -269,11 +251,10 @@ namespace AuxiliaryStructs
                     currButton.interactable = true;
                     
                     currButton.GetComponent<Image>().color = GetButtonColor();
-                    if (buttonI < markerPlaceholders.childCount)
+                    if (buttonI < 3)
                     {
                         int innerButtonI = buttonI; //for coroutine to save the iterated values
-                        currButton.onClick.AddListener(delegate() { ChangeLaneRequest(innerButtonI); });
-
+                        currButton.onClick.AddListener(delegate { ChangeLaneRequest(innerButtonI); });
                     }
                     else
                     {
@@ -281,11 +262,11 @@ namespace AuxiliaryStructs
                         EventTrigger trigger = currButton.gameObject.AddComponent<EventTrigger>();
                         EventTrigger.Entry pointerDown = new EventTrigger.Entry();
                         pointerDown.eventID = EventTriggerType.PointerDown;
-                        pointerDown.callback.AddListener(delegate(BaseEventData eventData) { ActionStartRequest(innerButtonI); });
+                        pointerDown.callback.AddListener(delegate { ActionStartRequest(innerButtonI); });
                         trigger.triggers.Add(pointerDown);
                         EventTrigger.Entry pointerUp = new EventTrigger.Entry();
                         pointerUp.eventID = EventTriggerType.PointerUp;
-                        pointerUp.callback.AddListener(delegate (BaseEventData eventData) { ActionFinishRequest(innerButtonI); });
+                        pointerUp.callback.AddListener(delegate { ActionFinishRequest(innerButtonI); });
                         trigger.triggers.Add(pointerUp);
                     }
                 }
@@ -316,7 +297,7 @@ namespace AuxiliaryStructs
             return actionStarted;
         }
         
-        [ClientRpc] 
+        [Server]
         public void AckActionStarted()
         {
             actionStarted = false;
@@ -352,7 +333,7 @@ namespace AuxiliaryStructs
             return actionFinished;
         }
         
-        [ClientRpc] 
+        [Server] 
         public void AckActionFinished()
         {
             actionFinished = false;
@@ -377,10 +358,10 @@ namespace AuxiliaryStructs
         
         public bool ChangedLane()
         {
-            return this.changedLane;
+            return changedLane;
         }
         
-        [ClientRpc] 
+        [Server]
         public void AckChangedLane()
         {
             changedLane = false;
@@ -421,18 +402,6 @@ namespace AuxiliaryStructs
         }
 
         
-        private Color CalcButtonColor(Color newColor)
-        {
-            float g = 1.0f - newColor.grayscale * 0.8f;
-            Color dualColor = new Color(g, g, g);
-            return dualColor;
-        }
-
-
-        public string GetId()
-        {
-            return info.id;
-        }
         
 
         [ClientRpc]
@@ -578,10 +547,6 @@ namespace AuxiliaryStructs
             playerButtons[buttonI].GetComponent<Image>().color = color;
         }
 
-        public bool IsButtonEnabled(int buttonI)
-        {
-            return isButtonEnabled[currPressedButtonI];
-        }
         
         [ClientRpc]
         public void ChangeAllButtonsColor(Color color)
@@ -599,7 +564,6 @@ namespace AuxiliaryStructs
             {
                 Button button = playerButtons[i];
                 button.interactable = false;
-                isButtonEnabled[i] = false;
                 button.GetComponent<Image>().color = disabledColor;
             }
         }
@@ -610,7 +574,6 @@ namespace AuxiliaryStructs
             {
                 Button button = playerButtons[i];
                 button.interactable = true;
-                isButtonEnabled[i] = true;
                 button.GetComponent<Image>().color = GetButtonColor();
             }
         }

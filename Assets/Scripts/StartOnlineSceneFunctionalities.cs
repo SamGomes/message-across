@@ -8,6 +8,7 @@ public class StartOnlineSceneFunctionalities : MonoBehaviour
     public InputField playerName;
     public InputField serverCode;
     public Button hostButton;
+    public Button serverButton;
     public Button joinButton;
 
 
@@ -28,16 +29,35 @@ public class StartOnlineSceneFunctionalities : MonoBehaviour
             popup.DisplayPopup();
         }
 
-        Globals.settings.networkSettings.currMultiplayerOption = "ONLINE";
-        hostButton.onClick.AddListener(delegate () {
-            Globals.settings.networkSettings.currOnlineOption = "HOST";
+        if (Globals.settings.networkSettings.currOnlineOption == "HOST" ||
+            Globals.settings.networkSettings.currOnlineOption == "SERVER")
+        {
             SceneManager.LoadScene("paramsSetup");
-        });
-        
-        joinButton.onClick.AddListener(delegate () {
-            Globals.settings.networkSettings.currOnlineOption = "CLIENT";
-            Globals.settings.networkSettings.serverCode = serverCode.text;
+        }
+        else if (Globals.settings.networkSettings.currOnlineOption == "CLIENT")
+        {
             SceneManager.LoadScene("mainScene");
-        });
+        }
+        else
+        {
+            Globals.settings.networkSettings.currMultiplayerOption = "ONLINE";
+            hostButton.onClick.AddListener(delegate()
+            {
+                Globals.settings.networkSettings.currOnlineOption = "HOST";
+                SceneManager.LoadScene("paramsSetup");
+            });
+            serverButton.onClick.AddListener(delegate()
+            {
+                Globals.settings.networkSettings.currOnlineOption = "SERVER";
+                SceneManager.LoadScene("paramsSetup");
+            });
+
+            joinButton.onClick.AddListener(delegate()
+            {
+                Globals.settings.networkSettings.currOnlineOption = "CLIENT";
+                Globals.settings.networkSettings.serverCode = serverCode.text;
+                SceneManager.LoadScene("mainScene");
+            });
+        }
     }
 }
