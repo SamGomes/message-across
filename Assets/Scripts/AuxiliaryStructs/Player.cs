@@ -50,9 +50,6 @@ namespace AuxiliaryStructs
 
         private IEnumerator currButtonLerp;
 
-       
-        public bool pressingButton;
-        
         private bool isTopMask;
         private bool activeLayout; //parameterize the side of the board player will play in, true if left
 
@@ -204,9 +201,7 @@ namespace AuxiliaryStructs
                 image.color = backgroundColor;
             }
             activeHalf[1].SetActive(false); //lets init it to hidden
-            
-            pressingButton = false;
-            
+
             //update ui placeholders after updating the order num
             playerPlaceholders =
                 new List<GameObject>();
@@ -619,29 +614,15 @@ namespace AuxiliaryStructs
 //        }
 
         [ClientRpc]
-        public void PressGameButton()
+        public void PressMarker()
         {
-            pressingButton = true;
-            gameButton.RegisterButtonDown();
+            marker.transform.localScale = marker.transform.localScale * 0.9f;
         }
 
         [ClientRpc]
-        public void ReleaseGameButton()
+        public void ReleaseMarker()
         {
-            pressingButton = false;
-            gameButton.RegisterButtonUp();
-
-        }
-
-        public GameObject GetUI()
-        {
-            return ui;
-        }
-        
-        
-        public bool IsPressingButton()
-        {
-            return pressingButton;
+            marker.transform.localScale = marker.transform.localScale / 0.9f;
         }
 
         public GameButton GetGameButton()

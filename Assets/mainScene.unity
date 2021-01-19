@@ -313,6 +313,10 @@ MonoBehaviour:
   playerSpawnMethod: 0
   spawnPrefabs: []
   markerPlaceholders: {fileID: 1553605807}
+  markerColliders:
+  - {fileID: 676340077}
+  - {fileID: 4983876231236875757}
+  - {fileID: 4983876231438987530}
   players: []
   playerGameObjects: []
   serverDebugUI: {fileID: 2084888378}
@@ -1123,6 +1127,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4712786913894404322}
   - component: {fileID: 6131093439163891416}
+  - component: {fileID: 676340077}
   m_Layer: 0
   m_Name: PlaceholderLine1
   m_TagString: Untagged
@@ -1130,6 +1135,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!65 &676340077
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 676340076}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.7, y: 1, z: 1.93}
+  m_Center: {x: -0.96, y: 0.58, z: 0}
 --- !u!1 &732500040
 GameObject:
   m_ObjectHideFlags: 0
@@ -3227,6 +3245,7 @@ GameObject:
   m_Component:
   - component: {fileID: 310018008522933346}
   - component: {fileID: 1169895736547322456}
+  - component: {fileID: 4983876231236875757}
   m_Layer: 0
   m_Name: PlaceholderLine2
   m_TagString: Untagged
@@ -3234,6 +3253,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!65 &4983876231236875757
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4983876231236875756}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.7, y: 1, z: 1.93}
+  m_Center: {x: -0.96, y: 0.58, z: 0}
 --- !u!1 &4983876231438987529
 GameObject:
   m_ObjectHideFlags: 0
@@ -3244,6 +3276,7 @@ GameObject:
   m_Component:
   - component: {fileID: 310018008187125895}
   - component: {fileID: 1169895736346259133}
+  - component: {fileID: 4983876231438987530}
   m_Layer: 0
   m_Name: PlaceholderLine3
   m_TagString: Untagged
@@ -3251,6 +3284,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!65 &4983876231438987530
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4983876231438987529}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.7, y: 1, z: 1.93}
+  m_Center: {x: -0.96, y: 0.58, z: 0}
 --- !u!114 &4983876231665582848
 MonoBehaviour:
   m_ObjectHideFlags: 0

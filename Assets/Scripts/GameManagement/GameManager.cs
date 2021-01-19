@@ -33,12 +33,15 @@ public class PlayerServerState
 
     public int numGives;
     public int numTakes;
+
+    public int markerI;
 } 
 
 //mainly implements the server
 public class GameManager : NetworkManager
 {
     public Transform markerPlaceholders;
+    public Collider[] markerColliders;
     
     public List<Player> players;
     public List<GameObject> playerGameObjects;
@@ -484,6 +487,7 @@ public class GameManager : NetworkManager
         {
             //reset player actions in server (maintains order implicitly)
             PlayerServerState newPlayerState = new PlayerServerState();
+            
             newPlayerState.numPossibleActionsPerLevel = currPlayerInfo.numPossibleActionsPerLevel;
             newPlayerState.currNumPossibleActionsPerLevel = currPlayerInfo.numPossibleActionsPerLevel;
             newPlayerState.score = 0;
@@ -497,6 +501,9 @@ public class GameManager : NetworkManager
             
             newPlayerState.numGives = 0;
             newPlayerState.numTakes = 0;
+
+            newPlayerState.markerI = 0;
+            
             playerServerStates.Add(newPlayerState);
         
         }
@@ -573,14 +580,14 @@ public class GameManager : NetworkManager
             if (player != null && player.ChangedLane())
             {
                 ChangeLane(pss, player);
-                UpdateButtonOverlaps(player, player.GetPressedButtonIndex());
+                UpdateButtonOverlaps(pss, player, player.GetPressedButtonIndex());
                 player.AckChangedLane();
             }
         }
     }
     
     [Server]
-    public void UpdateButtonOverlaps(Player currPlayer, int potentialIndex)
+    public void UpdateButtonOverlaps(PlayerServerState pss, Player currPlayer, int potentialIndex)
     {
         isLaneOverlap = false;
         foreach (Player player in players)
@@ -602,7 +609,7 @@ public class GameManager : NetworkManager
             {
                 player.ShowHalfMarker();
             }
-            player.UpdateActiveHalf(player.IsPressingButton());
+            player.UpdateActiveHalf(player.ActionStarted());
         }
     }
 
@@ -616,6 +623,9 @@ public class GameManager : NetworkManager
             cmge.PlayAudioClip(2, "Audio/trackChange");
         }
 
+        //update server state
+        pss.markerI = pressedButtonI;
+        
         //update player state and marker in track
         player.SetActiveTrackButton(pressedButtonI, markerPlaceholders.GetChild(pressedButtonI).transform.position);
         
@@ -647,7 +657,7 @@ public class GameManager : NetworkManager
     [Server]
     IEnumerator UpdateSpawner(LetterSpawner spawner)
     { 
-        while (spawnersStates[spawner.GetId()])
+        while (!spawnersStates[spawner.GetId()])
         {
             yield return null;
         }
@@ -665,8 +675,9 @@ public class GameManager : NetworkManager
         letterPool.RemoveAt(random);
         
         letterPools[spawner.GetId()] = letterPool;
-        
-        spawner.SpawnLetter(currLetter); //spawns the picked letter in each client
+
+        spawner.SpawnLetterInServer(currLetter); //spawns the letter on the server to verify collisions
+        spawner.SpawnLetterInClients(currLetter); //spawns the picked letter in each client
         
         StartCoroutine(UpdateSpawner(spawner));
     }
@@ -987,7 +998,7 @@ public class GameManager : NetworkManager
         cmge.PlayAudioClip(2, "Audio/clickUp");
 
         player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
-        player.ReleaseGameButton();
+        player.ReleaseMarker();
         
         player.ChangeButtonColor(pressedButtonI, pss.buttonColor);
         player.UpdateActiveHalf(false);
@@ -1006,7 +1017,7 @@ public class GameManager : NetworkManager
         {
             foreach (Player innerPlayer in players)
             {
-                if (innerPlayer != player && player.IsPressingButton())
+                if (innerPlayer != player && player.ActionStarted())
                 {
                     playerOverlappedAndPressing = true;
                     break;
@@ -1029,7 +1040,7 @@ public class GameManager : NetworkManager
         cmge.PlayAudioClip(2, "Audio/clickDown");
         player.SetActiveInteraction(iType);
                 
-        player.PressGameButton();
+        player.PressMarker();
         player.UpdateActiveHalf(true);
     }
     
@@ -1042,31 +1053,31 @@ public class GameManager : NetworkManager
         foreach (PlayerServerState pss in playerServerStates)
         {
             Player player = players[pss.orderNum];
-            GameButton playerButton = player.GetGameButton();
             foreach (LetterSpawner spawner in letterSpawners)
             {
                 GameObject firstLetter = spawner.GetCurrSpawnedLetterObjects().FirstOrDefault();
-                if(playerButton && firstLetter) //verify if they are loaded
+                if(firstLetter) //verify if they are loaded
                 {
-                    
                     if (firstLetter!=bufferedFirstLetter && 
                         letterPit.GetComponent<Collider>().bounds.Intersects(
-                        firstLetter.GetComponent<Collider>().bounds
-                    ))
+                            firstLetter.GetComponent<Collider>().bounds
+                        ))
                     {
                         bufferedFirstLetter = firstLetter;
-                        spawner.DestroyFirstLetter();
-                    }else
+                        spawner.DestroyFirstLetterInServer();
+                        spawner.DestroyFirstLetterInClients();
+                    }
+                    else
                     if (firstLetter!=bufferedFirstLetter && 
-                        playerButton.IsClicked() && 
-                        playerButton.GetComponent<Collider>().bounds.Intersects(
+                        player.ActionStarted() && 
+                        markerColliders[pss.markerI].bounds.Intersects(
                             firstLetter.GetComponent<Collider>().bounds
                     ))
                     {
                         bufferedFirstLetter = firstLetter;
                         RecordHit(firstLetter, pss);
                         spawner.DestroyFirstLetter();
-
+                    
                     }
                 }
             }

@@ -9,7 +9,7 @@ using UnityEngine.UI;
 public class LetterSpawner : NetworkBehaviour
 {
     public GameObject letterPrefab;
-    
+
     public float minIntervalRange;
     public float maxIntervalRange;
 
@@ -31,7 +31,7 @@ public class LetterSpawner : NetworkBehaviour
     {
         this.id = id;
     }
-    
+
     public int GetId()
     {
         return id;
@@ -43,18 +43,30 @@ public class LetterSpawner : NetworkBehaviour
         this.currStarredWord = currTargetWord;
     }
 
-    [ClientRpc]
     public void DestroyFirstLetter()
     {
         if (currLetters.Count == 0) //no letters to destroy
         {
             return;
         }
+
         GameObject firstLetter = currLetters.First();
         currLetters.RemoveAt(0);
         Destroy(firstLetter);
     }
     
+    [ClientRpc]
+    public void DestroyFirstLetterInClients()
+    {
+        DestroyFirstLetter();
+    }
+    
+    [Server]
+    public void DestroyFirstLetterInServer()
+    {
+        DestroyFirstLetter();
+    }
+
     [ClientRpc]
     public void DestroyAllLetters()
     {
@@ -62,6 +74,7 @@ public class LetterSpawner : NetworkBehaviour
         {
             return;
         }
+
         List<GameObject> letters = new List<GameObject>(currLetters);
         currLetters.Clear();
         foreach (GameObject letter in letters)
@@ -71,6 +84,17 @@ public class LetterSpawner : NetworkBehaviour
     }
 
     [ClientRpc]
+    public void SpawnLetterInClients(char currLetter)
+    {
+        SpawnLetter(currLetter);
+    }
+    
+    [Server]
+    public void SpawnLetterInServer(char currLetter)
+    {
+        SpawnLetter(currLetter);
+    }
+
     public void SpawnLetter(char currLetter)
     {
 
