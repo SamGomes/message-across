@@ -12,32 +12,31 @@ namespace AuxiliaryStructs
     
     public class Player : NetworkBehaviour
     {
+        public GameObject playerMarkerPrefab;
+        
+        private Color buttonColor;
         
         public List<GameObject> playerPlaceholders;
         
         private bool initted;
-
         private int activeButtonIndex;
-
         private Globals.KeyInteractionType activeInteraction;
 
-        public GameObject ui;
-        public GameObject wordPanel;
+        private GameObject ui;
+        private GameObject wordPanel;
 
         private TextMesh[] playerDisplayTexts;
         private SpriteRenderer playerDisplayImage;
         
-        public GameObject statePanel;
+        private GameObject statePanel;
 
-        public GameObject scoreUpdateUIup;
-        public GameObject scoreUpdateUIdown;
+        private GameObject scoreUpdateUIup;
+        private GameObject scoreUpdateUIdown;
 
-        public Text possibleActionsText;
-        public Text scoreText;
+        private Text possibleActionsText;
+        private Text scoreText;
 
         private GameObject marker;
-        public GameObject markerPrefab;
-        private GameButton gameButton;
         
         private List<GameObject> maskedHalf;
         private List<GameObject> activeHalf;
@@ -45,8 +44,6 @@ namespace AuxiliaryStructs
         
 
         private GameObject trackCanvas;
-
-        private Color buttonColor;
 
         private IEnumerator currButtonLerp;
 
@@ -60,6 +57,7 @@ namespace AuxiliaryStructs
         private bool changedLane;
         private bool actionStarted;
         private bool actionFinished;
+        private bool actionPerforming;
         private int currPressedButtonI;
 
         private Button readyButton;
@@ -91,8 +89,7 @@ namespace AuxiliaryStructs
                 return;
             }
             
-            
-            this.trackCanvas = GameObject.Find("Track/PlayerMarkers").gameObject;
+            trackCanvas = GameObject.Find("Track/PlayerMarkers").gameObject;
 
             //init active layout
             wordPanel = activeLayout
@@ -144,35 +141,31 @@ namespace AuxiliaryStructs
             possibleActionsText = statePanel.transform.Find("PossibleActionsText").GetComponent<Text>();
             scoreText = statePanel.transform.Find("ScoreText").GetComponent<Text>();
 
-            
             statePanel.GetComponentInChildren<Image>().color = backgroundColor;
             ui.GetComponentInChildren<Image>().color = backgroundColor;
 
             List<Image> imgs = new List<Image>(ui.GetComponentsInChildren<Image>());
             imgs.RemoveAt(0);
             
-            
             //for the state display
+            this.buttonColor = buttonColor;
             scoreText.color = buttonColor;
             possibleActionsText.color = buttonColor;
 
-            //for player buttons
-            foreach (Image img in imgs)
-            {
-                img.color = buttonColor;
-            }
-            
-            
             //init marker upon track set. Transform prefab in instance
-            marker = Instantiate(markerPrefab, trackCanvas.transform);
+            marker = Instantiate(playerMarkerPrefab, trackCanvas.transform);
             MeshRenderer[] meshes = marker.GetComponentsInChildren<MeshRenderer>();
             foreach (MeshRenderer mesh in meshes)
             {
                 mesh.material.color = backgroundColor;
             }
-
-            gameButton = marker.transform.Find("GameButton").GetComponent<GameButton>();
             
+            //for player buttons
+            foreach (Image img in imgs)
+            {
+                img.color = buttonColor;
+            }
+
             //update marker sides
             maskedHalf = new List<GameObject>();
             maskedHalf.Add((isTopMask)
@@ -245,7 +238,7 @@ namespace AuxiliaryStructs
                     Button currButton = playerButtons[buttonI];
                     currButton.interactable = true;
                     
-                    currButton.GetComponent<Image>().color = GetButtonColor();
+                    currButton.GetComponent<Image>().color = buttonColor;
                     if (buttonI < 3)
                     {
                         int innerButtonI = buttonI; //for coroutine to save the iterated values
@@ -285,6 +278,7 @@ namespace AuxiliaryStructs
         public void ActionStartRequest(int buttonI)
         {
             actionStarted = true;
+            actionPerforming = true;
             currPressedButtonI = buttonI;
         }
         public bool ActionStarted()
@@ -332,6 +326,13 @@ namespace AuxiliaryStructs
         public void AckActionFinished()
         {
             actionFinished = false;
+            actionPerforming = false;
+        }
+        
+        [Server] 
+        public bool IsPerformingAction()
+        {
+            return actionPerforming;
         }
 
         [ClientRpc]
@@ -546,8 +547,9 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void ChangeAllButtonsColor(Color color)
         {
-            foreach (Button button in ui.GetComponentsInChildren<Button>())
+            for (int i=0; i<playerButtons.Length; i++)
             {
+                Button button = playerButtons[i];
                 button.GetComponent<Image>().color = color;
             }
         }
@@ -569,7 +571,7 @@ namespace AuxiliaryStructs
             {
                 Button button = playerButtons[i];
                 button.interactable = true;
-                button.GetComponent<Image>().color = GetButtonColor();
+                button.GetComponent<Image>().color = buttonColor;
             }
         }
         
@@ -583,10 +585,6 @@ namespace AuxiliaryStructs
             return currPressedButtonI;
         }
 
-        public Color GetButtonColor()
-        {
-            return buttonColor;
-        }
 
         [ClientRpc]
         public void UpdateNumPossibleActions(int currNumPossibleActionsPerLevel)
@@ -616,18 +614,14 @@ namespace AuxiliaryStructs
         [ClientRpc]
         public void PressMarker()
         {
-            marker.transform.localScale = marker.transform.localScale * 0.9f;
+            marker.transform.localScale = new Vector3(0.24f, 0.24f, 0.24f);
         }
 
         [ClientRpc]
         public void ReleaseMarker()
         {
-            marker.transform.localScale = marker.transform.localScale / 0.9f;
+            marker.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
         }
 
-        public GameButton GetGameButton()
-        {
-            return gameButton;
-        }
     }
 }

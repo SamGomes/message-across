@@ -40,6 +40,7 @@ public class PlayerServerState
 //mainly implements the server
 public class GameManager : NetworkManager
 {
+    public GameObject markerPrefab;
     public Transform markerPlaceholders;
     public Collider[] markerColliders;
     
@@ -100,10 +101,8 @@ public class GameManager : NetworkManager
             {
                 letter.Lock();
             }
-
             ls.enabled = false;
         }
-
         isGameplayPaused = true;
     }
 
@@ -118,7 +117,6 @@ public class GameManager : NetworkManager
             }
             ls.enabled = true;
         }
-
         isGameplayPaused = false;
     }
     
@@ -130,7 +128,6 @@ public class GameManager : NetworkManager
         {
             Destroy(obj);
         }
-
         Globals.InitGlobals();
         SceneManager.LoadScene("paramsSetup");
     }
@@ -223,11 +220,11 @@ public class GameManager : NetworkManager
 
                 if (Globals.settings.networkSettings.serverCode == "")
                 {
-                    this.networkAddress = "localhost";
+                    networkAddress = "localhost";
                 }
                 else
                 {
-                    this.networkAddress = Globals.settings.networkSettings.serverCode;
+                    networkAddress = Globals.settings.networkSettings.serverCode;
                 }
                 Globals.settings.networkSettings.serverCode = GetMyIpAdress();
                 
@@ -236,7 +233,6 @@ public class GameManager : NetworkManager
                     StartHost();
                     Globals.settings.networkSettings.serverCode = GetMyIpAdress();
 //                    codesAndIPs.Add(networkAddress, randomStr);
-
                 }
                 else if (Globals.settings.networkSettings.currOnlineOption == "SERVER")
                 {
@@ -244,8 +240,7 @@ public class GameManager : NetworkManager
                 }
                 else // if (Globals.settings.networkSettings.currOnlineOption == "CLIENT")
                 {
-                    
-                    this.StartClient();
+                    StartClient();
                     serverDebugUI.SetActive(false);
                 }
             }
@@ -336,9 +331,7 @@ public class GameManager : NetworkManager
 
         cmge.StopCurrentAudioClip(0);
         cmge.PlayInfiniteAudioClip(0, Globals.backgroundMusicPath, Globals.backgroundMusicPath);
-
     }
-
 
     public override void OnClientDisconnect(NetworkConnection conn)
     {
@@ -353,6 +346,12 @@ public class GameManager : NetworkManager
         popup.DisplayPopup();
     }
 
+    public override void OnServerConnect(NetworkConnection conn)
+    {
+        base.OnServerConnect(conn);
+        Debug.Log("Connected client with ip: "+conn.address +" and id: "+ conn.connectionId+" and isReady: "+ conn.isReady);
+    }
+
     public override void OnServerAddPlayer(NetworkConnection conn)
     {
         //check if room is full
@@ -361,7 +360,6 @@ public class GameManager : NetworkManager
             conn.Disconnect();
             return;
         }
-        
         
         CreatePlayer(conn);
 
@@ -462,7 +460,6 @@ public class GameManager : NetworkManager
     void InitPlayer(NetworkConnection conn, int orderNum)
     {
         Player player = players[orderNum];
-
         
         GameObject playerInstance = playerGameObjects[orderNum];
         
@@ -505,16 +502,15 @@ public class GameManager : NetworkManager
             newPlayerState.markerI = 0;
             
             playerServerStates.Add(newPlayerState);
-        
         }
         
         //all these methods are broadcasted to each client
         player.SetActiveLayout(orderNum % 2 == 0);
         player.SetTopMask(orderNum % 2 == 0);
+
         player.Init(playerInstance, orderNum, bgdColor, buttonColor);
 
         player.SetScore(0, 0, 0);
-     
 
         player.UpdateNumPossibleActions(playerServerStates[orderNum].currNumPossibleActionsPerLevel);
         player.HideScoreText();
@@ -552,7 +548,6 @@ public class GameManager : NetworkManager
                     break;
                 }
             }
-
             if (allReady)
             {
                 inLobby = false;
@@ -609,7 +604,7 @@ public class GameManager : NetworkManager
             {
                 player.ShowHalfMarker();
             }
-            player.UpdateActiveHalf(player.ActionStarted());
+            player.UpdateActiveHalf(player.IsPerformingAction());
         }
     }
 
@@ -633,10 +628,6 @@ public class GameManager : NetworkManager
         player.ChangeAllButtonsColor(pss.buttonColor);
         player.ChangeButtonColor(pressedButtonI, new Color(1.0f, 0.82f, 0.0f));
     }
-    
-
-    
-    
     
     
     
@@ -985,7 +976,7 @@ public class GameManager : NetworkManager
                 if (player.ActionFinished())
                 {
                     FinishPlayerAction(pss, pressedButtonI);
-                    player.AckActionFinished();
+                    player.AckActionFinished(); 
                 }
             }
         }
@@ -1017,7 +1008,7 @@ public class GameManager : NetworkManager
         {
             foreach (Player innerPlayer in players)
             {
-                if (innerPlayer != player && player.ActionStarted())
+                if (innerPlayer != player && player.IsPerformingAction())
                 {
                     playerOverlappedAndPressing = true;
                     break;
@@ -1069,15 +1060,15 @@ public class GameManager : NetworkManager
                     }
                     else
                     if (firstLetter!=bufferedFirstLetter && 
-                        player.ActionStarted() && 
+                        player.IsPerformingAction() && 
                         markerColliders[pss.markerI].bounds.Intersects(
                             firstLetter.GetComponent<Collider>().bounds
                     ))
                     {
                         bufferedFirstLetter = firstLetter;
                         RecordHit(firstLetter, pss);
-                        spawner.DestroyFirstLetter();
-                    
+                        spawner.DestroyFirstLetterInServer();
+                        spawner.DestroyFirstLetterInClients();
                     }
                 }
             }
@@ -1149,7 +1140,7 @@ public class GameManager : NetworkManager
         currHitter.UpdateNumPossibleActions(currHitterSS.currNumPossibleActionsPerLevel);
             
         currHitter.HideReadyButton();
-        if (inLobby && isGameReady && currHitterSS.currNumPossibleActionsPerLevel == 0)
+        if (inLobby && isGameReady && currHitterSS.currNumPossibleActionsPerLevel <= 0)
         {
             currHitter.ShowReadyButton();
         }
@@ -1280,9 +1271,6 @@ public class GameManager : NetworkManager
         foreach (PlayerServerState pss in playerServerStates)
         {
             Player player = players[pss.orderNum];
-            
-            Debug.Log(pss.currNumPossibleActionsPerLevel);
-            
             if (pss.currNumPossibleActionsPerLevel > 0)
             {
                 arePlayersWithoutActions = false;
@@ -1290,6 +1278,7 @@ public class GameManager : NetworkManager
             else
             {
                 FinishPlayerAction(pss, player.GetPressedButtonIndex());
+                player.AckActionFinished(); 
                 //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
                 player.DisableAllButtons(Color.red);
             }

@@ -2886,27 +2886,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  playerPlaceholders: []
-  markerPlaceholders: {fileID: 0}
-  info:
-    buttonRGB: []
-    id: 
-    myKeys: 
-    myButtons: []
-    numPossibleActionsPerLevel: 0
-    numGives: 0
-    numTakes: 0
-  backgroundColor: {r: 0, g: 0, b: 0, a: 0}
-  ui: {fileID: 0}
-  wordPanel: {fileID: 0}
-  statePanel: {fileID: 0}
-  scoreUpdateUIup: {fileID: 0}
-  scoreUpdateUIdown: {fileID: 0}
-  possibleActionsText: {fileID: 0}
-  scoreText: {fileID: 0}
-  markerPrefab: {fileID: 4386560681917347188, guid: 14a8468a61ce685479cee356be20dec5,
+  playerMarkerPrefab: {fileID: 4386560681917347188, guid: 14a8468a61ce685479cee356be20dec5,
     type: 3}
-  pressingButton: 0
+  playerPlaceholders: []
 --- !u!1 &3653625052254107702
 GameObject:
   m_ObjectHideFlags: 0
@@ -5314,7 +5296,7 @@ SpriteRenderer:
   m_Size: {x: 8, y: 6}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &5891484135580372232
@@ -6963,6 +6945,6 @@ SpriteRenderer:
   m_Size: {x: 8, y: 6}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
