@@ -335,14 +335,14 @@ namespace AuxiliaryStructs
             return actionPerforming;
         }
 
-        [ClientRpc]
-        public void ResetButtonStates()
-        {
-            changedLane = true;
-            actionStarted = false;
-            actionFinished = false;
-            currPressedButtonI = 0;
-        }
+        // [ClientRpc]
+        // public void ResetButtonStates()
+        // {
+        //     changedLane = true;
+        //     actionStarted = false;
+        //     actionFinished = false;
+        //     currPressedButtonI = 0;
+        // }
         
         //change lane request and ack from server
         [Command]
@@ -396,8 +396,6 @@ namespace AuxiliaryStructs
         {
             scoreText.gameObject.SetActive(true);
         }
-
-        
         
 
         [ClientRpc]
@@ -504,7 +502,7 @@ namespace AuxiliaryStructs
         }
 
         [ClientRpc]
-        public void UpdateActiveHalf(bool visible)
+        public void UpdateTrackHalf(bool visible)
         {
             foreach (GameObject obj in maskedHalf)
             {

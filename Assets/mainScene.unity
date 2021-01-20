@@ -334,7 +334,6 @@ MonoBehaviour:
   - {fileID: 4983876232001914853}
   cmge: {fileID: 1787032151}
   letterPit: {fileID: 1273330582}
-  bufferedFirstLetter: {fileID: 0}
 --- !u!4 &75445756
 Transform:
   m_ObjectHideFlags: 0
@@ -1152,7 +1151,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.7, y: 1, z: 1.93}
+  m_Size: {x: 2.7, y: 0.25, z: 1.93}
   m_Center: {x: -0.96, y: 0.58, z: 0}
 --- !u!1 &732500040
 GameObject:
@@ -3302,7 +3301,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.7, y: 1, z: 1.93}
+  m_Size: {x: 2.7, y: 0.25, z: 1.93}
   m_Center: {x: -0.96, y: 0.58, z: 0}
 --- !u!1 &4983876231438987529
 GameObject:
@@ -3333,7 +3332,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.7, y: 1, z: 1.93}
+  m_Size: {x: 2.7, y: 0.25, z: 1.93}
   m_Center: {x: -0.96, y: 0.58, z: 0}
 --- !u!114 &4983876231665582848
 MonoBehaviour:
