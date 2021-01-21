@@ -9,8 +9,27 @@ using UnityEngine.UI;
 
 namespace AuxiliaryStructs
 {
+    public class PlayerServerState
+    {
+        public int orderNum;
+        public int numPossibleActionsPerLevel;
+        public int currNumPossibleActionsPerLevel;
+        public int score;
+        
+        public PlayerExercise currExercise;
+        public bool currExerciseFinished;
+        public string currWordState;
+        
+        public Color buttonColor;
+
+        public int numGives;
+        public int numTakes;
+
+        public int markerI;
+        public Globals.KeyInteractionType activeInteraction;
+    } 
     
-    public class Player : NetworkBehaviour
+    public class PlayerClientI : NetworkBehaviour
     {
         public GameObject playerMarkerPrefab;
         
@@ -20,7 +39,6 @@ namespace AuxiliaryStructs
         
         private bool initted;
         private int activeButtonIndex;
-        private Globals.KeyInteractionType activeInteraction;
 
         private GameObject ui;
         private GameObject wordPanel;
@@ -522,17 +540,6 @@ namespace AuxiliaryStructs
                 }
 
             }
-        }
-
-        [ClientRpc]
-        public void SetActiveInteraction(Globals.KeyInteractionType activeInteraction)
-        {
-            this.activeInteraction = activeInteraction;
-        }
-
-        public Globals.KeyInteractionType GetActiveInteraction()
-        {
-            return activeInteraction;
         }
 
         [ClientRpc]

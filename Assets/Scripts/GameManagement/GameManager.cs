@@ -16,26 +16,7 @@ using Telepathy;
 using Object = System.Object;
 using Random = UnityEngine.Random;
 
-public class PlayerServerState
-{
-    public int orderNum;
-    public int numPossibleActionsPerLevel;
-    public int currNumPossibleActionsPerLevel;
-    public int score;
-        
-    public PlayerExercise currExercise;
-    public bool currExerciseFinished;
-    public string currWordState;
-    
-    
-    public Color bgdColor;
-    public Color buttonColor;
 
-    public int numGives;
-    public int numTakes;
-
-    public int markerI;
-} 
 
 //mainly implements the server
 public class GameManager : NetworkManager
@@ -44,7 +25,7 @@ public class GameManager : NetworkManager
     public Transform markerPlaceholders;
     public Collider[] markerColliders;
     
-    public List<Player> players;
+    public List<PlayerClientI> players;
     public List<GameObject> playerGameObjects;
     public List<PlayerServerState> playerServerStates;
 
@@ -180,7 +161,7 @@ public class GameManager : NetworkManager
     public override void Start()
     {
         inLobby = true;
-        players = new List<Player>();
+        players = new List<PlayerClientI>();
         playerServerStates = new List<PlayerServerState>();
         spawnersStates = new bool[] {true, true, true};
         
@@ -412,7 +393,7 @@ public class GameManager : NetworkManager
         //special condition removes the score
         if (Globals.gameParam == Globals.ExercisesConfig.CUSTOM)
         {
-            foreach (Player player in players)
+            foreach (PlayerClientI player in players)
             {
                 //special condition also removes the score
                 player.ShowScoreText();
@@ -422,12 +403,12 @@ public class GameManager : NetworkManager
         //start player buttons
         foreach (PlayerServerState pss in playerServerStates)
         {
-            Player player = players[pss.orderNum];
-            ChangeLane(pss, player, 0);
+            PlayerClientI playerClientI = players[pss.orderNum];
+            ChangeLane(pss, playerClientI, 0);
             //player.ChangeAllButtonsColor(Color.red); done internally to increase performance
-            player.DisableAllButtons(Color.red);
+            playerClientI.DisableAllButtons(Color.red);
             pss.score = 0;
-            player.SetScore(0,0,0);
+            playerClientI.SetScore(0,0,0);
         }
         cmge.DisplayCountdownText(true, "Get Ready...");
 
@@ -453,7 +434,7 @@ public class GameManager : NetworkManager
 
     void InitPlayer(NetworkConnection conn, int orderNum)
     {
-        Player player = players[orderNum];
+        PlayerClientI playerClientI = players[orderNum];
         
         GameObject playerInstance = playerGameObjects[orderNum];
         
@@ -488,8 +469,6 @@ public class GameManager : NetworkManager
             newPlayerState.currExerciseFinished = false;
             newPlayerState.currWordState = "";
             newPlayerState.orderNum = orderNum;
-
-            newPlayerState.bgdColor = bgdColor;
             newPlayerState.buttonColor = buttonColor;
             
             newPlayerState.numGives = 0;
@@ -501,15 +480,15 @@ public class GameManager : NetworkManager
         }
         
         //all these methods are broadcasted to each client
-        player.SetActiveLayout(orderNum % 2 == 0);
-        player.SetTopMask(orderNum % 2 == 0);
+        playerClientI.SetActiveLayout(orderNum % 2 == 0);
+        playerClientI.SetTopMask(orderNum % 2 == 0);
 
-        player.Init(playerInstance, orderNum, bgdColor, buttonColor);
+        playerClientI.Init(playerInstance, orderNum, bgdColor, buttonColor);
 
-        player.SetScore(0, 0, 0);
+        playerClientI.SetScore(0, 0, 0);
 
-        player.UpdateNumPossibleActions(playerServerStates[orderNum].currNumPossibleActionsPerLevel);
-        player.HideScoreText();
+        playerClientI.UpdateNumPossibleActions(playerServerStates[orderNum].currNumPossibleActionsPerLevel);
+        playerClientI.HideScoreText();
     }
 
    
@@ -519,8 +498,8 @@ public class GameManager : NetworkManager
         GameObject playerGameObject = Instantiate(playerPrefab);
         //instantiates playerGameObject in all clients automatically
         NetworkServer.AddPlayerForConnection(conn, playerGameObject);
-        Player player = playerGameObject.GetComponent<Player>();
-        players.Add(player);
+        PlayerClientI playerClientI = playerGameObject.GetComponent<PlayerClientI>();
+        players.Add(playerClientI);
         playerGameObjects.Add(playerGameObject);
     }
 
@@ -536,7 +515,7 @@ public class GameManager : NetworkManager
         if (inLobby && isGameReady && players.Count > 0)
         {
             bool allReady = true;
-            foreach (Player player in players)
+            foreach (PlayerClientI player in players)
             {
                 if (!player.IsReady())
                 {
@@ -569,12 +548,12 @@ public class GameManager : NetworkManager
     {
         foreach (PlayerServerState pss in playerServerStates)
         {
-            Player player = players[pss.orderNum];
-            if (player != null && player.ChangedLane())
+            PlayerClientI playerClientI = players[pss.orderNum];
+            if (playerClientI != null && playerClientI.ChangedLane())
             {
-                int pressedButtonI = player.GetPressedButtonIndex();
-                ChangeLane(pss, player, pressedButtonI);
-                player.AckChangedLane();
+                int pressedButtonI = playerClientI.GetPressedButtonIndex();
+                ChangeLane(pss, playerClientI, pressedButtonI);
+                playerClientI.AckChangedLane();
             }
         }
     }
@@ -592,7 +571,7 @@ public class GameManager : NetworkManager
             }
         }
         
-        foreach (Player player in players)
+        foreach (PlayerClientI player in players)
         {
             if(isLaneOverlap)
             {
@@ -607,7 +586,7 @@ public class GameManager : NetworkManager
     }
 
     [Server]
-    private void ChangeLane(PlayerServerState pss, Player player, int laneI)
+    private void ChangeLane(PlayerServerState pss, PlayerClientI playerClientI, int laneI)
     {
         if (laneI != pss.markerI)
         {
@@ -617,11 +596,11 @@ public class GameManager : NetworkManager
             pss.markerI = laneI;
         
             //update player state and marker in track
-            player.SetActiveTrackButton(laneI, markerPlaceholders.GetChild(laneI).transform.position);
+            playerClientI.SetActiveTrackButton(laneI, markerPlaceholders.GetChild(laneI).transform.position);
         
             //update client player UIs after commands are executed on client
-            player.ChangeAllButtonsColor(pss.buttonColor);
-            player.ChangeButtonColor(laneI, new Color(1.0f, 0.82f, 0.0f));
+            playerClientI.ChangeAllButtonsColor(pss.buttonColor);
+            playerClientI.ChangeButtonColor(laneI, new Color(1.0f, 0.82f, 0.0f));
             
             UpdateButtonOverlaps(pss, laneI);
         }
@@ -732,7 +711,7 @@ public class GameManager : NetworkManager
         //spawn questionnaires before changing word
         foreach (PlayerServerState pss in playerServerStates)
         {
-            Player player = players[pss.orderNum];
+            PlayerClientI playerClientI = players[pss.orderNum];
             yield return StartCoroutine(Globals.logManager.WriteToLog(Globals.settings.generalSettings.databaseName,
                 "logs",
                 new Dictionary<string, string>()
@@ -819,15 +798,15 @@ public class GameManager : NetworkManager
 
         foreach (PlayerServerState pss in playerServerStates)
         {
-            Player player = players[pss.orderNum];
+            PlayerClientI playerClientI = players[pss.orderNum];
             
 //            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
             // player.ResetButtonStates();
-            player.EnableAllButtons();
+            playerClientI.EnableAllButtons();
             
             //reset player actions in server
             pss.currNumPossibleActionsPerLevel = pss.numPossibleActionsPerLevel;
-            player.UpdateNumPossibleActions(pss.currNumPossibleActionsPerLevel);
+            playerClientI.UpdateNumPossibleActions(pss.currNumPossibleActionsPerLevel);
         }
 
         Globals.currLevelId++;
@@ -855,14 +834,14 @@ public class GameManager : NetworkManager
         int i = Random.Range(0, 1);
         foreach (PlayerServerState pss in playerServerStates)
         {
-            Player player = players[pss.orderNum];
+            PlayerClientI playerClientI = players[pss.orderNum];
             pss.currWordState = "";
             pss.currExercise = newExercise.playerExercises[(i++) % newExercise.playerExercises.Count];
             for (int j=0; j < pss.currExercise.targetWord.Length; j++)
             {
                 pss.currWordState += ' ';
             }
-            player.InitCurrWordState("", pss.currExercise);
+            playerClientI.InitCurrWordState("", pss.currExercise);
         }
     }
 
@@ -898,17 +877,17 @@ public class GameManager : NetworkManager
 
         foreach (PlayerServerState pss in playerServerStates)
         {
-            Player player = players[pss.orderNum];
+            PlayerClientI playerClientI = players[pss.orderNum];
             //            player.ChangeAllButtonsColor(player.GetColor()); done internally to increase performance
             // player.ResetButtonStates();
-            player.EnableAllButtons();
+            playerClientI.EnableAllButtons();
             
             //reset player actions in server
             pss.currNumPossibleActionsPerLevel = pss.numPossibleActionsPerLevel;
-            player.UpdateNumPossibleActions(pss.currNumPossibleActionsPerLevel);
+            playerClientI.UpdateNumPossibleActions(pss.currNumPossibleActionsPerLevel);
             
-            ChangeLane(pss, player, 0);
-            player.HideReadyButton();
+            ChangeLane(pss, playerClientI, 0);
+            playerClientI.HideReadyButton();
         }
     }
 
@@ -931,14 +910,14 @@ public class GameManager : NetworkManager
         int i = Random.Range(0, 1);
         foreach (PlayerServerState pss in playerServerStates)
         {
-            Player player = players[pss.orderNum];
+            PlayerClientI playerClientI = players[pss.orderNum];
             pss.currWordState = "";
             pss.currExercise = newExercise.playerExercises[(i++) % newExercise.playerExercises.Count];
             for (int j=0; j < pss.currExercise.targetWord.Length; j++)
             {
                 pss.currWordState += ' ';
             }
-            player.InitCurrWordState("", pss.currExercise);
+            playerClientI.InitCurrWordState("", pss.currExercise);
         }
     }
     
@@ -949,26 +928,26 @@ public class GameManager : NetworkManager
     {
         foreach (PlayerServerState pss in playerServerStates)
         {
-            Player player = players[pss.orderNum];
-            if (player.ActionStarted() || player.ActionFinished())
+            PlayerClientI playerClientI = players[pss.orderNum];
+            if (playerClientI.ActionStarted() || playerClientI.ActionFinished())
             {
-                int pressedButtonI = player.GetPressedButtonIndex();
+                int pressedButtonI = playerClientI.GetPressedButtonIndex();
                 
                 // if (!player.IsButtonEnabled(pressedButtonI))
                 // {
                 //     continue;
                 // }
                 
-                if (player.ActionStarted())
+                if (playerClientI.ActionStarted())
                 {
                     StartPlayerAction(pss, pressedButtonI);
-                    player.AckActionStarted();
+                    playerClientI.AckActionStarted();
                 }
 
-                if (player.ActionFinished())
+                if (playerClientI.ActionFinished())
                 {
                     FinishPlayerAction(pss, pressedButtonI);
-                    player.AckActionFinished(); 
+                    playerClientI.AckActionFinished(); 
                 }
             }
         }
@@ -977,14 +956,14 @@ public class GameManager : NetworkManager
     [Server]
     private void FinishPlayerAction(PlayerServerState pss, int pressedButtonI)
     {
-        Player player = players[pss.orderNum];
+        PlayerClientI playerClientI = players[pss.orderNum];
         cmge.PlayAudioClip(2, "Audio/clickUp");
 
-        player.SetActiveInteraction(Globals.KeyInteractionType.NONE);
-        player.ReleaseMarker();
+        pss.activeInteraction = Globals.KeyInteractionType.NONE;
+        playerClientI.ReleaseMarker();
         
-        player.ChangeButtonColor(pressedButtonI, pss.buttonColor);
-        player.UpdateTrackHalf(false);
+        playerClientI.ChangeButtonColor(pressedButtonI, pss.buttonColor);
+        playerClientI.UpdateTrackHalf(false);
     }
 
 
@@ -997,7 +976,7 @@ public class GameManager : NetworkManager
             return;
         }
         
-        Player player = players[pss.orderNum];
+        PlayerClientI playerClientI = players[pss.orderNum];
         // //verify if button should be pressed
         // bool playerOverlappedAndPressing = false;
         // if (isLaneOverlap)
@@ -1019,16 +998,16 @@ public class GameManager : NetworkManager
         // }
         //
         
-        player.ChangeButtonColor(pressedButtonI, new Color(1.0f, 0.82f, 0.0f));
+        playerClientI.ChangeButtonColor(pressedButtonI, new Color(1.0f, 0.82f, 0.0f));
 
         int j = pressedButtonI - 2;
         Globals.KeyInteractionType iType = (Globals.KeyInteractionType) j;
+        pss.activeInteraction = iType;
         
         cmge.PlayAudioClip(2, "Audio/clickDown");
-        player.SetActiveInteraction(iType);
                 
-        player.PressMarker();
-        player.UpdateTrackHalf(true);
+        playerClientI.PressMarker();
+        playerClientI.UpdateTrackHalf(true);
     }
     
     private GameObject bufferedFirstLetter; //so that server syncs clients properly
@@ -1039,7 +1018,7 @@ public class GameManager : NetworkManager
         //verify collision letter-marker and letter-pit
         foreach (PlayerServerState pss in playerServerStates)
         {
-            Player player = players[pss.orderNum];
+            PlayerClientI playerClientI = players[pss.orderNum];
             foreach (LetterSpawner spawner in letterSpawners)
             {
                 GameObject firstLetter = spawner.GetCurrSpawnedLetterObjects().FirstOrDefault();
@@ -1056,7 +1035,7 @@ public class GameManager : NetworkManager
                     }
                     else
                     if (firstLetter!=bufferedFirstLetter && 
-                        player.IsPerformingAction() && 
+                        playerClientI.IsPerformingAction() && 
                         markerColliders[pss.markerI].bounds.Intersects(
                             firstLetter.GetComponent<Collider>().bounds
                     ))
@@ -1116,9 +1095,13 @@ public class GameManager : NetworkManager
     [Server]
     public void RecordHit(GameObject letterObj, PlayerServerState currHitterSS)
     {
-        Player currHitter = players[currHitterSS.orderNum];
+        PlayerClientI currHitter = players[currHitterSS.orderNum];
         currHitter.HideReadyButton();
         
+        //different rewards in different utility conditions
+        bool usefulForMe = false;
+        bool usefulForOther = false;
+
         //verify effect of actions 
         if (currHitterSS.currNumPossibleActionsPerLevel > 0)
         {
@@ -1127,11 +1110,7 @@ public class GameManager : NetworkManager
             letterObj.transform.localScale *= 1.2f;
             currHitter.UpdateNumPossibleActions(--currHitterSS.currNumPossibleActionsPerLevel);
 
-            //different rewards in different utility conditions
-            bool usefulForMe = false;
-            bool usefulForOther = false;
-
-            Globals.KeyInteractionType playerIT = currHitter.GetActiveInteraction();
+            Globals.KeyInteractionType playerIT = currHitterSS.activeInteraction;
             List<ScoreValue> scores = new List<ScoreValue>();
             switch (playerIT)
             {
@@ -1164,13 +1143,12 @@ public class GameManager : NetworkManager
                         {
                             continue;
                         }
-
+                        
+                        usefulForOther = TestAndExecuteHit(false, letterText, usefulTargetPlayerSS);
                         if (usefulForOther)
                         {
                             break;
                         }
-
-                        usefulForOther = TestAndExecuteHit(false, letterText, usefulTargetPlayerSS);
                     }
 
                     scores = currScoreSystem.takeScores;
@@ -1253,7 +1231,7 @@ public class GameManager : NetworkManager
         bool arePlayersWithoutActions = true;
         foreach (PlayerServerState pss in playerServerStates)
         {
-            Player player = players[pss.orderNum];
+            PlayerClientI playerClientI = players[pss.orderNum];
             if (pss.currNumPossibleActionsPerLevel > 0)
             {
                 arePlayersWithoutActions = false;
@@ -1274,7 +1252,7 @@ public class GameManager : NetworkManager
                 if (!pss.currExerciseFinished && pss.currNumPossibleActionsPerLevel >= 0)
                 {
                     pss.score += currScoreSystem.completeWordMyScore;
-                    player.SetScore(pss.score, currScoreSystem.completeWordMyScore, 1.3f);
+                    playerClientI.SetScore(pss.score, currScoreSystem.completeWordMyScore, 1.3f);
                 }
                 foreach (PlayerServerState innerPlayerSS in playerServerStates)
                 {
@@ -1286,7 +1264,7 @@ public class GameManager : NetworkManager
                     if (!innerPlayerSS.currExerciseFinished && innerPlayerSS.currNumPossibleActionsPerLevel >= 0)
                     {
                         innerPlayerSS.score += currScoreSystem.completeWordOtherScore;
-                        player.SetScore(innerPlayerSS.score, currScoreSystem.completeWordOtherScore, 1.3f);
+                        playerClientI.SetScore(innerPlayerSS.score, currScoreSystem.completeWordOtherScore, 1.3f);
                     }
                 }
             }
