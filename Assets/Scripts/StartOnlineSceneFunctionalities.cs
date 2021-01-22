@@ -5,6 +5,8 @@ using UnityEngine.UI;
 
 public class StartOnlineSceneFunctionalities : MonoBehaviour
 {
+    public Transform popupPositioner;
+    public Camera camera;
     public InputField playerName;
     public InputField serverCode;
     public Button hostButton;
@@ -16,9 +18,9 @@ public class StartOnlineSceneFunctionalities : MonoBehaviour
     {
         if (Globals.activeInfoPopups)
         {
-            Popup popup = new Popup(false);
+            Popup popup = new Popup(false, camera, popupPositioner);
             popup.SetMessage("This is the online dashboard. On the left, you can select to host an online game. " +
-                             "A game code is presented when you host a game." +
+                             "Your ip is presented when you host a game." +
                              "On the right, you can join a game given a host IP address.");
 //        popup.AddButton("Sure!", delegate
 //        {

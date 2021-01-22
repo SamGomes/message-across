@@ -16,12 +16,12 @@ using Telepathy;
 using Object = System.Object;
 using Random = UnityEngine.Random;
 
-
-
 //mainly implements the server
 public class GameManager : NetworkManager
 {
-    public GameObject markerPrefab;
+    public Camera camera;
+    public Transform popupPositioner;
+    
     public Transform markerPlaceholders;
     public Collider[] markerColliders;
     
@@ -39,8 +39,7 @@ public class GameManager : NetworkManager
     private int numLevelsLeft;
 
     private int exerciseGroupIndex;
-
-
+    
     public bool isGameplayPaused;
     public bool isGameplayStarted;
 
@@ -59,14 +58,10 @@ public class GameManager : NetworkManager
     private List<List<char>> letterPools;
 
     float playersLettersSpawnP;
-
-
+    
     public ClientMainGameElements cmge;
-
     public GameObject letterPit;
-
     private bool inLobby;
-
     private ScoreSystem currScoreSystem;
 //    public Dictionary<string, string> codesAndIPs; 
 
@@ -187,16 +182,22 @@ public class GameManager : NetworkManager
             }
             else if (Globals.settings.networkSettings.currMultiplayerOption == "ONLINE")
             {
-                Popup popup = new Popup(false);
+                Popup popup = new Popup(false, camera, popupPositioner);
                 if (Globals.activeInfoPopups)
                 {
-                    popup.SetMessage("Welcome to the wait lobby. This is where you wait for the all players to join." +
-                                     "The host IP is included at the top left of the screen. " +
-                                     "The wait lobby spawns some letters for you to train." +
-                                     "When you are ready to begin," +
-                                     " simply click on the \"Ready\" button, displayed whenever" +
-                                     " the players have no actions to perform. ");
+                    popup.SetMessage("Welcome to the wait lobby. This is where you wait for the two players to join." +
+                                     "The host IP is included at the top of the screen. " +
+                                     "The wait lobby spawns some exercises for you to train." );
                     popup.DisplayPopup();
+                    popup.AddOnHide(delegate
+                    {
+                        Popup popup2 = new Popup(false, camera, popupPositioner);
+                        popup2.SetMessage("When you are ready to begin," +
+                                         " simply click on the \"Ready to Start!\" button, displayed whenever" +
+                                         " both players joined and you have no more actions to perform. ");
+                        popup2.DisplayPopup();
+                        return 0;
+                    });
                 }
 
                 if (Globals.settings.networkSettings.serverCode == "")
@@ -318,7 +319,7 @@ public class GameManager : NetworkManager
     {
         base.OnClientDisconnect(conn);
         StopClient();
-        Popup popup = new Popup(false);
+        Popup popup = new Popup(false, camera, popupPositioner);
         popup.SetMessage("Disconnected by host or game not found. Returning to Menu...");
         popup.AddButton("OK", delegate { 
             SceneManager.LoadScene("startOnline");
@@ -348,7 +349,6 @@ public class GameManager : NetworkManager
         for(int i=0; i< players.Count; i++)
         {
             InitPlayer(conn, i);
-            ChangeLane(playerServerStates[i], players[i], 0);
         }
 
         //set game code for all players
@@ -644,7 +644,10 @@ public class GameManager : NetworkManager
         
         letterPools[spawner.GetId()] = letterPool;
 
-        spawner.SpawnLetterInServer(currLetter); //spawns the letter on the server to verify collisions
+        if (Globals.settings.networkSettings.currOnlineOption == "SERVER")
+        {
+            spawner.SpawnLetterInServer(currLetter); //spawns the letter on the server to verify collisions (not needed if a client is already host)
+        }
         spawner.SpawnLetterInClients(currLetter); //spawns the picked letter in each client
         
         StartCoroutine(UpdateSpawner(spawner));
@@ -868,7 +871,7 @@ public class GameManager : NetworkManager
         
         cmge.DisplayCountdownText(false, "");
 
-        yield return new WaitForSeconds(5);
+        yield return new WaitForSeconds(1);
         
         foreach (LetterSpawner spawner in letterSpawners)
         {
@@ -928,15 +931,14 @@ public class GameManager : NetworkManager
     {
         foreach (PlayerServerState pss in playerServerStates)
         {
+            if (pss.currNumPossibleActionsPerLevel <= 0)
+            {
+                continue;
+            }
             PlayerClientI playerClientI = players[pss.orderNum];
             if (playerClientI.ActionStarted() || playerClientI.ActionFinished())
             {
                 int pressedButtonI = playerClientI.GetPressedButtonIndex();
-                
-                // if (!player.IsButtonEnabled(pressedButtonI))
-                // {
-                //     continue;
-                // }
                 
                 if (playerClientI.ActionStarted())
                 {
@@ -1219,6 +1221,7 @@ public class GameManager : NetworkManager
         if (currHitterSS.currNumPossibleActionsPerLevel == 0)
         {
             FinishPlayerAction(currHitterSS, currHitter.GetPressedButtonIndex());
+            currHitter.AckActionFinished(); 
             currHitter.DisableAllButtons(Color.red);
             if (inLobby && isGameReady)
             {

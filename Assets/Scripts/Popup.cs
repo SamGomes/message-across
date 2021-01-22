@@ -12,9 +12,6 @@ public class Popup
     private GameObject popupInstance;
     private string audioPath;
 
-    private Func<int> OnShow;
-    private Func<int> OnHide;
-
     private GameObject buttonsContainer;
     private GameObject buttonPrefab;
 
@@ -55,9 +52,14 @@ public class Popup
     }
 
     // Use this for initialization
-    public Popup(bool isGlobal)
+    public Popup(bool isGlobal, Camera worldCamera, Transform popupPositioner)
     {
-        popupInstance = Object.Instantiate(Resources.Load<GameObject>( "Prefabs/Popup")).gameObject;
+        popupInstance = Object.Instantiate(Resources.Load<GameObject>( "Prefabs/Popup"), popupPositioner).gameObject;
+        popupInstance.GetComponentInChildren<Canvas>().worldCamera = worldCamera;
+        if (isGlobal)
+        {
+            Object.DontDestroyOnLoad(popupInstance); 
+        }
         if (isGlobal)
         {
             Object.DontDestroyOnLoad(popupInstance); 
@@ -81,13 +83,13 @@ public class Popup
     }
     
 
-    public void AddOnShow(Func<int> OnShow)
-    {
-        this.OnShow = OnShow;
-    }
+    // public void AddOnShow(Func<int> OnShow)
+    // {
+    //     this.OnShow = OnShow;
+    // }
     public void AddOnHide(Func<int> OnHide)
     {
-        this.OnHide = OnHide;
+        // this.OnHide = OnHide;
         UIcloseButton.onClick.AddListener(delegate ()
         {
             OnHide();

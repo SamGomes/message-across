@@ -117,6 +117,9 @@ public static class Globals
 
 public class StartSceneFunctionalities : MonoBehaviour
 {
+    public Transform popupPositioner;
+    public Camera camera;
+    
     public Button localButton;
     public Button onlineButton;
 
@@ -270,7 +273,7 @@ public class StartSceneFunctionalities : MonoBehaviour
         }
 
 
-        Popup popup = new Popup(false);
+        Popup popup = new Popup(false, camera, popupPositioner);
         popup.SetMessage("Welcome to MessageAcross ver 2.1! This version contemplates the new online mode " +
          "(offline is not currently working in this version), and a new word display interface, " +
          "focused on the game application for learning. Enjoy!" +
