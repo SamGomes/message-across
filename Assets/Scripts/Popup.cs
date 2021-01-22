@@ -8,6 +8,9 @@ using Object = UnityEngine.Object;
 
 public class Popup
 {
+    
+    private Func<int> OnHide;
+    
     private Button UIcloseButton;
     private GameObject popupInstance;
     private string audioPath;
@@ -65,6 +68,8 @@ public class Popup
             Object.DontDestroyOnLoad(popupInstance); 
         }
 
+        OnHide = delegate { return 0; };
+        
 //        Image background = popupInstance.transform.Find("Background").GetComponent<Image>();
 //        backround.color = backgroundColor;
         Transform canvas = popupInstance.transform.Find("Canvas");
@@ -87,13 +92,9 @@ public class Popup
     // {
     //     this.OnShow = OnShow;
     // }
-    public void AddOnHide(Func<int> OnHide)
+    public void SetOnHide(Func<int> OnHide)
     {
-        // this.OnHide = OnHide;
-        UIcloseButton.onClick.AddListener(delegate ()
-        {
-            OnHide();
-        });
+        this.OnHide = OnHide;
     }
     
     public void AddButton(string title, Func<int> OnClick)
@@ -115,6 +116,7 @@ public class Popup
     }
     public void HidePopupPanel()
     {
+        OnHide();
         popupInstance.gameObject.SetActive(false);
         PlayAllAnimations();
     }

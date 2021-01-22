@@ -15,22 +15,6 @@ public static class Globals
         CUSTOM
     }
 
-    public enum PlayerId
-    {
-        PLAYER_0,
-        PLAYER_1,
-        PLAYER_2,
-        NONE
-    }
-
-    public enum ButtonId
-    {
-        BTN_0,
-        BTN_1,
-        BTN_2,
-        NONE
-    }
-
     public enum KeyInteractionType
     {
         NONE,
@@ -48,24 +32,20 @@ public static class Globals
     
     
     public static GameSettings settings;
-    
-    public static KeyInteractionType[] keyInteractionTypes;
-    public static ButtonId[] buttonIds;
 
     public static int currLevelId;
     public static string gameId;
     public static ExercisesConfig gameParam;
-    public static List<GameObject> savedObjects;
 
     public static List<AudioManager> audioManagers;
-
+    public static string backgroundMusicPath;
     public static LogManager logManager;
 
     public static List<string> bufferedPlayerIds;
-
-    public static string backgroundMusicPath;
-
+    
     public static bool activeInfoPopups;
+
+    public static List<GameObject> savedGameObjects;
     
     public static IEnumerator LerpAnimation(GameObject source, Vector3 targetPos, float speed)
     {
@@ -77,39 +57,38 @@ public static class Globals
             yield return new WaitForSeconds(0.025f);
         }
     }
+    
 
     //settings and properties that derive from user choice are only
     // updated upon user score system choice
     public static void InitGlobals()
     {
-        Globals.keyInteractionTypes = (Globals.KeyInteractionType[])Enum.GetValues(typeof(Globals.KeyInteractionType));
-        Globals.buttonIds = (Globals.ButtonId[])Enum.GetValues(typeof(Globals.ButtonId));
+        currLevelId = 0;
 
-        Globals.currLevelId = 0;
-
-        Globals.gameId = "";
+        gameId = "";
         for (int i = 0; i < 20; i++)
         {
-            Globals.gameId += (char)('A' + UnityEngine.Random.Range(0, 26));
+            gameId += (char)('A' + UnityEngine.Random.Range(0, 26));
         }
 
-        Globals.gameParam = Globals.ExercisesConfig.TUTORIAL;
-        if (Globals.savedObjects == null)
+        gameParam = ExercisesConfig.TUTORIAL;
+        if (savedGameObjects == null)
         {
-            Globals.savedObjects = new List<GameObject>();
+            savedGameObjects = new List<GameObject>();
+            
+            audioManagers = new List<AudioManager>();
+            audioManagers.Add(new AudioManager(true));
+            audioManagers.Add(new AudioManager(false));
+            audioManagers.Add(new AudioManager(false));
+            
+            backgroundMusicPath = "Audio/backgroundLoop";
         }
 
-        Globals.audioManagers = new List<AudioManager>();
-        Globals.audioManagers.Add(new AudioManager(true));
-        Globals.audioManagers.Add(new AudioManager(false));
-        Globals.audioManagers.Add(new AudioManager(false));
-
-        if(Globals.bufferedPlayerIds == null)
+        if(bufferedPlayerIds == null)
         {
-            Globals.bufferedPlayerIds = new List<string>();
+            bufferedPlayerIds = new List<string>();
         }
 
-        Globals.backgroundMusicPath = "Audio/backgroundLoop";
     }
 }
 
@@ -274,20 +253,31 @@ public class StartSceneFunctionalities : MonoBehaviour
 
 
         Popup popup = new Popup(false, camera, popupPositioner);
-        popup.SetMessage("Welcome to MessageAcross ver 2.1! This version contemplates the new online mode " +
-         "(offline is not currently working in this version), and a new word display interface, " +
-         "focused on the game application for learning. Enjoy!" +
-         "\n\n" +
-         "Would you like to enable messages explaining the game screens?");
-        popup.AddButton("Sure!", delegate
+        popup.SetOnHide(delegate
         {
-            Globals.activeInfoPopups = true;
-            popup.HidePopupPanel();
+            Popup popup2 = new Popup(false, camera, popupPositioner);
+            popup2.SetMessage("Would you like to enable messages explaining the game screens?");
+            popup2.AddButton("Sure!", delegate
+            {
+                Globals.activeInfoPopups = true;
+                popup2.HidePopupPanel();
+                return 0;
+            });
+            popup2.AddButton("No", delegate
+            {
+                Globals.activeInfoPopups = false;
+                popup2.HidePopupPanel();
+                return 0;
+            });
+            popup2.HasCloseButton(false);
+            popup2.DisplayPopup();
             return 0;
         });
-        popup.AddButton("No", delegate
+        popup.SetMessage("Welcome to MessageAcross ver 2.1! This version contemplates the new online mode " +
+                          "(offline is not available yet in this version), and a new word display interface, " +
+                          "focused on the game application for learning. Enjoy!");
+        popup.AddButton("OK", delegate
         {
-            Globals.activeInfoPopups = false;
             popup.HidePopupPanel();
             return 0;
         });

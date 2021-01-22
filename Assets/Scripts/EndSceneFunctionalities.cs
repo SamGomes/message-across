@@ -12,22 +12,20 @@ public class EndSceneFunctionalities : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //remove game manager object
+        Destroy(Globals.savedGameObjects[3]);
+        
         quitButton.onClick.AddListener(delegate(){
             Application.Quit();
         });
         restartButton.onClick.AddListener(delegate () {
-            foreach (var obj in Globals.savedObjects)
-            {
-                Destroy(obj);
-            }
-            Globals.InitGlobals();
-            SceneManager.LoadScene("paramsSetup");
+            SceneManager.LoadScene("start");
         });
         
-        Globals.audioManagers[0].StopCurrentClip();
-        Globals.audioManagers[0].PlayInfiniteClip(
-            Globals.backgroundMusicPath,
-            Globals.backgroundMusicPath);
+        // Globals.audioManagers[0].StopCurrentClip();
+        // Globals.audioManagers[0].PlayInfiniteClip(
+        //     Globals.backgroundMusicPath,
+        //     Globals.backgroundMusicPath);
         
     }
 }

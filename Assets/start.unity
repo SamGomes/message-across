@@ -1222,6 +1222,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameVer
       objectReference: {fileID: 0}
+    - target: {fileID: 1362011019459651398, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
+        type: 3}
+      propertyPath: m_Text
+      value: Ver. 2.1 (beta)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1362011019459651398, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
+        type: 3}
+      propertyPath: m_FontData.m_BestFit
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1362011019459651398, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
+        type: 3}
+      propertyPath: m_FontData.m_MaxSize
+      value: 80
+      objectReference: {fileID: 0}
+    - target: {fileID: 1362011019459651398, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
+        type: 3}
+      propertyPath: m_FontData.m_FontSize
+      value: 80
+      objectReference: {fileID: 0}
     - target: {fileID: 1362011019459651399, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
         type: 3}
       propertyPath: m_Pivot.x
@@ -1260,12 +1280,12 @@ PrefabInstance:
     - target: {fileID: 1362011019459651399, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 214.1
+      value: 219.79382
       objectReference: {fileID: 0}
     - target: {fileID: 1362011019459651399, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 69.6
+      value: 33.79274
       objectReference: {fileID: 0}
     - target: {fileID: 1362011019459651399, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
         type: 3}
@@ -1305,12 +1325,12 @@ PrefabInstance:
     - target: {fileID: 1362011019459651399, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 282.8
+      value: 285.65
       objectReference: {fileID: 0}
     - target: {fileID: 1362011019459651399, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 182.9
+      value: 200.8
       objectReference: {fileID: 0}
     - target: {fileID: 1362011019459651399, guid: d5043a3c0ae9856bf9bbada7f7bb2665,
         type: 3}

@@ -38,11 +38,11 @@ public class ParamsSceneFunctionalities : MonoBehaviour
             popup.DisplayPopup();
         }
         
-        
-        if (Globals.savedObjects == null)
-        {
-            Globals.InitGlobals();
-        }
+        //
+        // if (Globals.savedObjects == null)
+        // {
+        //     Globals.InitGlobals();
+        // }
         startButton.onClick.AddListener(delegate ()
         {
             StartCoroutine(LoadScoreConfigAndStart());

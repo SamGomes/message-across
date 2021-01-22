@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class AudioManager{
 
-    private GameObject audioManagerObject;
+    public GameObject gameObject;
 
     private AudioSource source;
     private AudioSource loopSource;
     
     public AudioManager(bool includeAudioListener)
     {
-        this.audioManagerObject = new GameObject();
-        Object.DontDestroyOnLoad(audioManagerObject);
-        Globals.savedObjects.Add(audioManagerObject);
+        this.gameObject = new GameObject("AudioManager_index_"+Globals.savedGameObjects.Count+"");
+        Object.DontDestroyOnLoad(gameObject);
+        Globals.savedGameObjects.Add(gameObject);
 
-        this.source = audioManagerObject.AddComponent<AudioSource>();
-        this.loopSource = audioManagerObject.AddComponent<AudioSource>();
+        this.source = gameObject.AddComponent<AudioSource>();
+        this.loopSource = gameObject.AddComponent<AudioSource>();
         if (includeAudioListener)
         {
-            audioManagerObject.AddComponent<AudioListener>();
+            gameObject.AddComponent<AudioListener>();
         }
     }
 

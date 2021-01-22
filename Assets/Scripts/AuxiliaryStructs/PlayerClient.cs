@@ -29,7 +29,7 @@ namespace AuxiliaryStructs
         public Globals.KeyInteractionType activeInteraction;
     } 
     
-    public class PlayerClientI : NetworkBehaviour
+    public class PlayerClient : NetworkBehaviour
     {
         public GameObject playerMarkerPrefab;
         
@@ -281,11 +281,6 @@ namespace AuxiliaryStructs
             initted = true;
         }
 
-        public bool IsInitted()
-        {
-            return initted;
-        }
-        
         public bool IsReady()
         {
             return amIReady;
