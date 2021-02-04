@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.NetworkInformation;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -51,7 +50,7 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         List<ScoreSystemParam> scoreSystemParams = Globals.settings.generalSettings.scoreSystemParams;
         
         //generate tutorial button
-        Button tbutton = Object.Instantiate(buttonPrefab, paramsButtonsObject.transform);
+        Button tbutton = Instantiate(buttonPrefab, paramsButtonsObject.transform);
         tbutton.GetComponentInChildren<Text>().text = "T";
         tbutton.onClick.AddListener(delegate () {
             scoreConfigPath =  Application.streamingAssetsPath + "/scoreSystemConfigTutorial.cfg";

@@ -15,8 +15,14 @@ public class EndSceneFunctionalities : MonoBehaviour
         Destroy(Globals.savedGameObjects[3]);
 
         //hide player UIs, leave scores
-        Globals.savedGameObjects[4].GetComponent<PlayerClient>().HideUI();
-        Globals.savedGameObjects[5].GetComponent<PlayerClient>().HideUI();
+        if (Globals.savedGameObjects[4] != null)
+        {
+            Globals.savedGameObjects[4].GetComponent<PlayerClient>().HideUI();
+        }
+        if (Globals.savedGameObjects[5] != null)
+        {
+            Globals.savedGameObjects[5].GetComponent<PlayerClient>().HideUI();
+        }
         
         quitButton.onClick.AddListener(delegate(){
             Application.Quit();
