@@ -293,8 +293,8 @@ public class GameManager : NetworkManager
         exerciseGroupIndex = Random.Range(0, Globals.settings.exercisesGroups.exerciseGroups.Count);
         Shuffle(Globals.settings.exercisesGroups.exerciseGroups);
 
-        cmge.StopCurrentAudioClip(0);
-        cmge.PlayInfiniteAudioClip(0, Globals.backgroundMusicPath, Globals.backgroundMusicPath);
+        // cmge.StopCurrentAudioClip(0);
+        // cmge.PlayInfiniteAudioClip(0, Globals.backgroundMusicPath, Globals.backgroundMusicPath);
     }
 
     public override void OnClientDisconnect(NetworkConnection conn)
