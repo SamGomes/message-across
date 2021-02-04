@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using AuxiliaryStructs;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -14,11 +13,18 @@ public class EndSceneFunctionalities : MonoBehaviour
     {
         //remove game manager object
         Destroy(Globals.savedGameObjects[3]);
+
+        //hide player UIs, leave scores
+        Globals.savedGameObjects[4].GetComponent<PlayerClient>().HideUI();
+        Globals.savedGameObjects[5].GetComponent<PlayerClient>().HideUI();
         
         quitButton.onClick.AddListener(delegate(){
             Application.Quit();
         });
         restartButton.onClick.AddListener(delegate () {
+            //destroy client UIs
+            Destroy(Globals.savedGameObjects[4]);
+            Destroy(Globals.savedGameObjects[5]);
             SceneManager.LoadScene("start");
         });
         

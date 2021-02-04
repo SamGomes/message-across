@@ -106,7 +106,9 @@ namespace AuxiliaryStructs
             {
                 return;
             }
-            
+            DontDestroyOnLoad(gameObject);
+            Globals.savedGameObjects.Add(gameObject);
+
             trackCanvas = GameObject.Find("Track/PlayerMarkers").gameObject;
 
             //init active layout
@@ -422,7 +424,6 @@ namespace AuxiliaryStructs
             }
 
             
-            
             //Update UI
             playerDisplayTexts[0].text = currExercise.displayMessage;
             playerDisplayTexts[1].text = currWordState;
@@ -576,9 +577,9 @@ namespace AuxiliaryStructs
             }
         }
         
-        public int GetActiveButtonIndex()
+        public void HideUI()
         {
-            return activeButtonIndex;
+            ui.SetActive(false);
         }
 
         public int GetPressedButtonIndex()

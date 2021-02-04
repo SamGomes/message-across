@@ -955,7 +955,7 @@ public class GameManager : NetworkManager
             return;
         }
         
-        PlayerClient playerClient = players[pss.orderNum];
+        // PlayerClient playerClient = players[pss.orderNum];
         // //verify if button should be pressed
         // bool playerOverlappedAndPressing = false;
         // if (isLaneOverlap)
