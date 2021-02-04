@@ -154,7 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   popupPositioner: {fileID: 536526335}
-  camera: {fileID: 1865257863}
+  worldCam: {fileID: 1865257863}
   startButton: {fileID: 693456124}
   buttonPrefab: {fileID: 2350397367177531922, guid: 357aaa9b275d309428d641bde70f735a,
     type: 3}

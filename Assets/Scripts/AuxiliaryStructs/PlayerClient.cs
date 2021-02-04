@@ -434,6 +434,7 @@ namespace AuxiliaryStructs
             }
             catch (FileNotFoundException e)
             {
+                Debug.Log(e.Message);
                 playerDisplayImage.sprite =
                     Resources.Load<Sprite>("Textures/PlayerUI/ExerciseImages/placeholder");
             }

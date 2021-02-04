@@ -4,9 +4,8 @@ using UnityEngine;
 
 namespace LetterTrack
 {
-    public class LetterPit: NetworkBehaviour
+    public class LetterPit: MonoBehaviour
     {
-        [Client]
         private void OnTriggerEnter(Collider letter)
         {
             Destroy(letter.gameObject);

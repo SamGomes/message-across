@@ -97,7 +97,7 @@ public static class Globals
 public class StartSceneFunctionalities : MonoBehaviour
 {
     public Transform popupPositioner;
-    public Camera camera;
+    public Camera worldCam;
     
     public Button localButton;
     public Button onlineButton;
@@ -252,10 +252,10 @@ public class StartSceneFunctionalities : MonoBehaviour
         }
 
 
-        Popup popup = new Popup(false, camera, popupPositioner);
+        Popup popup = new Popup(false, worldCam, popupPositioner);
         popup.SetOnHide(delegate
         {
-            Popup popup2 = new Popup(false, camera, popupPositioner);
+            Popup popup2 = new Popup(false, worldCam, popupPositioner);
             popup2.SetMessage("Would you like to enable messages explaining the game screens?");
             popup2.AddButton("Sure!", delegate
             {

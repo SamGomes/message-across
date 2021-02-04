@@ -20,7 +20,7 @@ using Random = UnityEngine.Random;
 //mainly implements the server
 public class GameManager : NetworkManager
 {
-    public Camera camera;
+    public Camera worldCam;
     public Transform popupPositioner;
     
     public Transform markerPlaceholders;
@@ -154,7 +154,6 @@ public class GameManager : NetworkManager
         //check connection type
         if (!NetworkClient.active)
         {
-            
             if (Globals.settings.networkSettings.currMultiplayerOption == "LOCAL")
             {
                 OnStartServer();
@@ -170,7 +169,7 @@ public class GameManager : NetworkManager
             }
             else if (Globals.settings.networkSettings.currMultiplayerOption == "ONLINE")
             {
-                Popup popup = new Popup(false, camera, popupPositioner);
+                Popup popup = new Popup(false, worldCam, popupPositioner);
                 if (Globals.activeInfoPopups)
                 {
                     popup.SetMessage("Welcome to the wait lobby. This is where you wait for the two players to join." +
@@ -179,7 +178,7 @@ public class GameManager : NetworkManager
                     popup.DisplayPopup();
                     popup.SetOnHide(delegate
                     {
-                        Popup popup2 = new Popup(false, camera, popupPositioner);
+                        Popup popup2 = new Popup(false, worldCam, popupPositioner);
                         popup2.SetMessage("When you are ready to begin," +
                                          " simply click on the \"Ready to Start!\" button, displayed whenever" +
                                          " both players joined and you have no more actions to perform. ");
@@ -301,7 +300,7 @@ public class GameManager : NetworkManager
     {
         base.OnClientDisconnect(conn);
         StopClient();
-        Popup popup = new Popup(false, camera, popupPositioner);
+        Popup popup = new Popup(false, worldCam, popupPositioner);
         popup.SetMessage("Disconnected by host or game not found. Returning to Start Menu...");
         popup.AddButton("OK", delegate {
             conn.Disconnect();
@@ -851,7 +850,7 @@ public class GameManager : NetworkManager
         foreach (LetterSpawner spawner in letterSpawners)
         {
             ClearPool(spawner); //risky-> exercise may not have been synced yet
-            spawner.UpdateCurrStarredWord("");
+            // spawner.UpdateCurrStarredWord("");
         }
         
         cmge.DisplayCountdownText(false, "");
@@ -997,8 +996,8 @@ public class GameManager : NetworkManager
         playerClient.UpdateTrackHalf(true);
     }
     
-    private GameObject bufferedFirstLetter; //so that server syncs clients properly
-                                            ////(avoids removing the same letter multiple times)
+    private char bufferedFirstLetterText; //so that server syncs clients properly
+                                          ////(avoids removing the same letter multiple times)
     [Server]
     private void CheckMarkerCollisions()
     {
@@ -1008,35 +1007,34 @@ public class GameManager : NetworkManager
             PlayerClient playerClient = players[pss.orderNum];
             foreach (LetterSpawner spawner in letterSpawners)
             {
-                GameObject firstLetter = spawner.GetCurrSpawnedLetterObjects().FirstOrDefault();
-                if(firstLetter) //verify if they are loaded
+                GameObject firstLetterObj = spawner.GetCurrSpawnedLetterObjects().FirstOrDefault();
+                if(firstLetterObj) //verify if they are loaded
                 {
-                    if (firstLetter!=bufferedFirstLetter && 
+                    Letter firstLetter = firstLetterObj.GetComponent<Letter>();
+                    char firstLetterText = firstLetter.GetComponent<Letter>().letterText;
+                    // Debug.Log("firstLetterText: "+firstLetterText);
+                    // Debug.Log("bufferedFirstLetterText: "+bufferedFirstLetterText);
+                    if (
+                        // firstLetterText != bufferedFirstLetterText && 
                         letterPit.GetComponent<Collider>().bounds.Intersects(
                             firstLetter.GetComponent<Collider>().bounds
                         ))
                     {
-                        bufferedFirstLetter = firstLetter;
-                        if (Globals.settings.networkSettings.currOnlineOption == "SERVER")
-                        {
-                            spawner.DestroyFirstLetterInServer();
-                        }
-                        spawner.DestroyFirstLetterInClients();
+                        bufferedFirstLetterText = firstLetterText;
+                        spawner.DestroyFirstLetterInServer();
                     }
                     else
-                    if (firstLetter!=bufferedFirstLetter && 
+                    if (
+                        // firstLetterText != bufferedFirstLetterText && 
                         playerClient.IsPerformingAction() && 
                         markerColliders[pss.markerI].bounds.Intersects(
                             firstLetter.GetComponent<Collider>().bounds
-                    ))
+                        ))
                     {
-                        bufferedFirstLetter = firstLetter;
-                        RecordHit(firstLetter, pss);
-                        if (Globals.settings.networkSettings.currOnlineOption == "SERVER")
-                        {
-                            spawner.DestroyFirstLetterInServer();
-                        }
-                        spawner.DestroyFirstLetterInClients();
+                        Debug.Log("here");
+                        bufferedFirstLetterText = firstLetter.letterText;
+                        RecordHit(bufferedFirstLetterText, pss);
+                        spawner.DestroyFirstLetterInServer();
                     }
                 }
             }
@@ -1086,7 +1084,7 @@ public class GameManager : NetworkManager
 
    
     [Server]
-    public void RecordHit(GameObject letterObj, PlayerServerState currHitterSS)
+    public void RecordHit(char letterText, PlayerServerState currHitterSS)
     {
         PlayerClient currHitter = players[currHitterSS.orderNum];
         currHitter.HideReadyButton();
@@ -1098,9 +1096,7 @@ public class GameManager : NetworkManager
         //verify effect of actions 
         if (currHitterSS.currNumPossibleActionsPerLevel > 0)
         {
-            Letter letter = letterObj.gameObject.GetComponent<Letter>();
-            char letterText = letter.letterText;
-            letterObj.transform.localScale *= 1.2f;
+            // letterObj.transform.localScale *= 1.2f;
             currHitter.UpdateNumPossibleActions(--currHitterSS.currNumPossibleActionsPerLevel);
 
             Globals.KeyInteractionType playerIT = currHitterSS.activeInteraction;

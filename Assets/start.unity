@@ -244,7 +244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   popupPositioner: {fileID: 445847853}
-  camera: {fileID: 1865257863}
+  worldCam: {fileID: 1865257863}
   localButton: {fileID: 693456124}
   onlineButton: {fileID: 1930825952}
 --- !u!4 &521378540

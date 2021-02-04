@@ -22,12 +22,10 @@ public class Letter : NetworkBehaviour {
         }
     }
 
-    [ClientRpc]
     public void Lock()
     {
         isLocked = true;
     }
-    [ClientRpc]
     public void Unlock()
     {
         isLocked = false;

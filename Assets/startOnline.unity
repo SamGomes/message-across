@@ -621,7 +621,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   popupPositioner: {fileID: 398506008}
-  camera: {fileID: 1865257863}
+  worldCam: {fileID: 1865257863}
   playerName: {fileID: 1867719691}
   serverCode: {fileID: 1935573879}
   hostButton: {fileID: 1930825952}

@@ -15,13 +15,22 @@ public class LetterSpawner : NetworkBehaviour
 
     private float randomInterval;
 
-    private string currStarredWord;
+    // public char firstLetterText;
 
     private List<GameObject> currLetters;
 
     private int id;
 
 
+    // public void Update()
+    // {
+    //     GameObject firstLetter = currLetters.FirstOrDefault();
+    //     if (firstLetter)
+    //     {
+    //         firstLetterText = firstLetter.GetComponent<Letter>().letterText;
+    //     }
+    // }
+    
     private void Awake()
     {
         currLetters = new List<GameObject>();
@@ -37,11 +46,11 @@ public class LetterSpawner : NetworkBehaviour
         return id;
     }
 
-    [ClientRpc]
-    public void UpdateCurrStarredWord(string currTargetWord)
-    {
-        this.currStarredWord = currTargetWord;
-    }
+    // [ClientRpc]
+    // public void UpdateCurrStarredWord(string currTargetWord)
+    // {
+    //     this.currStarredWord = currTargetWord;
+    // }
 
     public void DestroyFirstLetter()
     {
@@ -55,11 +64,6 @@ public class LetterSpawner : NetworkBehaviour
         Destroy(firstLetter);
     }
     
-    [ClientRpc]
-    public void DestroyFirstLetterInClients()
-    {
-        DestroyFirstLetter();
-    }
     
     [Server]
     public void DestroyFirstLetterInServer()

@@ -12,7 +12,7 @@ using UnityEngine.UI;
 public class ParamsSceneFunctionalities : MonoBehaviour
 {
     public Transform popupPositioner;
-    public Camera camera;
+    public Camera worldCam;
     
     public Button startButton;
     public Button buttonPrefab;
@@ -30,7 +30,7 @@ public class ParamsSceneFunctionalities : MonoBehaviour
         }
         if (Globals.activeInfoPopups)
         {
-            Popup popup = new Popup(false, camera, popupPositioner);
+            Popup popup = new Popup(false, worldCam, popupPositioner);
             popup.SetMessage("Welcome to the version selection menu. " +
                              "Here the host can select one of the game versions, " +
                              "currently loaded into the game," +
