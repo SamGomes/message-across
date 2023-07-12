@@ -22,8 +22,8 @@ The words presented to players, as well as the score system of the game is fully
 ## Executing the game
 
 To execute the game (in Windows), only two steps are required:
-- Download the latest version of Message Across through git pages of this repository: https://samgomes.github.io/message-across/
-- Extract the folder and click on the executable (messageAcross.exe)
+- Download the latest version of Message Across through the [git pages](https://samgomes.github.io/message-across/) of this repository, or through [itch.io](https://samgomes.itch.io/message-across/);
+- Extract the folder and click on the executable (messageAcross.exe).
 
 For other platforms, the code can be also downloaded and re-built.
 
