@@ -24,12 +24,12 @@ fillPalette <- "Set1"
 
 myData <- read.csv(file="input/messageAcrossData.csv", header=TRUE, sep=",")
 
-plot <- ggplot(myData, aes(fill=myData$preferredVersion, y=((..count..)/sum(..count..)*100), x=1)) 
+plot <- ggplot(myData, aes(fill=myData$preferredVersion, y=((after_stat(count))/sum(after_stat(count))*100), x=1)) 
 plot <- plot + geom_bar() + labs(x="", fill="Preferred Version", y="") 
 plot <- plot + scale_x_discrete(breaks=c(0)) + scale_y_discrete(breaks=c(0))
 plot <- plot + scale_fill_manual(values=c("#f90909", "#0700dd", "#03ad11", "#fcfc05"))
 plot <- plot + theme(legend.title=element_text(size=20), legend.text=element_text(size=18),axis.text=element_text(size=18), axis.title=element_text(size=24,face="bold"),panel.background = element_blank()) 
-plot <- plot + geom_text(stat='count', size=8, aes(label=..count.., x=1, y=(..count../sum(..count..))*100), position = position_stack(vjust=0.5)) + coord_flip()
+plot <- plot + geom_text(stat='count', size=8, aes(label=after_stat(count), x=1, y=(after_stat(count)/sum(after_stat(count)))*100), position = position_stack(vjust=0.5)) + coord_flip()
 suppressMessages(ggsave(sprintf("plots/mainEffects/preferredVersion.png"), width = 8, height = 4))
 
 
@@ -69,10 +69,10 @@ processBoxPlot <- function(myData, yVarPre, yVarPos, behaviorsToProcess, yLabel,
   # hist <- hist + labs(x="Score Attribution System", y=yLabel)  + scale_fill_manual(values=c("#d7191c", "#75a352", "#0700dd", "#fcfc05"))
   suppressMessages(ggsave(sprintf("plots/%s.png", plotName), bg = "transparent"))
 }
-# processBoxPlot(myData, "meanNumberOfGives_", "", c("Comp.","Self-I.","M.Help","E.Altr."), "Mean Number of Gives", "meanNumberOfGives", -1, -1, -1)
+# processBoxPlot(myData, "meanNumberOfGives_", "", c("Comp.","Self-I.","M.Help","E.Altr."), "Mean Number of Gives", "meanNumberOfGives", NULL, NULL, NULL)
 processBoxPlot(myData, "meanNumberOfTakes_", "", c("Self-I.","E.Altr."), "Mean Number of Takes", "meanNumberOfTakesF", NULL, NULL, NULL, c("#e56102", "#613d95"))
 processBoxPlot(myData, "meanNumberOfTakes_", "", c("Comp.", "M.Help"), "Mean Number of Takes", "meanNumberOfTakesSV", c("0", "1", "2", "3", "4"), c(0,1,2,3,4), NULL, c("#d7191c", "#75a352"))
-# processBoxPlot(myData, "whoFocus_", "", c("Self-I.","E.Altr."), "Focus", "interactionFocus", c("Self -3","-2", "-1", "Both 0", "1", "2", "Other 3\n  Players  "), c(1,2,3,4,5,6,7), -1)
+# processBoxPlot(myData, "whoFocus_", "", c("Self-I.","E.Altr."), "Focus", "interactionFocus", c("Self -3","-2", "-1", "Both 0", "1", "2", "Other 3\n  Players  "), c(1,2,3,4,5,6,7), NULL)
 processBoxPlot(myData, "whoFocus_", "", c("Self-I.","E.Altr."), "Focus", "interactionMotives", c("Self- -3\noriented    ","-2", "-1", "0", "1", "2", "Others- 3\noriented    "), c(1,2,3,4,5,6,7), NULL, c("#e56102", "#613d95"))
 processBoxPlot(myData, "whatFocus_", "", c("Comp.", "M.Help"), "Challenge", "socialValence", c("Facilitate 3","2", "1", "0", "-1", "-2", "Complicate -3"), c(1,2,3,4,5,6,7), "reverse", c("#d7191c", "#75a352"))
 processBoxPlot(myData, "score_", "_7", c("Self-I.","E.Altr."), "Final Score", "finalScore", NULL, NULL, NULL, c("#e56102", "#613d95"))
@@ -96,7 +96,7 @@ for(i in  seq(from=1, to=dim(data)[1], by=2)) {
   j <- j+1
 }
 
-processBoxPlot(scoreData, "score_", "", c("Comp.", "M.Help"), "Final Score Diff.", "scoreDiffs", -1, -1, c("#d7191c", "#75a352"))
+processBoxPlot(scoreData, "score_", "", c("Comp.", "M.Help"), "Final Score Diff.", "scoreDiffs", NULL, NULL, c("#d7191c", "#75a352"))
 
 
 
@@ -165,7 +165,7 @@ plot <- plot + geom_vline(aes(xintercept = 5), color="black", linetype="dashed")
 # plot <- plot + annotation_custom(rasterGrob(mypng), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) + geom_point()
 
 plot <- plot + geom_count(show.legend=F)
-plot <- plot + aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version) + scale_fill_manual(values=c("#f90909", "#03ad11", "#0700dd", "#fcfc05"), guide=FALSE)
+plot <- plot + aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version) + scale_fill_manual(values=c("#f90909", "#03ad11", "#0700dd", "#fcfc05"), guide="none")
 plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("Self 1","2", "3", "4\nBoth", "5", "6", "7\nOther \n  Players  ")), breaks = c(1,2,3,4,5,6,7))
 plot <- plot + scale_y_continuous(longData$intention, name="Social Valence", labels = as.character(c("Help 3","2", "1", "Neutral 0", "-1", "-2", "Complicate -3")), breaks = c(1,2,3,4,5,6,7), trans = "reverse")
 
