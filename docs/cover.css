@@ -39,6 +39,14 @@ a:hover{
   z-index: -1;
 }
 
+.btn, .btn:hover{
+  color: black;
+  font-size: 1.5em;
+  width: 15%;
+  height: 10%;
+}
+
+
 
 
 /* Extra markup and styles for table-esque vertical and horizontal centering */
@@ -49,6 +57,7 @@ a:hover{
   display: table;
 
 }
+
 .cover-container{
 
   margin-top: 10vw;
