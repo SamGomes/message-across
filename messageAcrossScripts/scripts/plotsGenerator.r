@@ -145,6 +145,7 @@ for(i in  c("Comp.","Self-I.","M.Help","E.Altr.")) {
 
 plot <- ggplot(longData) 
 plot <- plot + facet_wrap(~version)
+plot <- plot + theme(panel.spacing = unit(2, "lines"), strip.text=element_text(size=10, face="bold"), legend.position="none", axis.text=element_text(size=10), axis.title=element_text(size=12, face="bold"))
 
 # draw grid lines
 plot <- plot + geom_hline(aes(yintercept = 3), color="black", linetype="dashed")
@@ -159,15 +160,10 @@ plot <- plot + geom_vline(aes(xintercept = 5), color="black", linetype="dashed")
 # plot <- plot + annotation_custom(rasterGrob(mypng), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) + geom_point()
 
 plot <- plot + geom_count(show.legend=F)
-print("#d7191c")
-print("#75a352")
-print("#e56102")
-print("#613d95")
 plot <- plot + aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version) 
 plot <- plot + scale_colour_manual(values=c("#d7191c", "#e56102", "#75a352", "#613d95"), guide="none")
 plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("-3\nSelf-\noriented","-2", "-1", "0", "1", "2", "3\nOthers-   \noriented   ")), breaks = c(1,2,3,4,5,6,7))
 plot <- plot + scale_y_continuous(longData$intention, name="Challenge", labels = as.character(c("Facilitate 3","2", "1", "0", "-1", "-2", "Complicate -3")), breaks = c(1,2,3,4,5,6,7), trans = "reverse")
-plot <- plot + theme(panel.spacing = unit(2, "lines"),legend.position="none", axis.text=element_text(size=10), axis.title=element_text(size=12, face="bold"))
 
 suppressMessages(ggsave(sprintf("plots/mainEffects/focusAndValence.png"), width = 8, height = 4))
 
