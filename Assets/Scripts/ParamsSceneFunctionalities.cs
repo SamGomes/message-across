@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.NetworkInformation;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -11,108 +10,47 @@ using UnityEngine.UI;
 
 public class ParamsSceneFunctionalities : MonoBehaviour
 {
+    public Transform popupPositioner;
+    public Camera worldCam;
+    
     public Button startButton;
     public Button buttonPrefab;
     public GameObject paramsButtonsObject;
     private string scoreConfigPath;
 
-
     void Start()
     {
-        StartCoroutine(YieldedStart());
-    }
-    
-    private void UpdateButtonColors(Button selectedButton)
-    {
-        Button[] paramsButtons = paramsButtonsObject.GetComponentsInChildren<Button>();
-        foreach (Button innerButton in paramsButtons)
+        string selectedScoreName = Globals.settings.networkSettings.selectedScoreName;
+        if (selectedScoreName.Length != 0)
         {
-            if (selectedButton == innerButton)
-            {
-                continue;
-            }
-            innerButton.GetComponentInChildren<Image>().color = new Color(1.0f, 1.0f, 1.0f);
+            scoreConfigPath = selectedScoreName;
+            scoreConfigPath = Application.streamingAssetsPath + "/" + selectedScoreName + ".cfg";
+            StartCoroutine(LoadScoreConfigAndStart());
         }
-        selectedButton.GetComponentInChildren<Image>().color = new Color(0.0f, 1.0f, 0.0f);
-    }
-
-    IEnumerator LoadScoreConfig()
-    {
-        string scoreConfigText = "";
-        if (scoreConfigPath.Contains("://") || scoreConfigPath.Contains(":///")) //url instead of path
+        if (Globals.activeInfoPopups)
         {
-            UnityWebRequest www = UnityWebRequest.Get(scoreConfigPath);
-            yield return www.SendWebRequest();
-            scoreConfigText = www.downloadHandler.text;
+            Popup popup = new Popup(false, worldCam, popupPositioner);
+            popup.SetMessage("Welcome to the version selection menu. " +
+                             "Here the host can select one of the game versions, " +
+                             "currently loaded into the game," +
+                             " and start a game session (open the game room).");
+            popup.DisplayPopup();
         }
-        else
-        {
-            scoreConfigText = File.ReadAllText(scoreConfigPath);
-        }
-        Globals.settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
-        Globals.settings.scoreSystem.path = scoreConfigPath;
-    }
-    
-    // Start is called before the first frame update
-    IEnumerator YieldedStart()
-    {
-        scoreConfigPath =  Application.streamingAssetsPath + "/scoreSystemConfigTutorial.cfg";
-        string generalConfigText = "";
-        string exercisesConfigText = "";
         
-        
-        
-        string generalConfigPath = Application.streamingAssetsPath + "/generalConfig.cfg";
-        string exercisesConfigPath = Application.streamingAssetsPath + "/exercisesConfig.cfg";
-
-        
-        if (generalConfigPath.Contains("://") || generalConfigPath.Contains(":///")) //url instead of path
-        {
-            UnityWebRequest www = UnityWebRequest.Get(generalConfigPath);
-            yield return www.SendWebRequest();
-            generalConfigText = www.downloadHandler.text;
-        }
-        else
-        {
-            generalConfigText = File.ReadAllText(generalConfigPath);
-        }
-
-        
-        if (exercisesConfigPath.Contains("://") || exercisesConfigPath.Contains(":///")) //url instead of path
-        {
-            UnityWebRequest www = UnityWebRequest.Get(generalConfigPath);
-            yield return www.SendWebRequest();
-            exercisesConfigText = www.downloadHandler.text;
-        }
-        else
-        {
-            exercisesConfigText = File.ReadAllText(exercisesConfigPath);
-        }
-
-        //string json = JsonUtility.ToJson(settings, true);
-        Globals.settings.generalSettings = JsonUtility.FromJson<GeneralSettings>(generalConfigText);
-        Globals.settings.exercisesGroups = JsonUtility.FromJson<ExerciseGroupsWrapper>(exercisesConfigText);
-        
-
-
-        if (Globals.savedObjects == null)
-        {
-            Globals.InitGlobals();
-        }
+        //
+        // if (Globals.savedObjects == null)
+        // {
+        //     Globals.InitGlobals();
+        // }
         startButton.onClick.AddListener(delegate ()
         {
-
-            StartCoroutine(LoadScoreConfig());
-            SceneManager.LoadScene("mainScene");
+            StartCoroutine(LoadScoreConfigAndStart());
         });
 
-
-
-        
         List<ScoreSystemParam> scoreSystemParams = Globals.settings.generalSettings.scoreSystemParams;
         
         //generate tutorial button
-        Button tbutton = Object.Instantiate(buttonPrefab, paramsButtonsObject.transform);
+        Button tbutton = Instantiate(buttonPrefab, paramsButtonsObject.transform);
         tbutton.GetComponentInChildren<Text>().text = "T";
         tbutton.onClick.AddListener(delegate () {
             scoreConfigPath =  Application.streamingAssetsPath + "/scoreSystemConfigTutorial.cfg";
@@ -136,11 +74,45 @@ public class ParamsSceneFunctionalities : MonoBehaviour
             });
         }
         
-        
-        
+        Globals.audioManagers[0].StopCurrentClip();
+        Globals.audioManagers[0].PlayInfiniteClip(
+            Globals.backgroundMusicPath,
+            Globals.backgroundMusicPath);
+    }
+    
+    private void UpdateButtonColors(Button selectedButton)
+    {
+        Button[] paramsButtons = paramsButtonsObject.GetComponentsInChildren<Button>();
+        foreach (Button innerButton in paramsButtons)
+        {
+            if (selectedButton == innerButton)
+            {
+                continue;
+            }
+            innerButton.GetComponentInChildren<Image>().color = new Color(1.0f, 1.0f, 1.0f);
+        }
+        selectedButton.GetComponentInChildren<Image>().color = new Color(0.0f, 1.0f, 0.0f);
+    }
 
-        Globals.backgroundAudioManager.StopCurrentClip();
-        Globals.backgroundAudioManager.PlayInfinitClip(Globals.backgroundMusicPath, Globals.backgroundMusicPath);
+    IEnumerator LoadScoreConfigAndStart()
+    {
+        string scoreConfigText = "";
+        if (scoreConfigPath.Contains("://") || scoreConfigPath.Contains(":///")) //url instead of path
+        {
+            UnityWebRequest www = UnityWebRequest.Get(scoreConfigPath);
+            yield return www.SendWebRequest();
+            scoreConfigText = www.downloadHandler.text;
+        }
+        else
+        {
+            scoreConfigText = File.ReadAllText(scoreConfigPath);
+        }
+        
+        Globals.settings.scoreSystem = JsonUtility.FromJson<ScoreSystem>(scoreConfigText);
+        Globals.settings.scoreSystem.path = scoreConfigPath;
+        
+        //start after waiting for data load
+        SceneManager.LoadScene("mainScene");
     }
 
 }

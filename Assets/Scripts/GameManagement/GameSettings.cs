@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using AuxiliaryStructs;
 using UnityEngine;
 
 
@@ -52,7 +53,7 @@ public class ScoreSystemParam
 public struct GeneralSettings
 {
     public List<ScoreSystemParam> scoreSystemParams;
-    public List<Player> players;
+    public List<PlayerInfo> playersParams;
     public int numLevels;
     public float playersLettersSpawnP;
     public string logMode;
@@ -61,10 +62,28 @@ public struct GeneralSettings
 }
 
 [Serializable]
+public struct MANetworkSettings
+{
+    public string currMultiplayerOption;
+
+    //for online games
+    public string currOnlineOption;
+    public string serverCode;
+    
+    //for server
+    public string selectedScoreName;
+}
+
+[Serializable]
 public struct GameSettings
 {
+    public MANetworkSettings networkSettings;
     public ExerciseGroupsWrapper exercisesGroups;
     public GeneralSettings generalSettings;
     public ScoreSystem scoreSystem;
+    
+    public ScoreSystem lobbyScoreSystem;
+    public ExerciseGroupsWrapper lobbyExercisesGroups;
+
 }
 

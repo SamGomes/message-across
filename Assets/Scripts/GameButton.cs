@@ -1,46 +1,33 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using AuxiliaryStructs;
+using Mirror;
 using UnityEngine;
 
 
-public class GameButton : MonoBehaviour {
-
-    private GameManager gameManager;
-
+public class GameButton : NetworkBehaviour {
+    
     private bool keyPressed;
     private bool isClicked;
 
     private AudioManager buttonAudioManager;
 
     private bool isBeingPressed;
-
-    private Collider currCollidingLetterCollider;
-
-    private Player owner;
-
-    public void RegisterButtonPress()
-    {
-        this.keyPressed = true;
-        this.isBeingPressed = false;
-    }
+    
     public void RegisterButtonDown()
     {
         this.keyPressed = true;
         this.isBeingPressed = true;
     }
+
     public void RegisterButtonUp()
     {
         this.isBeingPressed = false;
     }
-
-    void Start()
+    
+    public bool IsClicked()
     {
-        currCollidingLetterCollider = null;
-        gameManager = GameObject.FindObjectOfType<GameManager>();
+        return isClicked;
     }
-
+    
     // Update is called once per frame
     void Update()
     {
@@ -55,38 +42,6 @@ public class GameButton : MonoBehaviour {
         }
         if(!isBeingPressed)
             this.keyPressed = false;
-
-        
-        if (this.isClicked && this.currCollidingLetterCollider!=null)
-        {
-            GameObject currCollidingLetterObject = currCollidingLetterCollider.gameObject;
-            
-            gameManager.RecordHit(currCollidingLetterObject, owner);
-            
-            this.currCollidingLetterCollider = null;
-        }
     }
-
-    public bool IsButtonBeingPressed()
-    {
-        return isBeingPressed;
-    }
-
-    void OnTriggerEnter(Collider otherObject)
-    {
-        if (otherObject.GetComponent<Letter>() == null){
-            return;
-        }
-        this.currCollidingLetterCollider = otherObject;
-    }
-    
-    void OnTriggerExit(Collider otherObject)
-    {
-        this.currCollidingLetterCollider = null;
-    }
-
-    public void SetOwner(Player player)
-    {
-        this.owner = player;
-    }
+   
 }

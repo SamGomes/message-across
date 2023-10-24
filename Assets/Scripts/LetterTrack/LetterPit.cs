@@ -1,11 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using Mirror;
 using UnityEngine;
 
-public class LetterPit : MonoBehaviour
+namespace LetterTrack
 {
-    void OnTriggerEnter(Collider letter)
+    public class LetterPit: MonoBehaviour
     {
-        Destroy(letter.gameObject);
+        private void OnTriggerEnter(Collider letter)
+        {
+            Destroy(letter.gameObject);
+        }
     }
 }
