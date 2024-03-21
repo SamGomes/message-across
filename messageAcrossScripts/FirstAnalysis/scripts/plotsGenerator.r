@@ -143,32 +143,39 @@ for(i in  c("Comp.","Self-I.","M.Help","E.Altr.")) {
   j <- j+1
 }
 
-plot <- ggplot(longData) 
-plot <- plot + facet_wrap(~version)
-plot <- plot + theme(panel.spacing = unit(2, "lines"), strip.text=element_text(size=10, face="bold"), legend.position="none", axis.text=element_text(size=10), axis.title=element_text(size=12, face="bold"))
+generateFocusAndValence <- function(longData, plotName, numCols, colors, customWidth, customHeight){
+  plot <- ggplot(longData) 
+  plot <- plot + facet_wrap(~version, ncol = numCols)
+  plot <- plot + theme(plot.background = element_rect(fill='transparent'), panel.spacing = unit(2, "lines"), strip.text=element_text(size=10, face="bold"), legend.position="none", axis.text=element_text(size=10), axis.title=element_text(size=12, face="bold"))
 
-# draw grid lines
-plot <- plot + geom_hline(aes(yintercept = 3), color="black", linetype="dashed")
-plot <- plot + geom_hline(aes(yintercept = 5), color="black", linetype="dashed")
-plot <- plot + geom_vline(aes(xintercept = 3), color="black", linetype="dashed")
-plot <- plot + geom_vline(aes(xintercept = 5), color="black", linetype="dashed")
-# plot <- plot + geom_hline(data= longDataMean, aes(yintercept = intention), color="red")
-# plot <- plot + geom_vline(data= longDataMean, aes(xintercept = focus), color="red")
-
-
-# mypng <- readPNG("./perceptionSpaceSelf.png")
-# plot <- plot + annotation_custom(rasterGrob(mypng), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) + geom_point()
-
-plot <- plot + geom_count(show.legend=F)
-plot <- plot + aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version) 
-plot <- plot + scale_colour_manual(values=c("#d7191c", "#e56102", "#75a352", "#613d95"), guide="none")
-plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("-3\nSelf-\noriented","-2", "-1", "0", "1", "2", "3\nOthers-   \noriented   ")), breaks = c(1,2,3,4,5,6,7))
-plot <- plot + scale_y_continuous(longData$intention, name="Challenge", labels = as.character(c("Facilitate 3","2", "1", "0", "-1", "-2", "Complicate -3")), breaks = c(1,2,3,4,5,6,7), trans = "reverse")
-
-suppressMessages(ggsave(sprintf("plots/mainEffects/focusAndValence.png"), width = 8, height = 4))
+  # draw grid lines
+  plot <- plot + geom_hline(aes(yintercept = 3), color="black", linetype="dashed")
+  plot <- plot + geom_hline(aes(yintercept = 5), color="black", linetype="dashed")
+  plot <- plot + geom_vline(aes(xintercept = 3), color="black", linetype="dashed")
+  plot <- plot + geom_vline(aes(xintercept = 5), color="black", linetype="dashed")
+  # plot <- plot + geom_hline(data= longDataMean, aes(yintercept = intention), color="red")
+  # plot <- plot + geom_vline(data= longDataMean, aes(xintercept = focus), color="red")
 
 
+  # mypng <- readPNG("./perceptionSpaceSelf.png")
+  # plot <- plot + annotation_custom(rasterGrob(mypng), xmin=-Inf, xmax=Inf, ymin=-Inf, ymax=Inf) + geom_point()
 
+  plot <- plot + geom_count(show.legend=F)
+  plot <- plot + aes(x=longData$focus, y=longData$intention, color=longData$version, background=longData$version) 
+  plot <- plot + scale_colour_manual(values=colors, guide="none")
+  plot <- plot + scale_x_continuous(longData$focus, name="Focus", labels = as.character(c("-3\nSelf-\noriented","-2", "-1", "0", "1", "2", "3\nOthers-   \noriented   ")), breaks = c(1,2,3,4,5,6,7))
+  plot <- plot + scale_y_continuous(longData$intention, name="Challenge", labels = as.character(c("Facilitate 3","2", "1", "0", "-1", "-2", "Complicate -3")), breaks = c(1,2,3,4,5,6,7), trans = "reverse")
+
+  suppressMessages(ggsave(paste("plots/mainEffects/", plotName,sep=''), width = customWidth, height = customHeight))
+}
+
+longDataChall <- longData[(longData$version=="Comp." | longData$version=="M.Help"),]
+longDataChall$version <- factor(longDataChall$version, levels=c("M.Help","Comp."))
+
+generateFocusAndValence(longData[(longData$version=="Self-I." | longData$version=="E.Altr."),],"focusAndChall_FocusBehaviors.png", 2, c("#e56102","#613d95"), 8.5, 2.5)
+generateFocusAndValence(longDataChall,"focusAndChall_ChallengeBehaviors.png", 1, c("#75a352","#d7191c"), 4.5, 4.5)
+
+quit()
 
 actionsVariables <- (myData %>% select(playerId, grandMeanTakes, grandMeanGives, ratioTakesGives))
 plot <- ggplot(melt(actionsVariables, id="playerId"), aes(x = variable, y = value))  + geom_boxplot() + labs(x="Actions",y="Value")
